@@ -1,0 +1,331 @@
+const commonSources = ["wmoAtlas", "wmoSummary"];
+
+export const clouds = [
+  {
+    id: "cirrus",
+    name: "Cirrus",
+    polish: "pierzaste",
+    code: "Ci",
+    level: "wysokie",
+    altitude: "zwykle 5–13 km w umiarkowanych szerokościach",
+    headline: "Włókna, haczyki i pasma z kryształków lodu.",
+    observe: [
+      "delikatne włókna albo białe smugi",
+      "brak własnego cienia na ziemi",
+      "często haczykowate zakończenia i wyraźny kierunek przepływu",
+    ],
+    meaning:
+      "Same nie muszą oznaczać pogorszenia, ale ich systematyczne gęstnienie może wyprzedzać strefę frontową.",
+    trap:
+      "Smugi kondensacyjne mogą z czasem przejść w Cirrus homogenitus; pochodzenie antropogeniczne nie unieważnia klasyfikacji WMO.",
+    species: ["fibratus", "uncinus", "spissatus", "castellanus", "floccus"],
+    varieties: ["intortus", "radiatus", "vertebratus", "duplicatus"],
+    features: ["mamma", "fluctus"],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/cirrus.jpg",
+      author: "PiccoloNamek",
+      license: "CC BY-SA 3.0",
+      page: "https://commons.wikimedia.org/wiki/File:CirrusField-color.jpg",
+      note: "Rozległe pole Cirrus; w kadrze mogą współwystępować różne postacie.",
+    },
+  },
+  {
+    id: "cirrocumulus",
+    name: "Cirrocumulus",
+    polish: "kłębiasto-pierzaste",
+    code: "Cc",
+    level: "wysokie",
+    altitude: "zwykle 5–13 km",
+    headline: "Bardzo drobne ziarenka i fale bez wyraźnego cienia.",
+    observe: [
+      "drobne elementy pozornie mniejsze niż szerokość małego palca",
+      "regularne fale, ławice albo „rybia łuska”",
+      "elementy prawie bez szarego cieniowania",
+    ],
+    meaning:
+      "Ujawnia falowanie lub niestabilność w wysokiej troposferze; sama nazwa nie jest prostą prognozą opadu.",
+    trap:
+      "Najczęstszy spór dotyczy Altocumulus. Rozmiar kłębów oceniaj przy wyciągniętej ręce i razem z cieniem, nie osobno.",
+    species: ["stratiformis", "lenticularis", "castellanus", "floccus"],
+    varieties: ["undulatus", "lacunosus"],
+    features: ["virga", "mamma", "cavum"],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/cirrocumulus.jpg",
+      author: "autor niepodany w metadanych pliku",
+      license: "CC BY-SA 3.0",
+      page: "https://commons.wikimedia.org/wiki/File:Cirrocumulus_20040830.jpg",
+      note: "Drobna ławica elementów oglądana z powierzchni ziemi.",
+    },
+  },
+  {
+    id: "cirrostratus",
+    name: "Cirrostratus",
+    polish: "warstwowo-pierzaste",
+    code: "Cs",
+    level: "wysokie",
+    altitude: "zwykle 5–13 km",
+    headline: "Przejrzysta zasłona, która często zdradza się halo.",
+    observe: [
+      "mleczna lub włóknista zasłona na dużej części nieba",
+      "Słońce nadal rzuca cienie",
+      "halo 22° jest silną wskazówką, ale nie warunkiem koniecznym",
+    ],
+    meaning:
+      "Rozległy Cirrostratus często pojawia się przed frontem ciepłym, kiedy wilgoć dociera najpierw wysoko.",
+    trap:
+      "Altostratus silniej tłumi tarczę Słońca i zwykle nie daje halo. Cienki Cirrus fibratus może natomiast wyglądać jak fragment zasłony.",
+    species: ["fibratus", "nebulosus"],
+    varieties: ["duplicatus", "undulatus"],
+    features: [],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/cirrostratus.jpg",
+      author: "The Great Cloudwatcher",
+      license: "CC BY-SA 3.0",
+      page: "https://commons.wikimedia.org/wiki/File:Cirrostratus_with_mock_sun.jpg",
+      note: "Zasłona Cirrostratus z wyraźnym rozświetleniem wokół Słońca.",
+    },
+  },
+  {
+    id: "altocumulus",
+    name: "Altocumulus",
+    polish: "średnie kłębiaste",
+    code: "Ac",
+    level: "średnie",
+    altitude: "zwykle 2–7 km",
+    headline: "Ławice średnich kłębów z cieniem i strukturą.",
+    observe: [
+      "elementy pozornie szerokości około 1–3 palców",
+      "często jasna i ciemna strona każdego kłębu",
+      "ławice, soczewki, wieżyczki albo rozsypane płaty",
+    ],
+    meaning:
+      "Forma castellanus może sygnalizować niestabilność na poziomie średnim, ważną w ocenie potencjału burzowego.",
+    trap:
+      "Nie każda „barankowa” chmura to Altocumulus. Sprawdź skalę elementów, cieniowanie i poziom względem innych warstw.",
+    species: ["stratiformis", "lenticularis", "castellanus", "floccus", "volutus"],
+    varieties: [
+      "translucidus",
+      "perlucidus",
+      "opacus",
+      "duplicatus",
+      "undulatus",
+      "radiatus",
+      "lacunosus",
+    ],
+    features: ["virga", "mamma", "cavum", "fluctus", "asperitas"],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/altocumulus.jpg",
+      author: "Bidgee",
+      license: "CC BY-SA 3.0",
+      page: "https://commons.wikimedia.org/wiki/File:Altocumulus.jpg",
+      note: "Altocumulus z czytelnym cieniowaniem elementów.",
+    },
+  },
+  {
+    id: "altostratus",
+    name: "Altostratus",
+    polish: "średnie warstwowe",
+    code: "As",
+    level: "średnie",
+    altitude: "zwykle 2–7 km",
+    headline: "Szara lub niebieskawa warstwa, przez którą Słońce blednie.",
+    observe: [
+      "jednolita zasłona bez halo",
+      "Słońce wygląda jak przez matowe szkło albo znika",
+      "warstwa może mieć wyraźne fale i stopniowo grubieć",
+    ],
+    meaning:
+      "Często stanowi etap rozwoju rozległego systemu frontowego i może przechodzić w Nimbostratus.",
+    trap:
+      "Jeśli Słońce jest ostre i pojawia się halo, rozważ Cirrostratus. Jeśli opad stał się ciągły i podstawa całkiem nieczytelna, rozważ Nimbostratus.",
+    species: [],
+    varieties: ["translucidus", "opacus", "duplicatus", "undulatus", "radiatus"],
+    features: ["virga", "praecipitatio", "mamma", "pannus"],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/altostratus.jpg",
+      author: "Famartin",
+      license: "CC BY-SA 4.0",
+      page:
+        "https://commons.wikimedia.org/wiki/File:2020-12-31_16_06_58_Altostratus_with_a_wavy_undulating_base_above_the_Dulles_section_of_Sterling,_Loudoun_County,_Virginia.jpg",
+      note: "Altostratus o falistej podstawie.",
+    },
+  },
+  {
+    id: "nimbostratus",
+    name: "Nimbostratus",
+    polish: "warstwowe deszczowe",
+    code: "Ns",
+    level: "wielopoziomowe",
+    altitude: "gruba warstwa od niskich do średnich poziomów",
+    headline: "Rozległa ciemna warstwa z długotrwałym opadem.",
+    observe: [
+      "Słońce niewidoczne",
+      "ciągły opad obejmujący duży obszar",
+      "pod podstawą często postrzępione chmury pannus",
+    ],
+    meaning:
+      "Typowa chmura rozległego opadu warstwowego; może mocno obniżać podstawę i widzialność.",
+    trap:
+      "Niska poszarpana warstwa pod opadem nie musi być główną chmurą. Oddziel pannus od rozległego Nimbostratus powyżej.",
+    species: [],
+    varieties: [],
+    features: ["praecipitatio", "virga", "pannus"],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/nimbostratus.jpg",
+      author: "autor niepodany w metadanych pliku",
+      license: "CC BY-SA 3.0",
+      page: "https://commons.wikimedia.org/wiki/File:Ns1.jpg",
+      note: "Niska, opadowa sytuacja o słabo czytelnej podstawie.",
+    },
+  },
+  {
+    id: "stratocumulus",
+    name: "Stratocumulus",
+    polish: "kłębiasto-warstwowe",
+    code: "Sc",
+    level: "niskie",
+    altitude: "od powierzchni do około 2 km",
+    headline: "Duże, połączone wały lub płaty na niskim poziomie.",
+    observe: [
+      "duże elementy, często szersze niż trzy palce",
+      "ciemne podstawy i jasne kopuły",
+      "warstwa ma przerwy albo wyraźne człony",
+    ],
+    meaning:
+      "Często tworzy się pod inwersją, gdy mieszanie jest płytkie; bywa rozległy, ale opad zwykle jest słaby.",
+    trap:
+      "Z góry może przypominać pole Cumulus. Perspektywa jest częścią dowodu: oceń, czy elementy tworzą wspólną warstwę.",
+    species: ["stratiformis", "lenticularis", "castellanus", "floccus", "volutus"],
+    varieties: [
+      "translucidus",
+      "perlucidus",
+      "opacus",
+      "duplicatus",
+      "undulatus",
+      "radiatus",
+      "lacunosus",
+    ],
+    features: ["virga", "mamma", "praecipitatio", "fluctus", "asperitas", "cavum"],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/stratocumulus.jpg",
+      author: "Arun Kulshreshtha",
+      license: "CC BY 3.0 US",
+      page: "https://commons.wikimedia.org/wiki/File:Above_the_Clouds.jpg",
+      note: "Widok z góry na rozległą, członowaną warstwę; perspektywa lotnicza.",
+    },
+  },
+  {
+    id: "stratus",
+    name: "Stratus",
+    polish: "warstwowe",
+    code: "St",
+    level: "niskie",
+    altitude: "od powierzchni do około 2 km",
+    headline: "Niska, jednolita warstwa: mgła, która uniosła się nad grunt.",
+    observe: [
+      "prawie brak członów i pionowego rozwoju",
+      "jednolita szarość albo postrzępione fractus",
+      "mżawka jest możliwa, lecz nie silny opad konwekcyjny",
+    ],
+    meaning:
+      "Sygnalizuje nasycenie chłodnej warstwy przy powierzchni; dla lotnictwa może oznaczać bardzo niski pułap.",
+    trap:
+      "Mgła i Stratus to podobny proces, ale inna relacja do obserwatora: mgła styka się z gruntem w miejscu obserwacji.",
+    species: ["nebulosus", "fractus"],
+    varieties: ["opacus", "translucidus", "undulatus"],
+    features: ["praecipitatio", "fluctus"],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/stratus.jpg",
+      author: "kallerna",
+      license: "CC BY-SA 4.0",
+      page: "https://commons.wikimedia.org/wiki/File:Stratus_clouds_Vodno_4.jpg",
+      note: "Morze niskiej chmury widziane z wyżej położonego terenu.",
+    },
+  },
+  {
+    id: "cumulus",
+    name: "Cumulus",
+    polish: "kłębiaste",
+    code: "Cu",
+    level: "pionowe",
+    altitude: "podstawa zwykle niska; wierzchołek zależy od rozwoju",
+    headline: "Oddzielne kopuły o płaskiej podstawie i kalafiorowym wzroście.",
+    observe: [
+      "wyraźna płaska podstawa na poziomie kondensacji",
+      "jasne, ostre kopuły rosnące ku górze",
+      "oddzielne komórki zamiast wspólnej warstwy",
+    ],
+    meaning:
+      "Humilis wskazuje płytką konwekcję, a congestus silny rozwój, który może poprzedzać Cumulonimbus.",
+    trap:
+      "Granica congestus–Cumulonimbus nie zależy wyłącznie od wielkości. Szukaj włóknistego lub gładkiego, lodowego wierzchołka.",
+    species: ["humilis", "mediocris", "congestus", "fractus"],
+    varieties: ["radiatus"],
+    features: ["virga", "praecipitatio", "arcus", "fluctus", "tuba", "pileus", "velum", "pannus"],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/cumulus.jpg",
+      author: "PiccoloNamek",
+      license: "CC BY-SA 3.0",
+      page: "https://commons.wikimedia.org/wiki/File:GoldenMedows.jpg",
+      note: "Pole Cumulus o ograniczonym rozwoju pionowym.",
+    },
+  },
+  {
+    id: "cumulonimbus",
+    name: "Cumulonimbus",
+    polish: "kłębiasto-deszczowe",
+    code: "Cb",
+    level: "pionowe",
+    altitude: "od niskiej podstawy do górnej troposfery",
+    headline: "Głęboka konwekcja z lodowym wierzchołkiem i groźną pogodą.",
+    observe: [
+      "ogromny rozwój pionowy",
+      "gładki lub włóknisty wierzchołek, często kowadło incus",
+      "strefy opadu, szkwał, wyładowania lub wał arcus",
+    ],
+    meaning:
+      "Może nieść wyładowania, grad, silne prądy pionowe, oblodzenie, turbulencję i gwałtowne zmiany wiatru.",
+    trap:
+      "Nie czekaj na klasyczne kowadło. Cumulonimbus calvus już ma gładkawy lodowy wierzchołek i może być aktywną burzą.",
+    species: ["calvus", "capillatus"],
+    varieties: [],
+    features: [
+      "praecipitatio",
+      "virga",
+      "incus",
+      "mamma",
+      "arcus",
+      "murus",
+      "cauda",
+      "tuba",
+      "pannus",
+      "pileus",
+      "velum",
+      "flumen",
+    ],
+    sourceIds: commonSources,
+    image: {
+      src: "/assets/clouds/cumulonimbus.jpg",
+      author: "NOAA/AOML/Hurricane Research Division",
+      license: "domena publiczna",
+      page:
+        "https://commons.wikimedia.org/wiki/File:Fly00890_-_Flickr_-_NOAA_Photo_Library.jpg",
+      note: "Cumulonimbus z rozległym kowadłem oglądany z powietrza.",
+    },
+  },
+];
+
+export const cloudLevels = ["wszystkie", "niskie", "średnie", "wysokie", "pionowe", "wielopoziomowe"];
+
+export function getCloud(id) {
+  return clouds.find((cloud) => cloud.id === id);
+}
