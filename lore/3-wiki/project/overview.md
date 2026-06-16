@@ -18,6 +18,11 @@ application for learning cloud identification and vertical weather analysis.
   practice, local progress, and a private local observation journal.
 - Interactive AGL/MSL and pressure-level laboratory plus METAR/TAF, icing,
   turbulence, convection, CAPE, Skew-T, and cloud-motion wind interpretation.
+- Practical Windy layer decoder covering pressure-level wind, temperature,
+  humidity, cloud bands, cloud base, cloud tops, rain and thunderstorms, and
+  CAPE. It generates a complete interpretation sentence from pressure,
+  terrain, and cloud-band controls and pairs every field with a four-choice
+  reasoning check.
 - Contextual source drawers anchored in WMO, FAA, EASA, NOAA AWC, Windy
   interface documentation, and Wikimedia Commons file records.
 

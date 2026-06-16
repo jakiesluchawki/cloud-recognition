@@ -30,6 +30,11 @@ import {
 } from "../src/data/metar-training.js";
 import { sources } from "../src/data/sources.js";
 import {
+  cloudBands,
+  pressureLevels,
+  weatherLayers,
+} from "../src/data/weather-layers.js";
+import {
   aviationReviewPriority,
   aviationReviewQueue,
   aviationReviewSummary,
@@ -59,6 +64,10 @@ import {
   normalizeDegrees,
   windFromCloudMotion,
 } from "../src/lib/wind.js";
+import {
+  pressureSurfaceContext,
+  weatherLayerReading,
+} from "../src/lib/weather-layers.js";
 
 test("the atlas contains exactly the ten WMO cloud genera", () => {
   assert.equal(clouds.length, 10);
@@ -374,6 +383,48 @@ test("wind interpretation reverses cloud motion and normalizes bearings", () => 
     towardLabel: "W",
     fromLabel: "E",
   });
+});
+
+test("the Windy decoder corpus teaches eight fields with evidence and checks", () => {
+  assert.equal(weatherLayers.length, 8);
+  assert.deepEqual(Object.keys(pressureLevels), ["300", "500", "700", "850", "925", "1000"]);
+  assert.deepEqual(Object.keys(cloudBands), ["low", "medium", "high"]);
+
+  for (const layer of weatherLayers) {
+    assert.ok(layer.question.length >= 60, `${layer.id} needs a precise question`);
+    assert.ok(layer.reference.length >= 90, `${layer.id} needs a reference-frame explanation`);
+    assert.ok(layer.compare.length >= 3, `${layer.id} needs triangulation guidance`);
+    assert.ok(layer.trap.length >= 100, `${layer.id} needs a substantive trap`);
+    assert.ok(layer.sourceIds.length >= 3, `${layer.id} needs multiple sources`);
+    assert.equal(layer.check.options.length, 4, `${layer.id} check needs four choices`);
+    assert.equal(new Set(layer.check.options).size, 4, `${layer.id} choices must be unique`);
+    assert.ok(layer.check.correct >= 0 && layer.check.correct < 4);
+    assert.ok(layer.check.explanation.length >= 130, `${layer.id} needs explanatory feedback`);
+    for (const sourceId of layer.sourceIds) {
+      assert.ok(sources[sourceId], `${layer.id} references ${sourceId}`);
+    }
+  }
+});
+
+test("the Windy decoder keeps pressure surfaces and terrain conceptually separate", () => {
+  assert.deepEqual(pressureSurfaceContext(850, 1300), {
+    altitude: 1460,
+    use: "temperatura i adwekcja w dolnej troposferze",
+    pressure: 850,
+    terrain: 1300,
+    agl: 160,
+    intersectsTerrain: false,
+    nearTerrain: true,
+  });
+  assert.equal(pressureSurfaceContext(850, 1800).intersectsTerrain, true);
+  assert.match(weatherLayerReading("wind", { pressure: 850, terrain: 1300 }), /160 m AGL/);
+  assert.match(weatherLayerReading("wind", { pressure: 850, terrain: 1800 }), /przecinać teren/);
+  assert.match(
+    weatherLayerReading("cloud-bands", { cloudBand: "medium" }),
+    /około 2–6,5 km/,
+  );
+  assert.match(weatherLayerReading("cloud-base"), /modelowym gruntem \(AGL\)/);
+  assert.match(weatherLayerReading("cape"), /nie procentowa prognoza burzy/);
 });
 
 test("placement routes beginners, intermediate learners and experienced users differently", () => {

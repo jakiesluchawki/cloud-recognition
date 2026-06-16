@@ -60,6 +60,18 @@
   `design/qa/current/atlas-unified-search-mobile-kowadlo.png`
 - Desktop unified atlas search:
   `design/qa/current/atlas-unified-search-desktop-soczewka.png`
+- Mobile Windy decoder opening:
+  `design/qa/current/windy-decoder-mobile.png`
+- Mobile pressure surface intersecting high terrain:
+  `design/qa/current/windy-decoder-mobile-high-terrain.png`
+- Mobile cloud-base interpretation:
+  `design/qa/current/windy-decoder-mobile-cloud-base.png`
+- Mobile cloud-band selector:
+  `design/qa/current/windy-decoder-mobile-cloud-bands.png`
+- Mobile CAPE feedback:
+  `design/qa/current/windy-decoder-mobile-cape-feedback.png`
+- Desktop Windy decoder workbench:
+  `design/qa/current/windy-decoder-desktop.png`
 
 The source visual and lesson are different product states, so the full-view
 comparison evaluates design language rather than identical composition.
@@ -203,6 +215,33 @@ actions, and no prematurely visible recap, final check, or practice.
       plus Cumulonimbus; `soczewka` returns `lenticularis` plus Cc, Ac, and Sc.
       Mobile explanatory prose is 16 px, focus returns to the term card after
       closing its dialog, and both target widths have no horizontal overflow.
+
+18. **P1 fixed — The Layers tool did not teach how to read a weather map**
+    - Before: the practical surface ended with one terrain slider and six
+      pressure levels despite the lesson promising confident Windy use.
+    - Patch: the default tab is now an eight-field decoder built around one
+      repeatable protocol: time and place, field and unit, vertical reference,
+      then comparison.
+    - Evidence: each field exposes a complete interpretation sentence, three
+      comparison prompts, one explicit trap, sources, and four plausible
+      answers.
+
+19. **P1 fixed — Pressure-level colors invited a fixed-height reading**
+    - Patch: wind, temperature, and humidity reuse the pressure and terrain
+      controls. At 850 hPa over model terrain of 1800 m, the interface states
+      that the nominal pressure surface may intersect terrain instead of
+      reporting a false AGL value.
+
+20. **P2 fixed — Cloud products looked interchangeable**
+    - Patch: cloud bands, base, and tops are separate records. The band
+      selector teaches broad vertical zones and percent cover; base identifies
+      AGL over model terrain; tops warn against subtracting two differently
+      defined products.
+
+21. **P2 fixed — Assessment could leave focus behind**
+    - Patch: committed answers move keyboard focus to explanatory feedback.
+      Mobile checks confirmed one wrong and one correct marked choice with no
+      horizontal overflow at 390 px.
 
 ## Required Fidelity Surfaces
 

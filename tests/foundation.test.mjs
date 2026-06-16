@@ -52,7 +52,7 @@ test("the installable app and offline shell use the Pages base path", async () =
   assert.equal(manifest.start_url, "/cloud-recognition/");
   assert.equal(manifest.scope, "/cloud-recognition/");
   assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
-  assert.match(worker, /cloud-recognition-v11/);
+  assert.match(worker, /cloud-recognition-v12/);
 });
 
 test("GitHub Pages deployment runs tests before publishing", async () => {
@@ -148,6 +148,26 @@ test("the encyclopedia exposes formation, differential diagnosis and aviation co
   assert.match(app, /Diagnostyka różnicowa/);
   assert.match(app, /Znaczenie lotnicze/);
   assert.match(app, /Wiatr z nieba/);
+});
+
+test("the Layers page exposes a practical, assessed Windy decoder", async () => {
+  const app = await read("src/App.jsx");
+  const data = await read("src/data/weather-layers.js");
+  const styles = await read("src/styles.css");
+
+  assert.match(app, /Czytnik Windy/);
+  assert.match(app, /Nie patrz na kolor bez pytania/);
+  assert.match(app, /Ta mapa odpowiada na pytanie/);
+  assert.match(app, /Poprawne zdanie interpretacyjne/);
+  assert.match(app, /Porównaj obok/);
+  assert.match(app, /Jedno pole, cztery interpretacje/);
+  assert.match(app, /weatherLayerReading/);
+  assert.match(data, /cloud-base/);
+  assert.match(data, /cloud-tops/);
+  assert.match(data, /rain-thunder/);
+  assert.match(data, /CAPE jest wynikiem obliczenia/);
+  assert.match(styles, /\.windy-decoder\s*\{/);
+  assert.match(styles, /\.decoder-feedback\.is-correct/);
 });
 
 test("the cloud atlas exposes a prominent evidence-aware search", async () => {

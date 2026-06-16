@@ -60,6 +60,12 @@ import {
 import { fieldPrinciples, fieldQuestions } from "./data/field-guide.js";
 import { getSources, sourceList } from "./data/sources.js";
 import {
+  cloudBands,
+  getWeatherLayer,
+  pressureLevels,
+  weatherLayers,
+} from "./data/weather-layers.js";
+import {
   createObservationDraft,
   evidenceCoverage,
   nextDiscriminatingObservation,
@@ -104,6 +110,10 @@ import {
   updateAviationReview,
 } from "./lib/metar-training.js";
 import { searchCloudAtlas, searchTaxonomyTerms } from "./lib/cloud-search.js";
+import {
+  pressureSurfaceContext,
+  weatherLayerReading,
+} from "./lib/weather-layers.js";
 import { windFromCloudMotion } from "./lib/wind.js";
 
 const navItems = [
@@ -2137,17 +2147,251 @@ function TermDetail({ term, onClose, onOpenCloud, onSources }) {
   );
 }
 
-const pressureLevels = {
-  1000: { altitude: 110, use: "warstwa przyziemna nad niskim terenem" },
-  925: { altitude: 760, use: "niska warstwa, inwersje i napływ" },
-  850: { altitude: 1460, use: "temperatura i adwekcja w dolnej troposferze" },
-  700: { altitude: 3010, use: "wilgoć i ruch pionowy poziomu średniego" },
-  500: { altitude: 5570, use: "zatoki, niże górne i sterowanie przepływem" },
-  300: { altitude: 9160, use: "prąd strumieniowy i górna troposfera" },
+const weatherLayerIcons = {
+  wind: Wind,
+  gauge: Gauge,
+  rain: CloudRain,
+  cloud: Cloud,
+  pin: MapPin,
+  stack: Stack,
+  lightning: Lightning,
 };
 
+function WindyDecoderPanel({
+  terrain,
+  setTerrain,
+  pressure,
+  setPressure,
+  onSources,
+}) {
+  const [layerId, setLayerId] = useState("wind");
+  const [cloudBand, setCloudBand] = useState("low");
+  const [answerIndex, setAnswerIndex] = useState(null);
+  const feedbackRef = useRef(null);
+  const layer = getWeatherLayer(layerId);
+  const LayerIcon = weatherLayerIcons[layer.icon] || Info;
+  const pressureContext = pressureSurfaceContext(pressure, terrain);
+  const reading = weatherLayerReading(layerId, { pressure, terrain, cloudBand });
+  const answered = answerIndex !== null;
+  const isCorrect = answerIndex === layer.check.correct;
+
+  useEffect(() => {
+    setAnswerIndex(null);
+  }, [layerId]);
+
+  useEffect(() => {
+    if (answered) feedbackRef.current?.focus();
+  }, [answered, layerId]);
+
+  return (
+    <section className="windy-decoder">
+      <div className="decoder-protocol">
+        <div className="decoder-protocol__intro">
+          <span className="eyebrow">Protokół czytania mapy</span>
+          <h2>Nie patrz na kolor bez pytania</h2>
+          <p>
+            Każdą warstwę czytaj w tej samej kolejności. Dzięki temu mapa
+            przestaje być zbiorem efektownych plam, a zaczyna być argumentem,
+            który można sprawdzić.
+          </p>
+        </div>
+        {[
+          ["01", "Miejsce i czas", "Który termin, model i punkt naprawdę oglądasz?"],
+          ["02", "Pole i jednostka", "Co oblicza kolor, liczba i legenda?"],
+          ["03", "Poziom i odniesienie", "AGL, MSL, hPa, warstwa czy cała kolumna?"],
+          ["04", "Porównanie", "Która druga warstwa lub obserwacja może obalić wniosek?"],
+        ].map(([number, title, copy]) => (
+          <article key={number}>
+            <span>{number}</span>
+            <strong>{title}</strong>
+            <p>{copy}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="decoder-workbench">
+        <nav className="decoder-layer-picker" aria-label="Wybierz warstwę pogodową">
+          <span>Warstwy do przećwiczenia</span>
+          {weatherLayers.map((item) => {
+            const Icon = weatherLayerIcons[item.icon] || Info;
+            return (
+              <button
+                key={item.id}
+                className={item.id === layerId ? "active" : ""}
+                aria-pressed={item.id === layerId}
+                onClick={() => setLayerId(item.id)}
+              >
+                <Icon size={21} />
+                <span>{item.shortLabel}</span>
+                <CaretRight size={16} />
+              </button>
+            );
+          })}
+        </nav>
+
+        <article className="decoder-reader">
+          <header>
+            <div className="decoder-reader__icon"><LayerIcon size={28} /></div>
+            <div>
+              <span className="eyebrow">{layer.category}</span>
+              <h2>{layer.label}</h2>
+            </div>
+          </header>
+
+          <section className="decoder-question">
+            <span>Ta mapa odpowiada na pytanie</span>
+            <p>{layer.question}</p>
+          </section>
+
+          {layer.supportsPressure && (
+            <section className="decoder-controls" aria-label="Ustaw poziom i teren">
+              <div className="decoder-control-heading">
+                <div>
+                  <span>Poziom ciśnienia</span>
+                  <strong>{pressure} hPa</strong>
+                </div>
+                <div>
+                  <span>Orientacyjnie nad terenem</span>
+                  <strong>
+                    {pressureContext.intersectsTerrain
+                      ? "poziom przecina teren"
+                      : `${pressureContext.agl.toLocaleString("pl-PL")} m AGL`}
+                  </strong>
+                </div>
+              </div>
+              <div className="decoder-pressure-picker">
+                {Object.keys(pressureLevels).map((value) => (
+                  <button
+                    key={value}
+                    className={pressure === Number(value) ? "active" : ""}
+                    aria-pressed={pressure === Number(value)}
+                    onClick={() => setPressure(Number(value))}
+                  >
+                    {value}
+                  </button>
+                ))}
+              </div>
+              <label>
+                <span>
+                  Modelowy teren
+                  <strong>{terrain.toLocaleString("pl-PL")} m MSL</strong>
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="2200"
+                  step="50"
+                  value={terrain}
+                  onChange={(event) => setTerrain(Number(event.target.value))}
+                />
+              </label>
+            </section>
+          )}
+
+          {layer.supportsCloudBand && (
+            <section className="decoder-band-control">
+              <span>Wybierz pasmo wysokości</span>
+              <div>
+                {Object.values(cloudBands).map((band) => (
+                  <button
+                    key={band.id}
+                    className={cloudBand === band.id ? "active" : ""}
+                    aria-pressed={cloudBand === band.id}
+                    onClick={() => setCloudBand(band.id)}
+                  >
+                    <strong>{band.label}</strong>
+                    <small>{band.range}</small>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <blockquote className="decoder-reading">
+            <Eye size={24} />
+            <div>
+              <span>Poprawne zdanie interpretacyjne</span>
+              <p>{reading}</p>
+            </div>
+          </blockquote>
+
+          <div className="decoder-definitions">
+            <section>
+              <span>Jednostka</span>
+              <p>{layer.unit}</p>
+            </section>
+            <section>
+              <span>Układ odniesienia</span>
+              <p>{layer.reference}</p>
+            </section>
+          </div>
+
+          <section className="decoder-compare">
+            <span className="eyebrow">Zanim wyciągniesz wniosek</span>
+            <h3>Porównaj obok</h3>
+            <ol>
+              {layer.compare.map((item) => <li key={item}>{item}</li>)}
+            </ol>
+          </section>
+
+          <aside className="decoder-trap">
+            <Warning size={24} />
+            <div>
+              <strong>Najczęstsza pułapka</strong>
+              <p>{layer.trap}</p>
+            </div>
+          </aside>
+
+          <SourceButton ids={layer.sourceIds} onOpen={onSources} />
+        </article>
+
+        <aside className="decoder-check">
+          <span className="eyebrow">Sprawdź rozumowanie</span>
+          <h2>Jedno pole, cztery interpretacje</h2>
+          <p>{layer.check.prompt}</p>
+          <div role="group" aria-label="Wybierz jedną interpretację">
+            {layer.check.options.map((option, index) => {
+              const optionIsCorrect = answered && index === layer.check.correct;
+              const optionIsWrong = answered && index === answerIndex && !optionIsCorrect;
+              return (
+                <button
+                  key={option}
+                  className={`${optionIsCorrect ? "is-correct" : ""} ${optionIsWrong ? "is-wrong" : ""}`}
+                  disabled={answered}
+                  onClick={() => setAnswerIndex(index)}
+                >
+                  <span>{String.fromCharCode(65 + index)}</span>
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+          {answered && (
+            <section
+              ref={feedbackRef}
+              tabIndex="-1"
+              className={`decoder-feedback ${isCorrect ? "is-correct" : "is-wrong"}`}
+              aria-live="polite"
+            >
+              <strong>
+                {isCorrect
+                  ? "Tak. To wniosek, który dane rzeczywiście podtrzymują."
+                  : `Nie. Poprawna odpowiedź: ${String.fromCharCode(65 + layer.check.correct)}.`}
+              </strong>
+              <p>{layer.check.explanation}</p>
+              <button className="text-button" onClick={() => setAnswerIndex(null)}>
+                Spróbuj jeszcze raz
+              </button>
+            </section>
+          )}
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 function LayersPage({ onSources }) {
-  const [tab, setTab] = useState("lab");
+  const [tab, setTab] = useState("decoder");
   const [terrain, setTerrain] = useState(300);
   const [pressure, setPressure] = useState(850);
   const selected = pressureLevels[pressure];
@@ -2164,16 +2408,32 @@ function LayersPage({ onSources }) {
           <p>Zrozum, co naprawdę zmieniasz w aplikacjach pogodowych, gdy przesuwasz wysokość albo wybierasz poziom hPa.</p>
         </div>
         <SourceButton
-          ids={["faaWeather", "windyLevels", "windyClouds", "windyCloudBase"]}
+          ids={[
+            "faaWeather",
+            "windyOverlays",
+            "windyAcademy",
+            "windyLevels",
+            "ecmwfModelLevels",
+          ]}
           onOpen={onSources}
         />
       </header>
 
       <div className="segmented-control layers-tabs">
-        {[["lab", "Wysokość"], ["wind", "Wiatr z nieba"], ["metar", "METAR / TAF"], ["hazards", "Zagrożenia"], ["sounding", "Sondaż i Skew-T"]].map(([id, label]) => (
+        {[["decoder", "Czytnik Windy"], ["lab", "Wysokość"], ["wind", "Wiatr z nieba"], ["metar", "METAR / TAF"], ["hazards", "Zagrożenia"], ["sounding", "Sondaż i Skew-T"]].map(([id, label]) => (
           <button key={id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>
+
+      {tab === "decoder" && (
+        <WindyDecoderPanel
+          terrain={terrain}
+          setTerrain={setTerrain}
+          pressure={pressure}
+          setPressure={setPressure}
+          onSources={onSources}
+        />
+      )}
 
       {tab === "lab" && (
         <div className="atmosphere-lab">

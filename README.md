@@ -19,6 +19,8 @@ The application includes:
   turbulence, convection, and thunderstorms;
 - an independent laboratory for AGL, MSL, pressure levels, geopotential
   height, and the vertical layers used in Windy;
+- a practical Windy decoder for eight common overlays, with reference frames,
+  comparison fields, interpretation traps, and four-choice reasoning checks;
 - visible sources and confidence notes throughout the learning experience;
 - a mobile-first installable web app with offline learning support.
 

@@ -121,6 +121,61 @@ export const sources = {
     checkText: "Display wind at various altitudes instead of pressure",
     retrieved: "16 czerwca 2026",
   },
+  windyOverlays: {
+    id: "windyOverlays",
+    organization: "Windy",
+    title: "Description of weather overlays",
+    label: "Windy: opis warstw pogodowych",
+    url: "https://community.windy.com/topic/3361/description-of-weather-overlays",
+    kind: "Objaśnienie interfejsu",
+    trust:
+      "Opis produktu wyjaśniający znaczenie, jednostki i ograniczenia najważniejszych warstw Windy.",
+    scope:
+      "Wiatr, temperatura, wilgotność, zachmurzenie, podstawa i wierzchołki chmur, opad oraz CAPE.",
+    checkText: "Description of weather overlays",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
+  },
+  windyAcademy: {
+    id: "windyAcademy",
+    organization: "Windy",
+    title: "Windy Weather Academy",
+    label: "Windy Weather Academy",
+    url: "https://www.windy.com/articles/38548",
+    kind: "Przewodnik po produkcie",
+    trust:
+      "Oficjalny przewodnik Windy porządkujący pracę z modelami, osią czasu, warstwami mapy, meteogramem i airgramem.",
+    scope:
+      "Czytanie map, porównywanie modeli, prognoza szczegółowa i interpretacja warstw.",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
+  },
+  windyCloudBands: {
+    id: "windyCloudBands",
+    organization: "Windy",
+    title: "Clouds layer base",
+    label: "Windy: pasma wysokości chmur",
+    url: "https://community.windy.com/topic/36010/clouds-layer-base",
+    kind: "Objaśnienie interfejsu",
+    trust:
+      "Odpowiedź zespołu Windy podaje przybliżone granice niskiego, średniego i wysokiego pasma chmur.",
+    scope:
+      "Chmury niskie 0–2 km, średnie 2–6,5 km i wysokie powyżej około 6,5 km.",
+    checkText: "Clouds layer base",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
+  },
+  ecmwfModelLevels: {
+    id: "ecmwfModelLevels",
+    organization: "European Centre for Medium-Range Weather Forecasts",
+    title: "Pressure on model levels",
+    label: "ECMWF: poziomy modelu i ciśnienie",
+    url: "https://confluence.ecmwf.int/plugins/viewsource/viewpagesrc.action?pageId=158636068",
+    kind: "Dokumentacja modelu",
+    trust:
+      "Dokumentacja ECMWF opisująca zależność poziomów modelu od ciśnienia powierzchniowego oraz terenu.",
+    scope:
+      "Poziomy modelowe, powierzchnie ciśnienia, geopotencjał i pionowa reprezentacja atmosfery.",
+    checkText: "Pressure on model levels",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
+  },
   windyClouds: {
     id: "windyClouds",
     organization: "Windy Community",
