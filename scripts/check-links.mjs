@@ -15,10 +15,10 @@ const links = [
     url: source.url,
     expectedText: source.checkText,
   })),
-  ...clouds.map((cloud) => ({
-    label: `${cloud.name}: image provenance`,
-    url: cloud.image.page,
-  })),
+  ...clouds.flatMap((cloud) => cloud.images.map((image) => ({
+    label: `${cloud.name}: ${image.id} provenance`,
+    url: image.page,
+  }))),
 ];
 
 function sleep(milliseconds) {

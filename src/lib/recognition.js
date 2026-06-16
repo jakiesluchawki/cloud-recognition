@@ -20,10 +20,26 @@ function shuffle(items, random = Math.random) {
   return result;
 }
 
-export function createRecognitionQuestion(cloudId, random = Math.random) {
+export function selectRecognitionImage(imageIds, previousId = null, random = Math.random) {
+  const candidates = imageIds.filter((id) => id !== previousId);
+  const pool = candidates.length ? candidates : imageIds;
+  if (!pool.length) return null;
+  const index = Math.min(pool.length - 1, Math.floor(random() * pool.length));
+  return pool[index];
+}
+
+export function createRecognitionQuestion(
+  cloudId,
+  {
+    imageIds = [],
+    previousImageId = null,
+    random = Math.random,
+  } = {},
+) {
   const distractors = confusions[cloudId] || [];
   return {
     cloudId,
+    imageId: selectRecognitionImage(imageIds, previousImageId, random),
     choices: shuffle([cloudId, ...distractors], random),
   };
 }

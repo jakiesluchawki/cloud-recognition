@@ -4701,6 +4701,46 @@ p {
   font-size: 0.78rem;
 }
 
+.recognition-provenance {
+  margin: 18px 0;
+  border: 1px solid rgba(8, 47, 79, 0.16);
+  background: var(--white);
+  padding: 17px 18px;
+}
+
+.recognition-provenance > strong,
+.recognition-provenance > p,
+.recognition-provenance > small {
+  display: block;
+}
+
+.recognition-provenance > strong {
+  margin: 7px 0 8px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  line-height: 1.35;
+}
+
+.recognition-provenance > p {
+  margin: 0 0 11px;
+  color: #566870;
+  font-size: 0.74rem;
+}
+
+.recognition-provenance > small {
+  color: #687980;
+  font-size: 0.64rem;
+}
+
+.recognition-provenance a {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--blue);
+  font-weight: 750;
+}
+
 .recognition-feedback-actions {
   display: flex;
   flex-wrap: wrap;

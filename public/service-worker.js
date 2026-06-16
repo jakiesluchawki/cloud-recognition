@@ -1,11 +1,44 @@
-const VERSION = "cloud-recognition-v12";
+const VERSION = "cloud-recognition-v13";
 const BASE = "/cloud-recognition/";
+const CLOUD_PHOTOS = [
+  "altocumulus-lenticularis-nyons.jpg",
+  "altocumulus-mackerel.jpg",
+  "altocumulus.jpg",
+  "altostratus-sterling.jpg",
+  "altostratus-undulatus-dulles.jpg",
+  "altostratus.jpg",
+  "cirrocumulus-bergsfjorden.jpg",
+  "cirrocumulus-tallinn.jpg",
+  "cirrocumulus.jpg",
+  "cirrostratus-elko.jpg",
+  "cirrostratus-faint-halo.jpg",
+  "cirrostratus.jpg",
+  "cirrus-elko.jpg",
+  "cirrus-uncinus-new-jersey.jpg",
+  "cirrus.jpg",
+  "cumulonimbus-calvus.jpg",
+  "cumulonimbus-incus-krakow.jpg",
+  "cumulonimbus.jpg",
+  "cumulus-humilis-schwarzwald.jpg",
+  "cumulus-mediocris.jpg",
+  "cumulus.jpg",
+  "nimbostratus-hockenheim-1.jpg",
+  "nimbostratus-hockenheim-2.jpg",
+  "nimbostratus.jpg",
+  "stratocumulus-ewing.jpg",
+  "stratocumulus-jastrzebie.jpg",
+  "stratocumulus.jpg",
+  "stratus-sterling.jpg",
+  "stratus-virga-elko.jpg",
+  "stratus.jpg",
+];
 const APP_SHELL = [
   BASE,
   `${BASE}manifest.webmanifest`,
   `${BASE}assets/hero-atlas-swiatla.png`,
   `${BASE}icons/icon-192.png`,
   `${BASE}icons/icon-512.png`,
+  ...CLOUD_PHOTOS.map((file) => `${BASE}assets/clouds/${file}`),
 ];
 
 self.addEventListener("install", (event) => {

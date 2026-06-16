@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { access } from "node:fs/promises";
 import test from "node:test";
 import { clouds } from "../src/data/clouds.js";
 import {
@@ -56,6 +57,7 @@ import {
   recognitionMastery,
   recognitionWeight,
   selectRecognitionCloud,
+  selectRecognitionImage,
   updateRecognitionStats,
   weakestRecognitionCloud,
 } from "../src/lib/recognition.js";
@@ -156,7 +158,9 @@ test("taxonomy search ranks formal terms, aliases and compatible genera", () => 
   );
 });
 
-test("each cloud record exposes evidence, taxonomy, sources and image provenance", () => {
+test("each cloud record exposes evidence, taxonomy, sources and a varied photo bank", async () => {
+  const imageIds = new Set();
+
   for (const cloud of clouds) {
     assert.ok(cloud.observe.length >= 3, `${cloud.name} needs observable evidence`);
     assert.ok(Array.isArray(cloud.species));
@@ -164,9 +168,19 @@ test("each cloud record exposes evidence, taxonomy, sources and image provenance
     assert.ok(Array.isArray(cloud.features));
     assert.ok(Array.isArray(cloud.accessoryClouds));
     assert.ok(cloud.sourceIds.includes("wmoAtlas"));
-    assert.match(cloud.image.page, /^https:\/\/commons\.wikimedia\.org\//);
-    assert.ok(cloud.image.license);
-    assert.doesNotMatch(cloud.image.src, /^\//, `${cloud.name} must respect the Vite base path`);
+    assert.ok(cloud.images.length >= 3, `${cloud.name} needs at least three recognition photos`);
+
+    for (const image of cloud.images) {
+      assert.ok(!imageIds.has(image.id), `${image.id} must be globally unique`);
+      imageIds.add(image.id);
+      assert.match(image.page, /^https:\/\/commons\.wikimedia\.org\//);
+      assert.ok(image.author);
+      assert.ok(image.license);
+      assert.ok(image.note.length >= 30);
+      assert.ok(image.diagnostic.length >= 50);
+      assert.doesNotMatch(image.src, /^\//, `${cloud.name} must respect the Vite base path`);
+      await access(new URL(`../public/${image.src}`, import.meta.url));
+    }
   }
 });
 
@@ -332,14 +346,26 @@ test("every advertised lesson has honest timing and substantive teaching materia
 
 test("recognition questions always contain four unique plausible choices", () => {
   for (const cloud of clouds) {
-    const question = createRecognitionQuestion(cloud.id, () => 0.42);
+    const question = createRecognitionQuestion(cloud.id, {
+      imageIds: cloud.images.map((image) => image.id),
+      random: () => 0.42,
+    });
     assert.equal(question.choices.length, 4);
     assert.equal(new Set(question.choices).size, 4);
     assert.ok(question.choices.includes(cloud.id));
+    assert.ok(cloud.images.some((image) => image.id === question.imageId));
     for (const choice of question.choices) {
       assert.ok(clouds.some((candidate) => candidate.id === choice));
     }
   }
+});
+
+test("recognition photo selection avoids repeating the previous frame", () => {
+  const imageIds = ["first", "second", "third"];
+
+  assert.equal(selectRecognitionImage(imageIds, null, () => 0), "first");
+  assert.equal(selectRecognitionImage(imageIds, "first", () => 0), "second");
+  assert.equal(selectRecognitionImage(imageIds, "second", () => 0.999), "third");
 });
 
 test("recognition practice increases priority after an error", () => {

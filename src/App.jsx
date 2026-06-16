@@ -28,7 +28,7 @@ import {
   Wind,
   X,
 } from "@phosphor-icons/react";
-import { cloudLevels, clouds, getCloud } from "./data/clouds.js";
+import { cloudLevels, clouds, getCloud, getCloudImage } from "./data/clouds.js";
 import {
   comparisonDimensions,
   comparisonPresets,
@@ -1218,7 +1218,7 @@ function CloudCardGrid({ items, onSelect }) {
         <button className="cloud-card" key={cloud.id} onClick={() => onSelect(cloud.id)}>
           <span className="cloud-image-wrap">
             <img
-              src={publicAsset(cloud.image.src)}
+              src={publicAsset(getCloudImage(cloud).src)}
               alt={`${cloud.name}, ${cloud.polish}`}
               loading="lazy"
               decoding="async"
@@ -1425,7 +1425,7 @@ function FieldObserver({ onOpenCloud, onCompareClouds, onSaveObservation, onSour
             return (
               <article className={index === 0 ? "leading" : ""} key={result.cloudId}>
                 <div className="hypothesis-image">
-                  <img src={publicAsset(cloud.image.src)} alt={`${cloud.name}, ${cloud.polish}`} />
+                  <img src={publicAsset(getCloudImage(cloud).src)} alt={`${cloud.name}, ${cloud.polish}`} />
                   <span>{String(index + 1).padStart(2, "0")}</span>
                 </div>
                 <div className="hypothesis-body">
@@ -1475,7 +1475,7 @@ function FieldObserver({ onOpenCloud, onCompareClouds, onSaveObservation, onSour
               <article key={cloud.id}>
                 <div>
                   <span className="cloud-code">{cloud.code}</span>
-                  <img src={publicAsset(cloud.image.src)} alt={`${cloud.name}, ${cloud.polish}`} />
+                  <img src={publicAsset(getCloudImage(cloud).src)} alt={`${cloud.name}, ${cloud.polish}`} />
                 </div>
                 <h4>{cloud.name}</h4>
                 <p>{cloud.altitude}</p>
@@ -1702,7 +1702,7 @@ function CloudComparison({ initialIds, onOpenCloud, onSources }) {
           <article key={cloud.id}>
             <div>
               <img
-                src={publicAsset(cloud.image.src)}
+                src={publicAsset(getCloudImage(cloud).src)}
                 alt={`${cloud.name}, ${cloud.polish}`}
                 loading="lazy"
                 decoding="async"
@@ -1948,6 +1948,7 @@ function CloudDetail({
   onSources,
 }) {
   const profile = getCloudProfile(cloud.id);
+  const leadImage = getCloudImage(cloud);
   const dialogRef = useDialogFocus(onClose);
 
   return (
@@ -1963,7 +1964,7 @@ function CloudDetail({
       >
         <button className="icon-button detail-close" onClick={onClose} aria-label="Zamknij kartę"><X size={22} /></button>
         <div className="detail-image">
-          <img src={publicAsset(cloud.image.src)} alt={`${cloud.name}, ${cloud.polish}`} />
+          <img src={publicAsset(getCloudImage(cloud).src)} alt={`${cloud.name}, ${cloud.polish}`} />
           <span className="cloud-code">{cloud.code}</span>
         </div>
         <div className="detail-body">
@@ -2068,9 +2069,9 @@ function CloudDetail({
           </div>
           <section className="photo-record">
             <span className="eyebrow">Metryka fotografii</span>
-            <p>{cloud.image.note}</p>
-            <p><strong>{cloud.image.author}</strong> · {cloud.image.license}</p>
-            <a href={cloud.image.page} target="_blank" rel="noreferrer">Strona pliku i licencja <ArrowSquareOut size={15} /></a>
+            <p>{leadImage.note}</p>
+            <p><strong>{leadImage.author}</strong> · {leadImage.license}</p>
+            <a href={leadImage.page} target="_blank" rel="noreferrer">Strona pliku i licencja <ArrowSquareOut size={15} /></a>
           </section>
           <SourceButton ids={[...cloud.sourceIds, "wmoPrinciples", "faaWeather", "commons"]} onOpen={onSources} />
         </div>
@@ -3636,14 +3637,26 @@ function RecognitionTest({
   onSources,
 }) {
   const cloudIds = clouds.map((cloud) => cloud.id);
+  const lastImageByCloud = useRef({});
+  const buildQuestion = (id) => {
+    const questionCloud = getCloud(id);
+    return createRecognitionQuestion(id, {
+      imageIds: questionCloud.images.map((image) => image.id),
+      previousImageId: lastImageByCloud.current[id],
+    });
+  };
   const [question, setQuestion] = useState(() => {
     const id = cloudIds.includes(initialCloudId)
       ? initialCloudId
       : selectRecognitionCloud(cloudIds, stats);
-    return createRecognitionQuestion(id);
+    return buildQuestion(id);
   });
   const [answer, setAnswer] = useState(null);
+  useEffect(() => {
+    lastImageByCloud.current[question.cloudId] = question.imageId;
+  }, [question.cloudId, question.imageId]);
   const cloud = getCloud(question.cloudId);
+  const image = getCloudImage(cloud, question.imageId);
   const chosenCloud = answer ? getCloud(answer) : null;
   const summary = recognitionSummary(stats);
   const dialogRef = useDialogFocus(onClose);
@@ -3660,7 +3673,7 @@ function RecognitionTest({
 
   const next = () => {
     const id = selectRecognitionCloud(cloudIds, stats, question.cloudId);
-    setQuestion(createRecognitionQuestion(id));
+    setQuestion(buildQuestion(id));
     setAnswer(null);
   };
 
@@ -3683,7 +3696,7 @@ function RecognitionTest({
           <button className="icon-button" onClick={onClose} aria-label="Zamknij test"><X size={22} /></button>
         </div>
         <div className="recognition-photo">
-          <img src={publicAsset(cloud.image.src)} alt="Chmura do rozpoznania" />
+          <img src={publicAsset(image.src)} alt="Chmura do rozpoznania" />
           <span>{cloud.level}</span>
         </div>
         <div className="recognition-options">
@@ -3718,6 +3731,17 @@ function RecognitionTest({
                 <p>{discriminator}</p>
               </aside>
             )}
+            <aside className="recognition-provenance">
+              <span className="eyebrow">Dowód w tym kadrze</span>
+              <strong>{image.diagnostic}</strong>
+              <p>{image.note}</p>
+              <small>
+                Fot. {image.author} · {image.license} ·{" "}
+                <a href={image.page} target="_blank" rel="noreferrer">
+                  strona pliku i licencja <ArrowSquareOut size={13} />
+                </a>
+              </small>
+            </aside>
             <div className="recognition-feedback-actions">
               <SourceButton ids={cloud.sourceIds} onOpen={onSources} compact />
               {discriminator && (
@@ -3739,6 +3763,7 @@ function RecognitionTest({
           </div>
           <p>
             Dystraktory pochodzą z grup rzeczywiście mylonych wizualnie.
+            Każdy rodzaj jest ćwiczony na kilku niezależnych fotografiach.
             Algorytm częściej wraca do rodzajów, przy których popełniasz błędy.
             Wynik zostaje wyłącznie w tej przeglądarce.
           </p>

@@ -53,7 +53,7 @@ test("the installable app and offline shell use the Pages base path", async () =
   assert.equal(manifest.start_url, "/cloud-recognition/");
   assert.equal(manifest.scope, "/cloud-recognition/");
   assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
-  assert.match(worker, /cloud-recognition-v12/);
+  assert.match(worker, /cloud-recognition-v13/);
 });
 
 test("GitHub Pages deployment runs tests before publishing", async () => {
@@ -91,6 +91,8 @@ test("the recognition test is globally available and explains its methodology", 
   assert.match(app, /function RecognitionTest/);
   assert.match(app, /cztery prawdopodobne odpowiedzi/i);
   assert.match(app, /Dystraktory pochodzą z grup rzeczywiście mylonych wizualnie/);
+  assert.match(app, /Każdy rodzaj jest ćwiczony na kilku niezależnych fotografiach/);
+  assert.match(app, /Dowód w tym kadrze/);
   assert.match(app, /formatResultCount/);
 });
 
@@ -240,7 +242,8 @@ test("external sources and image provenance have a scheduled link monitor", asyn
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /npm run check:links/);
   assert.match(monitor, /sourceList/);
-  assert.match(monitor, /cloud\.image\.page/);
+  assert.match(monitor, /cloud\.images\.map/);
+  assert.match(monitor, /url: image\.page/);
   assert.match(monitor, /page or file you requested cannot be found/i);
   assert.match(monitor, /expected content marker/);
 });
