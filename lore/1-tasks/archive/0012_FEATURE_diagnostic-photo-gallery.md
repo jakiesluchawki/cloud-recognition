@@ -2,7 +2,7 @@
 id: "0012"
 title: "Teach within-genus variation with a diagnostic photo gallery"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0003", "0005", "0011"]
 tags: ["priority-high", "atlas", "photography", "active-recall", "mobile"]
@@ -23,6 +23,13 @@ history:
       Implemented and locally verified the gallery: 52 tests, nine lesson
       audits, 46 link checks, production build, and Brave QA at 1440 x 1000
       and 390 x 844 pass. Public Pages verification remains.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published the gallery in commit 412eb2b. All 52 tests, nine lesson
+      audits, 46 links, local and public Brave QA, and GitHub Pages run
+      27608187935 passed.
 ---
 
 # Teach within-genus variation with a diagnostic photo gallery
@@ -67,7 +74,7 @@ species, viewpoint, illumination, mixed layers, and development stage.
       legible on desktop.
 - [x] Existing recognition, atlas, comparison, and source behavior remains
       intact.
-- [ ] Automated tests, lesson audit, link audit, production build, Brave QA,
+- [x] Automated tests, lesson audit, link audit, production build, Brave QA,
       and public GitHub Pages verification pass.
 
 ## Design Decisions
@@ -142,3 +149,11 @@ species, viewpoint, illumination, mixed layers, and development stage.
 ## Future Work
 
 No follow-up has emerged yet.
+
+## Release
+
+- Feature commit: `412eb2b`
+- GitHub Pages run: `27608187935`
+- Public JavaScript: `index-DLyuj-RU.js`
+- Public CSS: `index-BAGktMQg.css`
+- Offline cache: `cloud-recognition-v14`

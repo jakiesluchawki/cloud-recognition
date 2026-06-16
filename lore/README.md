@@ -1,6 +1,6 @@
 # Lore Index
 
-> Auto-generated on 2026-06-16 11:24. Do not edit manually.
+> Auto-generated on 2026-06-16 11:34. Do not edit manually.
 > Use `lore_generate-index` tool to regenerate.
 
 Quick reference for task dependencies, status, and ADR relationships.
@@ -9,7 +9,7 @@ Quick reference for task dependencies, status, and ADR relationships.
 
 | Active | Blocked | Backlog | Completed | ADRs |
 |:------:|:-------:|:-------:|:---------:|:----:|
-| 0 | 0 | 1 | 10 | 0 |
+| 0 | 0 | 1 | 11 | 0 |
 
 ## Task Status
 
@@ -26,3 +26,4 @@ Quick reference for task dependencies, status, and ADR relationships.
 | 0009 | [Unify search across the complete cl...](lore/1-tasks/archive/0009_FEATURE_unified-atlas-search.md) | FEATURE | completed | — | — | — |
 | 0010 | [Build a practical Windy layer decod...](lore/1-tasks/archive/0010_FEATURE_windy-layer-decoder.md) | FEATURE | completed | — | — | — |
 | 0011 | [Build a multi-image cloud recogniti...](lore/1-tasks/archive/0011_FEATURE_multi-image-recognition-bank.md) | FEATURE | completed | — | — | — |
+| 0012 | [Teach within-genus variation with a...](lore/1-tasks/archive/0012_FEATURE_diagnostic-photo-gallery.md) | FEATURE | completed | — | — | — |
