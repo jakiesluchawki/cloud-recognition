@@ -52,7 +52,7 @@ test("the installable app and offline shell use the Pages base path", async () =
   assert.equal(manifest.start_url, "/cloud-recognition/");
   assert.equal(manifest.scope, "/cloud-recognition/");
   assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
-  assert.match(worker, /cloud-recognition-v5/);
+  assert.match(worker, /cloud-recognition-v6/);
 });
 
 test("GitHub Pages deployment runs tests before publishing", async () => {

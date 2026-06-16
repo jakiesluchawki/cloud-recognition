@@ -49,6 +49,7 @@ import {
   quizQuestions,
 } from "./data/learning.js";
 import { lessons } from "./data/lessons.js";
+import { metarTrainingScenarios, tafTrainingScenarios } from "./data/metar-training.js";
 import { fieldPrinciples, fieldQuestions } from "./data/field-guide.js";
 import { getSources, sourceList } from "./data/sources.js";
 import {
@@ -83,6 +84,10 @@ import {
   updateRecognitionStats,
   weakestRecognitionCloud,
 } from "./lib/recognition.js";
+import {
+  chooseDifferentScenario,
+  evaluateTrainingAnswer,
+} from "./lib/metar-training.js";
 import { windFromCloudMotion } from "./lib/wind.js";
 
 const navItems = [
@@ -2118,38 +2123,357 @@ function WindPanel({ onSources }) {
             <small>ruch chmury do {result.towardLabel} · kierunek wiatru podajemy „z”</small>
           </div>
         </div>
-        <div className="wind-caveats">
-          <article><strong>Lenticularis</strong><p>Kształt może stać w miejscu, gdy powietrze szybko przepływa przez falę.</p></article>
-          <article><strong>Virga</strong><p>Nachylenie łączy znoszenie z opadaniem i parowaniem hydrometeorów.</p></article>
-          <article><strong>Cumulonimbus</strong><p>Nowe komórki mogą rozwijać się w innym kierunku niż przepływa samo powietrze.</p></article>
-          <article><strong>Radiatus</strong><p>Pasma pozornie zbiegają się przez perspektywę, choć są prawie równoległe.</p></article>
-        </div>
         <SourceButton ids={["faaWeather", "wmoAtlas"]} onOpen={onSources} />
+      </div>
+      <div className="wind-caveats wind-caveats--wide">
+        <article><strong>Lenticularis</strong><p>Kształt może stać w miejscu, gdy powietrze szybko przepływa przez falę.</p></article>
+        <article><strong>Virga</strong><p>Nachylenie łączy znoszenie z opadaniem i parowaniem hydrometeorów.</p></article>
+        <article><strong>Cumulonimbus</strong><p>Nowe komórki mogą rozwijać się w innym kierunku niż przepływa samo powietrze.</p></article>
+        <article><strong>Radiatus</strong><p>Pasma pozornie zbiegają się przez perspektywę, choć są prawie równoległe.</p></article>
       </div>
     </section>
   );
 }
 
-function MetarPanel({ onSources }) {
-  const [decoded, setDecoded] = useState(false);
+const METAR_SPRINT_SECONDS = 30;
+
+function ReportRibbon({ report, focusTokens = [], revealed = false }) {
   return (
-    <section className="knowledge-panel">
-      <div className="panel-heading">
-        <span className="panel-icon"><AirplaneTilt size={27} /></span>
-        <div><span className="eyebrow">Warsztat kodu</span><h2>EPWA 161230Z 24012KT 9999 BKN018CB OVC050 18/14 Q1012</h2></div>
+    <div className="metar-report" aria-label={`Depesza: ${report}`}>
+      {report.split(" ").map((token, index) => (
+        <span
+          key={`${token}-${index}`}
+          className={revealed && focusTokens.includes(token) ? "is-focus" : ""}
+        >
+          {token}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function TrainingQuestion({
+  question,
+  answerIndex,
+  timedOut = false,
+  onAnswer,
+  onNext,
+  nextLabel,
+}) {
+  const answered = answerIndex !== null || timedOut;
+  const result = answerIndex !== null
+    ? evaluateTrainingAnswer(question, answerIndex)
+    : timedOut
+      ? {
+          isCorrect: false,
+          correct: question.options[question.correct],
+          explanation: question.explanation,
+        }
+      : null;
+
+  return (
+    <div className="metar-question">
+      <span className="metar-question__stage">{question.stage}</span>
+      <h3>{question.prompt}</h3>
+      <div className="metar-options" role="group" aria-label="Wybierz jedną odpowiedź">
+        {question.options.map((option, index) => {
+          const isCorrect = answered && index === question.correct;
+          const isWrong = answered && index === answerIndex && index !== question.correct;
+          return (
+            <button
+              key={option}
+              className={`${isCorrect ? "is-correct" : ""} ${isWrong ? "is-wrong" : ""}`}
+              disabled={answered}
+              onClick={() => onAnswer(index)}
+            >
+              <span>{String.fromCharCode(65 + index)}</span>
+              {option}
+            </button>
+          );
+        })}
       </div>
-      <button className="button button--primary" onClick={() => setDecoded(!decoded)}>{decoded ? "Ukryj rozbiór" : "Rozłóż raport na części"}</button>
-      {decoded && (
-        <div className="decode-grid">
-          <article><strong>161230Z</strong><span>16. dzień miesiąca, 12:30 UTC</span></article>
-          <article><strong>24012KT</strong><span>wiatr z 240°, 12 węzłów</span></article>
-          <article><strong>9999</strong><span>widzialność 10 km lub więcej</span></article>
-          <article><strong>BKN018CB</strong><span>5–7 oktantów, podstawa 1800 ft AGL, Cumulonimbus</span></article>
-          <article><strong>OVC050</strong><span>pełne pokrycie, podstawa 5000 ft AGL</span></article>
-          <article><strong>18/14 Q1012</strong><span>temperatura 18°C, punkt rosy 14°C, QNH 1012 hPa</span></article>
+      {result && (
+        <div
+          className={`metar-feedback ${result.isCorrect ? "is-correct" : "is-wrong"}`}
+          aria-live="polite"
+        >
+          <strong>
+            {result.isCorrect
+              ? "Dobrze odczytane."
+              : timedOut
+                ? "Czas minął."
+                : `Poprawna odpowiedź: ${result.correct}`}
+          </strong>
+          <p>{result.explanation}</p>
+          <button className="button button--primary" onClick={onNext}>
+            {nextLabel} <ArrowRight size={17} />
+          </button>
         </div>
       )}
-      <div className="notice"><Warning size={20} /><p>Pułap tworzy tu BKN018, nie OVC050. To przykład edukacyjny, nie aktualny raport lotniskowy.</p></div>
+    </div>
+  );
+}
+
+function MetarPanel({ onSources }) {
+  const [mode, setMode] = useState("decode");
+  const [scenarioIndex, setScenarioIndex] = useState(0);
+  const [selectedToken, setSelectedToken] = useState(null);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [answerIndex, setAnswerIndex] = useState(null);
+  const [timedOut, setTimedOut] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(METAR_SPRINT_SECONDS);
+  const [score, setScore] = useState({
+    correct: 0,
+    attempts: 0,
+    seconds: 0,
+    timedAttempts: 0,
+  });
+  const [tafIndex, setTafIndex] = useState(0);
+  const [tafQuestionIndex, setTafQuestionIndex] = useState(0);
+  const [tafAnswerIndex, setTafAnswerIndex] = useState(null);
+
+  const scenario = metarTrainingScenarios[scenarioIndex];
+  const question = scenario.questions[questionIndex];
+  const tafScenario = tafTrainingScenarios[tafIndex];
+  const tafQuestion = tafScenario.questions[tafQuestionIndex];
+  const isSprint = mode === "sprint";
+  const questionAnswered = answerIndex !== null || timedOut;
+  const selectedGroup = scenario.groups.find((group) => group.token === selectedToken);
+
+  useEffect(() => {
+    if (!isSprint || questionAnswered) return undefined;
+    if (secondsLeft <= 0) {
+      setTimedOut(true);
+      setScore((current) => ({
+        ...current,
+        attempts: current.attempts + 1,
+        seconds: current.seconds + METAR_SPRINT_SECONDS,
+        timedAttempts: current.timedAttempts + 1,
+      }));
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => setSecondsLeft((current) => current - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [isSprint, questionAnswered, secondsLeft]);
+
+  const startMode = (nextMode) => {
+    setMode(nextMode);
+    setQuestionIndex(0);
+    setAnswerIndex(null);
+    setTimedOut(false);
+    setSecondsLeft(METAR_SPRINT_SECONDS);
+    setSelectedToken(null);
+  };
+
+  const chooseScenario = (index) => {
+    setScenarioIndex(index);
+    setQuestionIndex(0);
+    setAnswerIndex(null);
+    setTimedOut(false);
+    setSecondsLeft(METAR_SPRINT_SECONDS);
+    setSelectedToken(null);
+  };
+
+  const chooseAnswer = (index) => {
+    if (questionAnswered) return;
+    const result = evaluateTrainingAnswer(question, index);
+    setAnswerIndex(index);
+    setScore((current) => ({
+      correct: current.correct + (result.isCorrect ? 1 : 0),
+      attempts: current.attempts + 1,
+      seconds: current.seconds + (isSprint ? METAR_SPRINT_SECONDS - secondsLeft : 0),
+      timedAttempts: current.timedAttempts + (isSprint ? 1 : 0),
+    }));
+  };
+
+  const nextMetarQuestion = () => {
+    if (questionIndex < scenario.questions.length - 1) {
+      setQuestionIndex((current) => current + 1);
+    } else {
+      setScenarioIndex((current) => chooseDifferentScenario(
+        current,
+        metarTrainingScenarios.length,
+      ));
+      setQuestionIndex(0);
+    }
+    setAnswerIndex(null);
+    setTimedOut(false);
+    setSecondsLeft(METAR_SPRINT_SECONDS);
+  };
+
+  const chooseTafAnswer = (index) => {
+    if (tafAnswerIndex !== null) return;
+    setTafAnswerIndex(index);
+  };
+
+  const nextTafQuestion = () => {
+    if (tafQuestionIndex < tafScenario.questions.length - 1) {
+      setTafQuestionIndex((current) => current + 1);
+    } else {
+      setTafIndex((current) => chooseDifferentScenario(
+        current,
+        tafTrainingScenarios.length,
+      ));
+      setTafQuestionIndex(0);
+    }
+    setTafAnswerIndex(null);
+  };
+
+  const averageSeconds = score.timedAttempts > 0
+    ? Math.round(score.seconds / score.timedAttempts)
+    : null;
+
+  return (
+    <section className="knowledge-panel metar-workshop">
+      <div className="panel-heading">
+        <span className="panel-icon"><AirplaneTilt size={27} /></span>
+        <div>
+          <span className="eyebrow">Interaktywna pracownia kodu</span>
+          <h2>Najpierw odczytaj. Potem odsłoń rozwiązanie.</h2>
+          <p className="panel-lead">
+            Uczysz się kolejności pracy: miejsce i czas, wiatr, widzialność,
+            zjawiska, chmury, temperatura, QNH, a na końcu pułap i wniosek.
+          </p>
+        </div>
+      </div>
+
+      <div className="metar-mode-switch" aria-label="Tryb pracowni">
+        <button className={mode === "decode" ? "active" : ""} onClick={() => startMode("decode")}>Rozbiór aktywny</button>
+        <button className={mode === "practice" ? "active" : ""} onClick={() => startMode("practice")}>Trening METAR</button>
+        <button className={mode === "sprint" ? "active" : ""} onClick={() => startMode("sprint")}>Odprawa 30 s</button>
+        <button className={mode === "taf" ? "active" : ""} onClick={() => startMode("taf")}>Oś czasu TAF</button>
+      </div>
+
+      {mode !== "taf" && (
+        <div className="metar-scenario-nav">
+          <div>
+            <span>Depesza edukacyjna {scenarioIndex + 1}/{metarTrainingScenarios.length}</span>
+            <strong>{scenario.station} · {scenario.title}</strong>
+          </div>
+          <button
+            className="button button--secondary"
+            onClick={() => chooseScenario(chooseDifferentScenario(
+              scenarioIndex,
+              metarTrainingScenarios.length,
+            ))}
+          >
+            Losuj inną
+          </button>
+        </div>
+      )}
+
+      {mode === "decode" && (
+        <div className="metar-decode">
+          <p className="metar-instruction">
+            Kliknij grupę, nazwij ją własnymi słowami, dopiero potem sprawdź
+            znaczenie. Grupy tworzące pułap są oznaczane dopiero po wyborze.
+          </p>
+          <div className="metar-token-board">
+            {scenario.groups.map((group) => (
+              <button
+                key={group.token}
+                className={selectedToken === group.token ? "active" : ""}
+                aria-pressed={selectedToken === group.token}
+                onClick={() => setSelectedToken(group.token)}
+              >
+                {group.token}
+              </button>
+            ))}
+          </div>
+          <div className="metar-group-answer" aria-live="polite">
+            {selectedGroup ? (
+              <>
+                <span>{selectedGroup.label}</span>
+                <strong>{selectedGroup.token}</strong>
+                <p>{selectedGroup.meaning}</p>
+                {selectedGroup.ceiling && <small>Ta grupa może tworzyć pułap.</small>}
+              </>
+            ) : (
+              <>
+                <span>Zadanie</span>
+                <strong>Wybierz pierwszą grupę</strong>
+                <p>{scenario.context}</p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {(mode === "practice" || mode === "sprint") && (
+        <div className="metar-practice">
+          <div className="metar-practice__topline">
+            <span>Pytanie {questionIndex + 1}/{scenario.questions.length}</span>
+            <div className="metar-score">
+              <strong>{score.correct}/{score.attempts}</strong>
+              <span>poprawne</span>
+              {averageSeconds && <span>· średnio {averageSeconds} s</span>}
+            </div>
+            {isSprint && (
+              <div
+                className={`metar-timer ${secondsLeft <= 8 ? "is-urgent" : ""}`}
+                aria-live="polite"
+              >
+                <Gauge size={20} />
+                <strong>{secondsLeft}s</strong>
+              </div>
+            )}
+          </div>
+          <ReportRibbon
+            report={scenario.report}
+            focusTokens={question.focusTokens}
+            revealed={questionAnswered}
+          />
+          <TrainingQuestion
+            question={question}
+            answerIndex={answerIndex}
+            timedOut={timedOut}
+            onAnswer={chooseAnswer}
+            onNext={nextMetarQuestion}
+            nextLabel={questionIndex < scenario.questions.length - 1 ? "Następne pytanie" : "Następna depesza"}
+          />
+        </div>
+      )}
+
+      {mode === "taf" && (
+        <div className="taf-practice">
+          <div className="metar-scenario-nav">
+            <div>
+              <span>Prognoza edukacyjna {tafIndex + 1}/{tafTrainingScenarios.length}</span>
+              <strong>{tafScenario.station} · {tafScenario.title}</strong>
+            </div>
+          </div>
+          <ReportRibbon
+            report={tafScenario.report}
+            focusTokens={tafQuestion.focusTokens}
+            revealed={tafAnswerIndex !== null}
+          />
+          <div className="taf-timeline" aria-label="Oś czasu prognozy TAF">
+            {tafScenario.timeline.map((period) => (
+              <article key={period.time}>
+                <span>{period.time}</span>
+                <strong>{period.label}</strong>
+                <p>{period.detail}</p>
+              </article>
+            ))}
+          </div>
+          <TrainingQuestion
+            question={tafQuestion}
+            answerIndex={tafAnswerIndex}
+            onAnswer={chooseTafAnswer}
+            onNext={nextTafQuestion}
+            nextLabel={tafQuestionIndex < tafScenario.questions.length - 1 ? "Następne pytanie" : "Następna prognoza"}
+          />
+        </div>
+      )}
+
+      <div className="notice">
+        <Warning size={20} />
+        <p>
+          Wszystkie depesze w pracowni są fikcyjnymi przykładami edukacyjnymi.
+          Nie są aktualnymi raportami ani materiałem do podejmowania decyzji operacyjnych.
+        </p>
+      </div>
       <SourceButton ids={["awcCodes", "easaAircrew"]} onOpen={onSources} />
     </section>
   );

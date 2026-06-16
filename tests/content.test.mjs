@@ -19,7 +19,17 @@ import {
   moduleChecks,
 } from "../src/data/learning.js";
 import { lessonMinutes, lessons } from "../src/data/lessons.js";
+import {
+  metarTrainingScenarios,
+  tafTrainingScenarios,
+} from "../src/data/metar-training.js";
 import { sources } from "../src/data/sources.js";
+import {
+  chooseDifferentScenario,
+  evaluateTrainingAnswer,
+  findReportedCeiling,
+  parseSkyGroup,
+} from "../src/lib/metar-training.js";
 import { calculatePlacement } from "../src/lib/placement.js";
 import {
   createRecognitionQuestion,
@@ -368,4 +378,61 @@ test("hard cases expose more disputed boundaries and valid comparison routes", (
       assert.ok(cloudIds.has(cloudId), `${item.pair} references ${cloudId}`);
     }
   }
+});
+
+test("the METAR workshop offers varied reports and four plausible answers", () => {
+  assert.ok(metarTrainingScenarios.length >= 6);
+
+  const reports = new Set();
+  for (const scenario of metarTrainingScenarios) {
+    assert.ok(!reports.has(scenario.report), `${scenario.id} duplicates a report`);
+    reports.add(scenario.report);
+    assert.ok(scenario.groups.length >= 6, `${scenario.id} needs a complete guided decode`);
+    assert.ok(scenario.questions.length >= 4, `${scenario.id} needs a substantive exercise`);
+
+    for (const question of scenario.questions) {
+      assert.equal(question.options.length, 4, `${question.id} must have four choices`);
+      assert.equal(new Set(question.options).size, 4, `${question.id} choices must be unique`);
+      assert.ok(question.correct >= 0 && question.correct < 4);
+      assert.ok(question.explanation.length >= 45, `${question.id} needs teaching feedback`);
+      assert.ok(question.focusTokens.length >= 1, `${question.id} needs evidence highlighting`);
+    }
+  }
+});
+
+test("the TAF workshop teaches timelines rather than isolated abbreviations", () => {
+  assert.ok(tafTrainingScenarios.length >= 2);
+
+  for (const scenario of tafTrainingScenarios) {
+    assert.ok(scenario.report.startsWith("TAF "));
+    assert.ok(scenario.timeline.length >= 3, `${scenario.id} needs a meaningful timeline`);
+    assert.ok(scenario.questions.length >= 3, `${scenario.id} needs timeline practice`);
+    for (const question of scenario.questions) {
+      assert.equal(question.options.length, 4);
+      assert.equal(new Set(question.options).size, 4);
+    }
+  }
+});
+
+test("ceiling logic distinguishes BKN OVC and VV from FEW and SCT", () => {
+  assert.deepEqual(parseSkyGroup("BKN018CB"), {
+    token: "BKN018CB",
+    amount: "BKN",
+    heightFt: 1800,
+    cloudType: "CB",
+    createsCeiling: true,
+  });
+  assert.equal(parseSkyGroup("SCT018TCU").createsCeiling, false);
+  assert.equal(findReportedCeiling("EPWA 161230Z 9999 BKN018CB OVC050").token, "BKN018CB");
+  assert.equal(findReportedCeiling("EPGD 160530Z 1200 BR VV002").heightFt, 200);
+  assert.equal(findReportedCeiling("EPKK 161400Z 9999 FEW020 SCT045"), null);
+});
+
+test("training answers and scenario rotation are deterministic at their boundaries", () => {
+  const question = metarTrainingScenarios[0].questions[0];
+  assert.equal(evaluateTrainingAnswer(question, question.correct).isCorrect, true);
+  assert.equal(evaluateTrainingAnswer(question, 0).correct, question.options[question.correct]);
+  assert.equal(chooseDifferentScenario(0, 1, () => 0.5), 0);
+  assert.notEqual(chooseDifferentScenario(2, 6, () => 0), 2);
+  assert.notEqual(chooseDifferentScenario(2, 6, () => 0.999), 2);
 });
