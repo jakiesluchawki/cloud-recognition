@@ -1,4 +1,4 @@
-const VERSION = "cloud-recognition-v18";
+const VERSION = "cloud-recognition-v19";
 const BASE = "/cloud-recognition/";
 const CLOUD_PHOTOS = [
   "altocumulus-lenticularis-nyons.jpg",
@@ -36,6 +36,9 @@ const APP_SHELL = [
   BASE,
   `${BASE}manifest.webmanifest`,
   `${BASE}assets/hero-atlas-swiatla.png`,
+  `${BASE}assets/upper-atmosphere/nacreous-clouds-antarctica.jpg`,
+  `${BASE}assets/upper-atmosphere/noctilucent-clouds-laboe.jpg`,
+  `${BASE}assets/upper-atmosphere/polar-stratospheric-cloud-type-i.jpg`,
   `${BASE}icons/icon-192.png`,
   `${BASE}icons/icon-512.png`,
   ...CLOUD_PHOTOS.map((file) => `${BASE}assets/clouds/${file}`),
