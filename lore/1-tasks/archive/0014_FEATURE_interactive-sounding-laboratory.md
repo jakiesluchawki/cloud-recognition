@@ -2,7 +2,7 @@
 id: "0014"
 title: "Build an interactive sounding and Skew-T laboratory"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0005", "0010"]
 tags: ["priority-high", "aviation", "sounding", "skew-t", "active-learning", "mobile"]
@@ -19,6 +19,13 @@ history:
       Created after a product-depth audit found that the Sounding and Skew-T
       tab promises expert vertical analysis but currently contains only a
       two-state paragraph switch with no profile, method, examples, or check.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published the interactive sounding laboratory in commit 67484e8.
+      All 60 automated tests (+3), nine lesson audits, 52 link checks,
+      local and public Brave QA, and GitHub Pages run 27609772205 passed.
 ---
 
 # Build an interactive sounding and Skew-T laboratory
@@ -73,9 +80,8 @@ showing where any of them appears or how an analyst reads the diagram.
 - [x] The laboratory has no horizontal overflow at 390 px and remains legible
       at desktop width.
 - [x] Existing Layers tools remain intact.
-- [ ] Automated tests, lesson audit, link audit, production build, browser QA,
-      and public GitHub Pages verification pass. Local quality gates and browser
-      QA pass; public verification remains pending deployment.
+- [x] Automated tests, lesson audit, link audit, production build, browser QA,
+      and public GitHub Pages verification pass.
 
 ## Design Decisions
 
@@ -124,8 +130,8 @@ showing where any of them appears or how an analyst reads the diagram.
   checks, and a concise glossary.
 - Added three monitored NWS source records and advanced the offline cache to
   `cloud-recognition-v16`.
-- Added 5 automated assertions groups across the new content and UI contract;
-  the suite now contains 60 passing tests.
+- Added three automated test cases across the new data, projection, and UI
+  contracts; the suite now contains 60 passing tests.
 
 ## Issues Encountered
 
@@ -138,6 +144,10 @@ showing where any of them appears or how an analyst reads the diagram.
 - **In-app browser unavailable:** The configured in-app browser was not
   available in this session. Responsive and interaction QA therefore used the
   installed Brave browser through local Playwright as a fallback.
+- **Index generator version omitted stable sections:** The available Lore CLI
+  updated counts and task rows but dropped the existing dependency graph,
+  ADR table, and legend. Those stable generated sections were restored while
+  retaining the new task count and archive entry.
 
 ## Broken/Modified Tests
 
@@ -153,3 +163,23 @@ showing where any of them appears or how an analyst reads the diagram.
 No follow-up task was required to complete this scope. Operational ingestion,
 live model selection, and automated profile calculation remain outside the
 free, deterministic teaching application defined for this version.
+
+## Verification
+
+- 60 automated tests pass.
+- All nine learning modules pass the lesson quality audit.
+- All 52 source and photograph pages pass the link monitor.
+- Production build succeeds with JavaScript `index-BQUnbfHe.js` and CSS
+  `index-DaC-Y-vP.css`.
+- Headless Brave reports no horizontal overflow at 1440 x 1000 or 390 x 844.
+- Local and public interaction QA confirms scenario changes, layer toggles,
+  the correct-answer path, and the elevated-parcel profile.
+- GitHub Pages workflow `27609772205` completed successfully.
+
+## Release
+
+- Feature commit: `67484e8`
+- GitHub Pages run: `27609772205`
+- Public JavaScript: `index-BQUnbfHe.js`
+- Public CSS: `index-DaC-Y-vP.css`
+- Offline cache: `cloud-recognition-v16`
