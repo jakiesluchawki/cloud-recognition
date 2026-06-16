@@ -50,6 +50,7 @@ import {
 } from "./data/learning.js";
 import { lessons } from "./data/lessons.js";
 import {
+  aviationBriefingSets,
   metarDecodeSections,
   metarSectionByGroupLabel,
   metarStructurePhases,
@@ -68,7 +69,9 @@ import {
 } from "./lib/field-guide.js";
 import { calculatePlacement } from "./lib/placement.js";
 import {
+  clearAviationReview,
   clearObservationDraft,
+  loadAviationReview,
   loadJournal,
   loadLessonPosition,
   loadObservationDraft,
@@ -76,6 +79,7 @@ import {
   loadProgress,
   loadRecognitionStats,
   saveJournal,
+  saveAviationReview,
   saveLessonPosition,
   saveObservationDraft,
   saveProfile,
@@ -91,9 +95,15 @@ import {
   weakestRecognitionCloud,
 } from "./lib/recognition.js";
 import {
+  aviationReviewPriority,
+  aviationReviewQueue,
+  aviationReviewSummary,
   chooseDifferentScenario,
+  createAviationQuestionBank,
   evaluateTrainingAnswer,
+  updateAviationReview,
 } from "./lib/metar-training.js";
+import { searchCloudAtlas } from "./lib/cloud-search.js";
 import { windFromCloudMotion } from "./lib/wind.js";
 
 const navItems = [
@@ -1001,21 +1011,11 @@ function AtlasPage({
     if (initialComparisonIds?.length >= 2) setComparisonIds(initialComparisonIds);
   }, [initialComparisonIds?.join(","), initialTab]);
 
-  const filtered = clouds.filter((cloud) => {
-    const matchesLevel = level === "wszystkie" || cloud.level === level;
-    const profile = getCloudProfile(cloud.id);
-    const haystack = [
-      cloud.name,
-      cloud.polish,
-      cloud.code,
-      cloud.headline,
-      profile?.essence,
-      ...cloud.species,
-      ...cloud.varieties,
-      ...cloud.features,
-      ...(cloud.accessoryClouds || []),
-    ].join(" ").toLowerCase();
-    return matchesLevel && haystack.includes(query.toLowerCase());
+  const filtered = searchCloudAtlas(clouds, {
+    query,
+    level,
+    getProfile: getCloudProfile,
+    taxonomyTerms,
   });
 
   useEffect(() => {
@@ -1070,6 +1070,39 @@ function AtlasPage({
 
       {tab === "atlas" && (
         <>
+          <section className="atlas-search" role="search" aria-labelledby="atlas-search-title">
+            <div className="atlas-search__intro">
+              <span className="eyebrow">Wyszukiwarka chmur</span>
+              <h2 id="atlas-search-title">Szukaj po nazwie albo po tym, co widzisz</h2>
+              <p>
+                Możesz wpisać rodzaj, kod WMO, gatunek, cechę lub obserwację,
+                na przykład „kowadło”, „bez halo” albo „drobne fale”.
+              </p>
+            </div>
+            <label className="atlas-search__field">
+              <MagnifyingGlass size={23} />
+              <span className="sr-only">Szukaj w atlasie chmur</span>
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="np. Cumulonimbus, Ci, kowadło, bez halo"
+              />
+              {query && (
+                <button type="button" onClick={() => setQuery("")} aria-label="Wyczyść wyszukiwanie">
+                  <X size={18} />
+                </button>
+              )}
+            </label>
+            <div className="atlas-search__status">
+              <span aria-live="polite">
+                {query
+                  ? `${formatResultCount(filtered.length)} dla „${query.trim()}”`
+                  : "Przeszukujesz pełny atlas 10 rodzajów"}
+              </span>
+              {level !== "wszystkie" && <small>Filtr wysokości: {level}</small>}
+            </div>
+          </section>
           <div className="encyclopedia-stats" aria-label="Zakres encyklopedii">
             <article><strong>10</strong><span>rodzajów troposferycznych</span></article>
             <article><strong>15</strong><span>gatunków WMO</span></article>
@@ -1077,10 +1110,7 @@ function AtlasPage({
             <article><strong>25</strong><span>cech, chmur towarzyszących i klas specjalnych</span></article>
           </div>
           <div className="atlas-tools">
-            <label className="search-field">
-              <MagnifyingGlass size={20} />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj nazwy, kodu albo terminu WMO" />
-            </label>
+            <span className="atlas-tools__label">Filtruj według typowego poziomu</span>
             <div className="filter-scroll">
               {cloudLevels.map((item) => (
                 <button key={item} className={level === item ? "active" : ""} onClick={() => setLevel(item)}>{item}</button>
@@ -2158,6 +2188,85 @@ function ReportRibbon({ report, focusTokens = [], revealed = false }) {
   );
 }
 
+function BriefingReportGrid({ briefing, question, revealed = false }) {
+  return (
+    <div className="briefing-report-grid">
+      {briefing.reports.map((briefingReport) => {
+        const scenario = metarTrainingScenarios.find(
+          (candidate) => candidate.id === briefingReport.scenarioId,
+        );
+        if (!scenario) return null;
+        const isFocused = revealed
+          && question.focusScenarioIds.includes(briefingReport.scenarioId);
+
+        return (
+          <article
+            key={briefingReport.scenarioId}
+            className={`briefing-report-card ${isFocused ? "is-focus" : ""}`}
+          >
+            <header>
+              <span>{briefingReport.role}</span>
+              <strong>{scenario.station}</strong>
+            </header>
+            <p>{briefingReport.note}</p>
+            <div className="briefing-report-code" aria-label={`Depesza ${scenario.station}`}>
+              {scenario.report.split(" ").map((token, index) => (
+                <span
+                  key={`${token}-${index}`}
+                  className={isFocused && question.focusTokens.includes(token) ? "is-focus" : ""}
+                >
+                  {token}
+                </span>
+              ))}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
+const reviewKindLabels = {
+  metar: "METAR",
+  taf: "TAF",
+  briefing: "Odprawa",
+};
+
+function formatReviewDue(dueAt, now = Date.now()) {
+  if (!dueAt || dueAt <= now) return "teraz";
+  const hours = Math.ceil((dueAt - now) / (60 * 60 * 1000));
+  if (hours < 24) return `za ${hours} godz.`;
+  const days = Math.ceil(hours / 24);
+  if (days <= 7) return `za ${days} dni`;
+  return new Intl.DateTimeFormat("pl-PL", {
+    day: "numeric",
+    month: "short",
+  }).format(dueAt);
+}
+
+function ReviewEvidence({ item, revealed = false }) {
+  if (item.kind === "briefing") {
+    const briefing = aviationBriefingSets.find(
+      (candidate) => candidate.id === item.sourceId,
+    );
+    return briefing ? (
+      <BriefingReportGrid
+        briefing={briefing}
+        question={item.question}
+        revealed={revealed}
+      />
+    ) : null;
+  }
+
+  return (
+    <ReportRibbon
+      report={item.report}
+      focusTokens={item.question.focusTokens}
+      revealed={revealed}
+    />
+  );
+}
+
 function TrainingQuestion({
   question,
   answerIndex,
@@ -2248,29 +2357,99 @@ function MetarPanel({ onSources }) {
   const [tafIndex, setTafIndex] = useState(0);
   const [tafQuestionIndex, setTafQuestionIndex] = useState(0);
   const [tafAnswerIndex, setTafAnswerIndex] = useState(null);
+  const [briefingIndex, setBriefingIndex] = useState(0);
+  const [briefingQuestionIndex, setBriefingQuestionIndex] = useState(0);
+  const [briefingAnswerIndex, setBriefingAnswerIndex] = useState(null);
+  const [aviationReviewRecords, setAviationReviewRecords] = useState(loadAviationReview);
+  const [reviewSeenKeys, setReviewSeenKeys] = useState([]);
+  const [reviewQuestionKey, setReviewQuestionKey] = useState(null);
+  const [reviewAnswerIndex, setReviewAnswerIndex] = useState(null);
+  const [reviewResetArmed, setReviewResetArmed] = useState(false);
   const trainingHeadingRef = useRef(null);
   const hasTrainingNavigatedRef = useRef(false);
 
+  const questionBank = useMemo(() => createAviationQuestionBank(
+    metarTrainingScenarios,
+    tafTrainingScenarios,
+    aviationBriefingSets,
+  ), []);
+  const questionBankByKey = useMemo(
+    () => new Map(questionBank.map((item) => [item.key, item])),
+    [questionBank],
+  );
   const scenario = metarTrainingScenarios[scenarioIndex];
   const question = scenario.questions[questionIndex];
   const tafScenario = tafTrainingScenarios[tafIndex];
   const tafQuestion = tafScenario.questions[tafQuestionIndex];
+  const briefing = aviationBriefingSets[briefingIndex];
+  const briefingQuestion = briefing.questions[briefingQuestionIndex];
+  const reviewNow = Date.now();
+  const dueReviewItems = aviationReviewQueue(
+    questionBank,
+    aviationReviewRecords,
+    reviewNow,
+  ).filter((item) => !reviewSeenKeys.includes(item.key));
+  const activeReviewItem = reviewQuestionKey
+    ? questionBankByKey.get(reviewQuestionKey)
+    : dueReviewItems[0];
+  const activeReviewRecord = activeReviewItem
+    ? aviationReviewRecords[activeReviewItem.key]
+    : null;
+  const reviewSummary = aviationReviewSummary(
+    questionBank,
+    aviationReviewRecords,
+    reviewNow,
+  );
+  const reviewRecords = Object.values(aviationReviewRecords)
+    .filter((record) => questionBankByKey.has(record.key))
+    .sort((first, second) => (
+      aviationReviewPriority(second, reviewNow)
+      - aviationReviewPriority(first, reviewNow)
+    ));
   const isSprint = mode === "sprint";
   const questionAnswered = answerIndex !== null || timedOut;
   const selectedGroup = scenario.groups.find((group) => group.token === selectedToken);
   const selectedGuide = metarDecodeSections.find((section) => (
     section.id === (guideSectionId || metarSectionByGroupLabel[selectedGroup?.label])
   ));
+  const metarReviewItem = questionBankByKey.get(
+    `metar:${scenario.id}:${question.id}`,
+  );
+  const tafReviewItem = questionBankByKey.get(
+    `taf:${tafScenario.id}:${tafQuestion.id}`,
+  );
+  const briefingReviewItem = questionBankByKey.get(
+    `briefing:${briefing.id}:${briefingQuestion.id}`,
+  );
+
+  const recordAviationAnswer = (item, correct) => {
+    if (!item) return;
+    setAviationReviewRecords((current) => {
+      const next = updateAviationReview(current, item, correct);
+      saveAviationReview(next);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!hasTrainingNavigatedRef.current || mode === "decode") return;
     trainingHeadingRef.current?.focus();
-  }, [mode, questionIndex, tafQuestionIndex, scenarioIndex, tafIndex]);
+  }, [
+    mode,
+    questionIndex,
+    tafQuestionIndex,
+    briefingQuestionIndex,
+    scenarioIndex,
+    tafIndex,
+    briefingIndex,
+    activeReviewItem?.key,
+  ]);
 
   useEffect(() => {
     if (!isSprint || questionAnswered) return undefined;
     if (secondsLeft <= 0) {
       setTimedOut(true);
+      recordAviationAnswer(metarReviewItem, false);
       setScore((current) => ({
         ...current,
         attempts: current.attempts + 1,
@@ -2282,13 +2461,21 @@ function MetarPanel({ onSources }) {
 
     const timer = window.setTimeout(() => setSecondsLeft((current) => current - 1), 1000);
     return () => window.clearTimeout(timer);
-  }, [isSprint, questionAnswered, secondsLeft]);
+  }, [isSprint, questionAnswered, secondsLeft, metarReviewItem]);
 
   const startMode = (nextMode) => {
     hasTrainingNavigatedRef.current = nextMode !== "decode";
     setMode(nextMode);
     setQuestionIndex(0);
     setAnswerIndex(null);
+    setTafQuestionIndex(0);
+    setTafAnswerIndex(null);
+    setBriefingQuestionIndex(0);
+    setBriefingAnswerIndex(null);
+    setReviewSeenKeys([]);
+    setReviewQuestionKey(null);
+    setReviewAnswerIndex(null);
+    setReviewResetArmed(false);
     setTimedOut(false);
     setSecondsLeft(METAR_SPRINT_SECONDS);
     setSelectedToken(null);
@@ -2310,6 +2497,7 @@ function MetarPanel({ onSources }) {
     if (questionAnswered) return;
     const result = evaluateTrainingAnswer(question, index);
     setAnswerIndex(index);
+    recordAviationAnswer(metarReviewItem, result.isCorrect);
     setScore((current) => ({
       correct: current.correct + (result.isCorrect ? 1 : 0),
       attempts: current.attempts + 1,
@@ -2337,6 +2525,10 @@ function MetarPanel({ onSources }) {
   const chooseTafAnswer = (index) => {
     if (tafAnswerIndex !== null) return;
     setTafAnswerIndex(index);
+    recordAviationAnswer(
+      tafReviewItem,
+      evaluateTrainingAnswer(tafQuestion, index).isCorrect,
+    );
   };
 
   const nextTafQuestion = () => {
@@ -2351,6 +2543,57 @@ function MetarPanel({ onSources }) {
       setTafQuestionIndex(0);
     }
     setTafAnswerIndex(null);
+  };
+
+  const chooseBriefingAnswer = (index) => {
+    if (briefingAnswerIndex !== null) return;
+    setBriefingAnswerIndex(index);
+    recordAviationAnswer(
+      briefingReviewItem,
+      evaluateTrainingAnswer(briefingQuestion, index).isCorrect,
+    );
+  };
+
+  const nextBriefingQuestion = () => {
+    hasTrainingNavigatedRef.current = true;
+    if (briefingQuestionIndex < briefing.questions.length - 1) {
+      setBriefingQuestionIndex((current) => current + 1);
+    } else {
+      setBriefingIndex((current) => chooseDifferentScenario(
+        current,
+        aviationBriefingSets.length,
+      ));
+      setBriefingQuestionIndex(0);
+    }
+    setBriefingAnswerIndex(null);
+  };
+
+  const chooseReviewAnswer = (index) => {
+    if (!activeReviewItem || reviewAnswerIndex !== null) return;
+    setReviewQuestionKey(activeReviewItem.key);
+    setReviewAnswerIndex(index);
+    recordAviationAnswer(
+      activeReviewItem,
+      evaluateTrainingAnswer(activeReviewItem.question, index).isCorrect,
+    );
+  };
+
+  const nextReviewQuestion = () => {
+    if (activeReviewItem) {
+      setReviewSeenKeys((current) => [...current, activeReviewItem.key]);
+    }
+    hasTrainingNavigatedRef.current = true;
+    setReviewQuestionKey(null);
+    setReviewAnswerIndex(null);
+  };
+
+  const resetAviationReview = () => {
+    clearAviationReview();
+    setAviationReviewRecords({});
+    setReviewSeenKeys([]);
+    setReviewQuestionKey(null);
+    setReviewAnswerIndex(null);
+    setReviewResetArmed(false);
   };
 
   const averageSeconds = score.timedAttempts > 0
@@ -2376,9 +2619,13 @@ function MetarPanel({ onSources }) {
         <button aria-pressed={mode === "practice"} className={mode === "practice" ? "active" : ""} onClick={() => startMode("practice")}>Trening METAR</button>
         <button aria-pressed={mode === "sprint"} className={mode === "sprint" ? "active" : ""} onClick={() => startMode("sprint")}>Odprawa 30 s</button>
         <button aria-pressed={mode === "taf"} className={mode === "taf" ? "active" : ""} onClick={() => startMode("taf")}>Oś czasu TAF</button>
+        <button aria-pressed={mode === "briefing"} className={mode === "briefing" ? "active" : ""} onClick={() => startMode("briefing")}>Odprawa 3 stacji</button>
+        <button aria-pressed={mode === "review"} className={mode === "review" ? "active" : ""} onClick={() => startMode("review")}>
+          Powtórki {reviewSummary.due > 0 ? `· ${reviewSummary.due}` : ""}
+        </button>
       </div>
 
-      {mode !== "taf" && (
+      {["decode", "practice", "sprint"].includes(mode) && (
         <div className="metar-scenario-nav">
           <div>
             <span>Depesza edukacyjna {scenarioIndex + 1}/{metarTrainingScenarios.length}</span>
@@ -2616,6 +2863,192 @@ function MetarPanel({ onSources }) {
             onNext={nextTafQuestion}
             nextLabel={tafQuestionIndex < tafScenario.questions.length - 1 ? "Następne pytanie" : "Następna prognoza"}
           />
+        </div>
+      )}
+
+      {mode === "briefing" && (
+        <div className="briefing-practice">
+          <div className="briefing-heading">
+            <div>
+              <span className="eyebrow">{briefing.kicker}</span>
+              <h3>{briefing.title}</h3>
+              <p>{briefing.context}</p>
+            </div>
+            <span className="briefing-progress">
+              Pytanie {briefingQuestionIndex + 1}/{briefing.questions.length}
+            </span>
+          </div>
+          <BriefingReportGrid
+            briefing={briefing}
+            question={briefingQuestion}
+            revealed={briefingAnswerIndex !== null}
+          />
+          <p className="taf-instruction">
+            Najpierw porównaj wszystkie trzy depesze. Wyróżnienie dowodów
+            pojawi się dopiero po odpowiedzi.
+          </p>
+          <TrainingQuestion
+            question={briefingQuestion}
+            answerIndex={briefingAnswerIndex}
+            headingRef={trainingHeadingRef}
+            onAnswer={chooseBriefingAnswer}
+            onNext={nextBriefingQuestion}
+            nextLabel={briefingQuestionIndex < briefing.questions.length - 1
+              ? "Następne pytanie"
+              : "Następna odprawa"}
+          />
+        </div>
+      )}
+
+      {mode === "review" && (
+        <div className="aviation-review">
+          <header className="review-heading">
+            <div>
+              <span className="eyebrow">Pamięć lokalna · bez konta</span>
+              <h3>Powtarzaj reguły, które rzeczywiście sprawiają trudność</h3>
+              <p>
+                Błąd przywraca pytanie natychmiast i podnosi jego priorytet.
+                Kolejne poprawne odpowiedzi stopniowo wydłużają odstęp.
+              </p>
+            </div>
+            <div className="review-summary" aria-label="Stan powtórek">
+              <article><strong>{reviewSummary.tracked}</strong><span>śledzonych reguł</span></article>
+              <article><strong>{reviewSummary.due}</strong><span>do powtórki</span></article>
+              <article>
+                <strong>{reviewSummary.nextDueAt
+                  ? formatReviewDue(reviewSummary.nextDueAt, reviewNow)
+                  : "—"}</strong>
+                <span>następna sesja</span>
+              </article>
+            </div>
+          </header>
+
+          {activeReviewItem ? (
+            <section className="review-session" aria-label="Aktywna powtórka">
+              <div className="review-session__meta">
+                <span>{reviewKindLabels[activeReviewItem.kind]}</span>
+                <strong>{activeReviewItem.topic}</strong>
+                <small>{activeReviewItem.title}</small>
+              </div>
+              <ReviewEvidence
+                item={activeReviewItem}
+                revealed={reviewAnswerIndex !== null}
+              />
+              <TrainingQuestion
+                question={activeReviewItem.question}
+                answerIndex={reviewAnswerIndex}
+                headingRef={trainingHeadingRef}
+                feedbackDetail={reviewAnswerIndex !== null ? (
+                  <div className="review-feedback-detail">
+                    <p>
+                      <strong>Plan pamięci:</strong>{" "}
+                      {activeReviewRecord?.lastResult === "correct"
+                        ? `następna próba ${formatReviewDue(activeReviewRecord.dueAt)}`
+                        : "pytanie pozostaje pilne i wróci w kolejnej sesji"}.
+                    </p>
+                    {activeReviewItem.kind === "taf" && (
+                      <div className="taf-debrief">
+                        <span className="eyebrow">Oś czasu prognozy</span>
+                        <div className="taf-timeline">
+                          {activeReviewItem.timeline.map((period) => (
+                            <article key={period.time}>
+                              <span>{period.time}</span>
+                              <strong>{period.label}</strong>
+                              <p>{period.detail}</p>
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+                onAnswer={chooseReviewAnswer}
+                onNext={nextReviewQuestion}
+                nextLabel="Następna powtórka"
+              />
+            </section>
+          ) : (
+            <section className="review-empty">
+              <Check size={32} weight="bold" />
+              <div>
+                <span className="eyebrow">
+                  {reviewSeenKeys.length > 0 ? "Sesja zakończona" : "Brak pytań na teraz"}
+                </span>
+                <h4 ref={trainingHeadingRef} tabIndex="-1">
+                  {reviewSummary.tracked === 0
+                    ? "Najpierw odpowiedz na kilka pytań w pracowni"
+                    : "Na tę chwilę wszystko zostało odtworzone"}
+                </h4>
+                <p>
+                  {reviewSummary.tracked === 0
+                    ? "Każda odpowiedź w METAR, TAF i odprawach tworzy prywatny plan powtórek na tym urządzeniu."
+                    : reviewSummary.nextDueAt
+                      ? `Najbliższa zaplanowana powtórka: ${formatReviewDue(reviewSummary.nextDueAt, reviewNow)}.`
+                      : "Nowa sesja pojawi się po kolejnych odpowiedziach."}
+                </p>
+                <div>
+                  <button className="button button--primary" onClick={() => startMode("practice")}>
+                    Trening METAR <ArrowRight size={17} />
+                  </button>
+                  <button className="button button--secondary" onClick={() => startMode("briefing")}>
+                    Odprawa 3 stacji
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          <details className="review-ledger">
+            <summary>
+              <span>
+                <strong>Co zapisano na tym urządzeniu</strong>
+                <small>{reviewRecords.length} rekordów · pełna kontrola i możliwość usunięcia</small>
+              </span>
+              <CaretDown size={19} />
+            </summary>
+            <div className="review-ledger__body">
+              {reviewRecords.length > 0 ? (
+                <div className="review-records">
+                  {reviewRecords.map((record) => (
+                    <article key={record.key}>
+                      <div>
+                        <span>{reviewKindLabels[record.kind]} · {record.topic}</span>
+                        <strong>{record.title}</strong>
+                      </div>
+                      <dl>
+                        <div><dt>dobrze</dt><dd>{record.correct}</dd></div>
+                        <div><dt>błędy</dt><dd>{record.wrong}</dd></div>
+                        <div><dt>seria</dt><dd>{record.streak}</dd></div>
+                        <div><dt>termin</dt><dd>{formatReviewDue(record.dueAt, reviewNow)}</dd></div>
+                      </dl>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="review-ledger__empty">Nie zapisano jeszcze żadnej odpowiedzi.</p>
+              )}
+
+              {reviewResetArmed ? (
+                <div className="review-reset-confirm" role="alert">
+                  <p>Usunąć wszystkie lokalne wyniki i terminy powtórek?</p>
+                  <button className="button button--coral" onClick={resetAviationReview}>
+                    Potwierdź usunięcie
+                  </button>
+                  <button className="button button--secondary" onClick={() => setReviewResetArmed(false)}>
+                    Anuluj
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="review-reset-button"
+                  onClick={() => setReviewResetArmed(true)}
+                  disabled={reviewRecords.length === 0}
+                >
+                  <Trash size={17} /> Wyczyść pamięć powtórek
+                </button>
+              )}
+            </div>
+          </details>
         </div>
       )}
 

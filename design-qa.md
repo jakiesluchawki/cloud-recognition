@@ -149,6 +149,28 @@ actions, and no prematurely visible recap, final check, or practice.
       390 px, body copy is 16 px, mode controls are 50 px high, and all ten
       glossary sections remain reachable.
 
+14. **P1 fixed — The atlas search was technically present but easy to miss**
+    - Before: a thin underlined field appeared after the statistics and read
+      like a minor filter.
+    - Patch: the first atlas tool is now a dedicated editorial search surface
+      explaining that names, WMO codes, morphology, and diagnostic evidence
+      are searchable. Exact names and codes rank before descriptive matches;
+      Polish diacritics are optional.
+    - Evidence: `atlas-search-mobile.png` and
+      `atlas-search-mobile-result.png`. The query `kowadlo` returns only
+      Cumulonimbus, the field is 62 px high, and document width remains 390 px.
+
+15. **P1 fixed — Aviation practice had no continuity between sessions**
+    - Patch: two three-station briefings require cross-report synthesis, while
+      every METAR, TAF, and briefing answer feeds a transparent local review
+      schedule.
+    - Evidence: `aviation-briefing-mobile.png`,
+      `aviation-review-mobile.png`, `aviation-review-mobile-ledger.png`, and
+      `aviation-review-desktop.png`. Mobile renders three reports and four
+      choices without overflow. Feedback receives focus, the completed session
+      heading receives focus after the final item, and the two-step reset
+      removes the local storage record and returns the tracked count to zero.
+
 ## Required Fidelity Surfaces
 
 - **Typography:** Newsreader and Manrope remain consistent with Atlas Światła.
@@ -174,6 +196,10 @@ actions, and no prematurely visible recap, final check, or practice.
   feedback and next-question transitions preserve the same keyboard context.
   The METAR glossary uses native buttons, pressed states, and a horizontally
   scrollable mobile index without introducing page-level overflow.
+  Atlas search uses a native search input with a 44 px clear action and live
+  result count. Aviation review retains native answer buttons, feedback focus,
+  completion focus, disclosure semantics, and an explicit destructive-action
+  confirmation.
 
 ## Residual Risk
 

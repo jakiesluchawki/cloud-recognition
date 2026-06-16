@@ -716,3 +716,164 @@ export const tafTrainingScenarios = [
     ],
   },
 ];
+
+export const aviationBriefingSets = [
+  {
+    id: "low-visibility-day",
+    title: "Widzialność, pułap i granice CAVOK",
+    kicker: "Odprawa porównawcza · trzy lotniska",
+    context:
+      "Porównaj trzy niezależne, fikcyjne obserwacje z jednego dnia szkoleniowego. Szukaj warunków ograniczających, nie najdłuższego raportu.",
+    reports: [
+      {
+        scenarioId: "epgd-low",
+        role: "Niska widzialność",
+        note: "Zamglenie łączy się tu z bardzo małą widzialnością pionową.",
+      },
+      {
+        scenarioId: "eppo-cavok",
+        role: "Warunki CAVOK",
+        note: "Skrót nie oznacza całkowicie bezchmurnego regionu.",
+      },
+      {
+        scenarioId: "epwr-snow",
+        role: "Zimowy pułap",
+        note: "Śnieg, ujemna temperatura i pełne pokrycie.",
+      },
+    ],
+    questions: [
+      {
+        id: "brief-lowest-ceiling",
+        stage: "Priorytet odprawy",
+        prompt: "Która stacja raportuje najniższy pułap?",
+        options: ["EPGD", "EPPO", "EPWR", "Wszystkie raportują ten sam pułap"],
+        correct: 0,
+        explanation:
+          "EPGD podaje VV002, czyli widzialność pionową 200 ft. EPWR ma OVC008, czyli 800 ft, a CAVOK w EPPO nie raportuje warstwy tworzącej pułap.",
+        focusScenarioIds: ["epgd-low"],
+        focusTokens: ["VV002"],
+        topic: "Pułap: BKN, OVC i VV",
+      },
+      {
+        id: "brief-winter-risk",
+        stage: "Synteza",
+        prompt: "Który raport łączy słaby śnieg, mróz i pełne pokrycie na 800 ft?",
+        options: ["EPGD", "EPPO", "EPWR", "Żaden z raportów"],
+        correct: 2,
+        explanation:
+          "W EPWR grupy -SN, M02/M04 oraz OVC008 wspólnie opisują słaby śnieg, temperaturę poniżej zera i pułap 800 ft.",
+        focusScenarioIds: ["epwr-snow"],
+        focusTokens: ["-SN", "OVC008", "M02/M04"],
+        topic: "Synteza kilku grup METAR",
+      },
+      {
+        id: "brief-cavok-limit",
+        stage: "Granice wniosku",
+        prompt: "Którego wniosku nie wolno wyciągnąć z CAVOK w raporcie EPPO?",
+        options: [
+          "Na stacji spełniono kryteria CAVOK",
+          "Nie raportuje się istotnej chmury w zakresie kryteriów CAVOK",
+          "Cała trasa pozostanie bezchmurna przez wiele godzin",
+          "Widzialność na stacji spełnia kryterium skrótu",
+        ],
+        correct: 2,
+        explanation:
+          "CAVOK jest skrótem obserwacji punktowej. Nie opisuje całej trasy i nie gwarantuje utrzymania warunków w przyszłości.",
+        focusScenarioIds: ["eppo-cavok"],
+        focusTokens: ["CAVOK"],
+        topic: "CAVOK bez nadinterpretacji",
+      },
+      {
+        id: "brief-departure-priority",
+        stage: "Porównanie",
+        prompt: "Który raport wymaga największej uwagi ze względu na jednocześnie niski pułap i widzialność?",
+        options: ["EPGD", "EPPO", "EPWR", "Nie da się porównać żadnego elementu"],
+        correct: 0,
+        explanation:
+          "EPGD łączy 1200 m widzialności z VV002. EPWR ma 3000 m i OVC008, a EPPO używa CAVOK.",
+        focusScenarioIds: ["epgd-low"],
+        focusTokens: ["1200", "VV002"],
+        topic: "Porównanie ograniczeń między stacjami",
+      },
+    ],
+  },
+  {
+    id: "convective-afternoon",
+    title: "Konwekcja, porywy i warstwy bez pułapu",
+    kicker: "Odprawa porównawcza · popołudniowa konwekcja",
+    context:
+      "Trzy fikcyjne obserwacje pokazują różne etapy rozwoju: spokojne warstwy, TCU z przelotnym opadem oraz CB w warstwie tworzącej pułap.",
+    reports: [
+      {
+        scenarioId: "epkk-layers",
+        role: "Warstwy bez pułapu",
+        note: "FEW i SCT są ważne, ale nie tworzą ceiling.",
+      },
+      {
+        scenarioId: "epkt-showers",
+        role: "TCU i porywy",
+        note: "Porywy, opad przelotny i TCU wskazują rozwój konwekcyjny bez kodu CB.",
+      },
+      {
+        scenarioId: "epwa-convection",
+        role: "CB w warstwie BKN",
+        note: "Niższa warstwa BKN zawiera CB i wyznacza raportowany pułap.",
+      },
+    ],
+    questions: [
+      {
+        id: "brief-explicit-cb",
+        stage: "Konwekcja",
+        prompt: "Która stacja jawnie raportuje Cumulonimbus w warstwie tworzącej pułap?",
+        options: ["EPKK", "EPKT", "EPWA", "Żadna"],
+        correct: 2,
+        explanation:
+          "EPWA podaje BKN018CB. BKN tworzy pułap na 1800 ft, a dopisek CB jednoznacznie identyfikuje Cumulonimbus w tej warstwie.",
+        focusScenarioIds: ["epwa-convection"],
+        focusTokens: ["BKN018CB"],
+        topic: "CB i TCU w grupach zachmurzenia",
+      },
+      {
+        id: "brief-gusts-showers",
+        stage: "Zjawiska",
+        prompt: "Gdzie występują jednocześnie porywy, słaby przelotny deszcz i TCU?",
+        options: ["EPKK", "EPKT", "EPWA", "We wszystkich trzech raportach"],
+        correct: 1,
+        explanation:
+          "EPKT łączy 22015G28KT, -SHRA i SCT018TCU. Każda z tych informacji pochodzi z osobnej grupy.",
+        focusScenarioIds: ["epkt-showers"],
+        focusTokens: ["22015G28KT", "-SHRA", "SCT018TCU"],
+        topic: "Synteza wiatru, zjawisk i konwekcji",
+      },
+      {
+        id: "brief-no-ceiling",
+        stage: "Pułap",
+        prompt: "Który raport zawiera chmury, ale nie raportuje pułapu?",
+        options: ["EPKK", "EPKT", "EPWA", "Każdy raport tworzy pułap"],
+        correct: 0,
+        explanation:
+          "EPKK podaje FEW020 i SCT045. Ani FEW, ani SCT nie spełnia definicji warstwy tworzącej pułap.",
+        focusScenarioIds: ["epkk-layers"],
+        focusTokens: ["FEW020", "SCT045"],
+        topic: "Pułap: FEW i SCT",
+      },
+      {
+        id: "brief-ceiling-comparison",
+        stage: "Porównanie",
+        prompt: "Która z dwóch stacji z raportowanym pułapem ma niższy ceiling?",
+        options: [
+          "EPKT, 1800 ft",
+          "EPKT, 3500 ft",
+          "EPWA, 1800 ft",
+          "EPWA, 5000 ft",
+        ],
+        correct: 2,
+        explanation:
+          "EPWA ma BKN018CB, więc pułap wynosi 1800 ft. W EPKT niższe SCT018TCU nie tworzy pułapu; tworzy go BKN035 na 3500 ft.",
+        focusScenarioIds: ["epkt-showers", "epwa-convection"],
+        focusTokens: ["SCT018TCU", "BKN035", "BKN018CB", "OVC050"],
+        topic: "Porównanie pułapu między raportami",
+      },
+    ],
+  },
+];

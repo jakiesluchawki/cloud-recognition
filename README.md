@@ -6,14 +6,16 @@ the weather from first observation through advanced aviation interpretation.
 The application includes:
 
 - adaptive knowledge placement instead of forcing everyone through lesson one;
-- a WMO-based encyclopedia with 10 genera and 49 formal taxonomy terms;
+- a WMO-based encyclopedia with 10 genera, 49 formal taxonomy terms, and
+  evidence-aware search across names, codes, morphology, and diagnostic clues;
 - an evidence-based field observer with three transparent hypotheses;
 - a differential comparison laboratory for two or three cloud genera;
 - nine full lessons with honest time plans, sourced chapters, worked examples,
   chapter-by-chapter mobile focus, active recall, module-specific practice,
   checks, and an adaptive recognition review map;
-- aviation weather: METAR/TAF, ceilings, icing, turbulence, convection, and
-  thunderstorms;
+- aviation weather: complete METAR anatomy, active METAR/TAF decoding,
+  three-station briefings, transparent local spaced review, ceilings, icing,
+  turbulence, convection, and thunderstorms;
 - an independent laboratory for AGL, MSL, pressure levels, geopotential
   height, and the vertical layers used in Windy;
 - visible sources and confidence notes throughout the learning experience;

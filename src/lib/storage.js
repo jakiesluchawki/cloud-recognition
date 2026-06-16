@@ -5,6 +5,7 @@ const KEYS = {
   recognition: "cloud-recognition:recognition",
   observationDraft: "cloud-recognition:observation-draft",
   lessonPositions: "cloud-recognition:lesson-positions",
+  aviationReview: "cloud-recognition:aviation-review",
 };
 
 function read(key, fallback) {
@@ -79,5 +80,21 @@ export function clearObservationDraft() {
     window.localStorage.removeItem(KEYS.observationDraft);
   } catch {
     // The draft is optional when storage is unavailable.
+  }
+}
+
+export function loadAviationReview() {
+  return read(KEYS.aviationReview, {});
+}
+
+export function saveAviationReview(records) {
+  write(KEYS.aviationReview, records);
+}
+
+export function clearAviationReview() {
+  try {
+    window.localStorage.removeItem(KEYS.aviationReview);
+  } catch {
+    // Review history is optional when storage is unavailable.
   }
 }

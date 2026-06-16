@@ -52,7 +52,7 @@ test("the installable app and offline shell use the Pages base path", async () =
   assert.equal(manifest.start_url, "/cloud-recognition/");
   assert.equal(manifest.scope, "/cloud-recognition/");
   assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
-  assert.match(worker, /cloud-recognition-v8/);
+  assert.match(worker, /cloud-recognition-v9/);
 });
 
 test("GitHub Pages deployment runs tests before publishing", async () => {
@@ -115,6 +115,7 @@ test("lessons expose honest time plans, adaptive practice and keyboard-safe dial
 
 test("the METAR and TAF workshop preserves active recall and keyboard context", async () => {
   const app = await read("src/App.jsx");
+  const storage = await read("src/lib/storage.js");
 
   assert.match(app, /Anatomia całej depeszy/);
   assert.match(app, /METAR jest zdaniem czytanym od lewej do prawej/);
@@ -122,6 +123,16 @@ test("the METAR and TAF workshop preserves active recall and keyboard context", 
   assert.match(app, /Co jeszcze możesz tu spotkać/);
   assert.match(app, /Wyjaśnij dokładnie/);
   assert.match(app, /aria-pressed=\{mode === "taf"\}/);
+  assert.match(app, /aria-pressed=\{mode === "briefing"\}/);
+  assert.match(app, /aria-pressed=\{mode === "review"\}/);
+  assert.match(app, /Odprawa 3 stacji/);
+  assert.match(app, /Pamięć lokalna · bez konta/);
+  assert.match(app, /Co zapisano na tym urządzeniu/);
+  assert.match(app, /Potwierdź usunięcie/);
+  assert.match(app, /recordAviationAnswer\(metarReviewItem/);
+  assert.match(app, /recordAviationAnswer\(\s*tafReviewItem/);
+  assert.match(storage, /cloud-recognition:aviation-review/);
+  assert.match(storage, /clearAviationReview/);
   assert.match(app, /role="timer"/);
   assert.match(app, /feedbackDetail=\{tafAnswerIndex !== null/);
   assert.match(app, /Pełny rozbiór osi czasu/);
@@ -137,6 +148,19 @@ test("the encyclopedia exposes formation, differential diagnosis and aviation co
   assert.match(app, /Diagnostyka różnicowa/);
   assert.match(app, /Znaczenie lotnicze/);
   assert.match(app, /Wiatr z nieba/);
+});
+
+test("the cloud atlas exposes a prominent evidence-aware search", async () => {
+  const app = await read("src/App.jsx");
+  const styles = await read("src/styles.css");
+
+  assert.match(app, /Wyszukiwarka chmur/);
+  assert.match(app, /Szukaj po nazwie albo po tym, co widzisz/);
+  assert.match(app, /type="search"/);
+  assert.match(app, /Wyczyść wyszukiwanie/);
+  assert.match(app, /searchCloudAtlas/);
+  assert.match(styles, /\.atlas-search\s*\{/);
+  assert.match(styles, /\.atlas-search__field:focus-within/);
 });
 
 test("the field observer replaces the shallow binary key with transparent hypotheses", async () => {

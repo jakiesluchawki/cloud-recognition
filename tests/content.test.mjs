@@ -8,6 +8,7 @@ import {
 } from "../src/data/comparison.js";
 import {
   cloudProfiles,
+  getCloudProfile,
   taxonomyCategories,
   taxonomyTerms,
 } from "../src/data/encyclopedia.js";
@@ -20,6 +21,7 @@ import {
 } from "../src/data/learning.js";
 import { lessonMinutes, lessons } from "../src/data/lessons.js";
 import {
+  aviationBriefingSets,
   metarDecodeSections,
   metarSectionByGroupLabel,
   metarStructurePhases,
@@ -28,11 +30,17 @@ import {
 } from "../src/data/metar-training.js";
 import { sources } from "../src/data/sources.js";
 import {
+  aviationReviewPriority,
+  aviationReviewQueue,
+  aviationReviewSummary,
   chooseDifferentScenario,
+  createAviationQuestionBank,
   evaluateTrainingAnswer,
   findReportedCeiling,
   parseSkyGroup,
+  updateAviationReview,
 } from "../src/lib/metar-training.js";
+import { normalizeCloudSearch, searchCloudAtlas } from "../src/lib/cloud-search.js";
 import { calculatePlacement } from "../src/lib/placement.js";
 import {
   createRecognitionQuestion,
@@ -64,6 +72,30 @@ test("the atlas contains exactly the ten WMO cloud genera", () => {
       "Stratocumulus",
       "Stratus",
     ],
+  );
+});
+
+test("atlas search finds clouds by code, Polish observation and taxonomy", () => {
+  const search = (query) => searchCloudAtlas(clouds, {
+    query,
+    getProfile: getCloudProfile,
+    taxonomyTerms,
+  });
+
+  assert.equal(normalizeCloudSearch("  KOWADŁO  "), "kowadlo");
+  assert.deepEqual(search("Ci").map((cloud) => cloud.id), ["cirrus"]);
+  assert.equal(search("pierzaste")[0].id, "cirrus");
+  assert.ok(search("kowadlo").some((cloud) => cloud.id === "cumulonimbus"));
+  assert.ok(search("bez halo").some((cloud) => cloud.id === "altostratus"));
+  assert.ok(search("drobne fale").some((cloud) => cloud.id === "cirrocumulus"));
+  assert.deepEqual(
+    searchCloudAtlas(clouds, {
+      query: "",
+      level: "wysokie",
+      getProfile: getCloudProfile,
+      taxonomyTerms,
+    }).map((cloud) => cloud.level),
+    ["wysokie", "wysokie", "wysokie"],
   );
 });
 
@@ -458,6 +490,74 @@ test("the TAF workshop teaches timelines rather than isolated abbreviations", ()
       assert.equal(new Set(question.options).size, 4);
     }
   }
+});
+
+test("multi-report briefings require synthesis across three coherent reports", () => {
+  const scenarioIds = new Set(metarTrainingScenarios.map((scenario) => scenario.id));
+
+  assert.ok(aviationBriefingSets.length >= 2);
+  for (const briefing of aviationBriefingSets) {
+    assert.ok(briefing.context.length >= 90, `${briefing.id} needs a real briefing context`);
+    assert.ok(briefing.reports.length >= 3, `${briefing.id} needs at least three reports`);
+    assert.ok(briefing.questions.length >= 4, `${briefing.id} needs a substantive exercise`);
+
+    for (const report of briefing.reports) {
+      assert.ok(scenarioIds.has(report.scenarioId), `${briefing.id} references ${report.scenarioId}`);
+      assert.ok(report.note.length >= 30, `${briefing.id}.${report.scenarioId} needs a role`);
+    }
+
+    for (const question of briefing.questions) {
+      assert.equal(question.options.length, 4, `${question.id} must have four choices`);
+      assert.equal(new Set(question.options).size, 4, `${question.id} choices must be unique`);
+      assert.ok(question.explanation.length >= 80, `${question.id} needs reasoning`);
+      assert.ok(question.topic.length >= 12, `${question.id} needs a review topic`);
+      assert.ok(question.focusScenarioIds.length >= 1, `${question.id} needs report evidence`);
+      assert.ok(question.focusTokens.length >= 1, `${question.id} needs token evidence`);
+      for (const scenarioId of question.focusScenarioIds) {
+        assert.ok(
+          briefing.reports.some((report) => report.scenarioId === scenarioId),
+          `${question.id} focuses a report outside its briefing`,
+        );
+      }
+    }
+  }
+});
+
+test("aviation review becomes urgent after errors and relaxes after recall", () => {
+  const bank = createAviationQuestionBank(
+    metarTrainingScenarios,
+    tafTrainingScenarios,
+    aviationBriefingSets,
+  );
+  const now = Date.UTC(2026, 5, 16, 8, 0, 0);
+  const item = bank[0];
+  const afterError = updateAviationReview({}, item, false, now);
+  const afterRecall = updateAviationReview(afterError, item, true, now + 1000);
+  const afterSecondRecall = updateAviationReview(
+    afterRecall,
+    item,
+    true,
+    now + (6 * 60 * 60 * 1000) + 2000,
+  );
+
+  assert.equal(afterError[item.key].dueAt, now);
+  assert.ok(afterRecall[item.key].dueAt > now);
+  assert.ok(afterSecondRecall[item.key].dueAt > afterRecall[item.key].dueAt);
+  assert.ok(
+    aviationReviewPriority(afterError[item.key], now)
+      > aviationReviewPriority(afterRecall[item.key], now + 1000),
+  );
+  assert.ok(
+    aviationReviewPriority(afterRecall[item.key], now + 1000)
+      > aviationReviewPriority(afterSecondRecall[item.key], now + 2000),
+  );
+  assert.deepEqual(aviationReviewQueue(bank, afterError, now).map((entry) => entry.key), [item.key]);
+  assert.equal(aviationReviewQueue(bank, afterRecall, now + 1000).length, 0);
+
+  const summary = aviationReviewSummary(bank, afterRecall, now + 1000);
+  assert.equal(summary.tracked, 1);
+  assert.equal(summary.due, 0);
+  assert.equal(summary.nextDueAt, afterRecall[item.key].dueAt);
 });
 
 test("ceiling logic distinguishes BKN OVC and VV from FEW and SCT", () => {
