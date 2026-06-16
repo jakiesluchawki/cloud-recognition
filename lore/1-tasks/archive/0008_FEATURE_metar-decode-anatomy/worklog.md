@@ -15,3 +15,5 @@
   `design/qa/current/`.
 - Passed 42 automated tests, the nine-module lesson audit, the production
   build, and all 22 monitored external links.
+- Published source commit `32e9324`; GitHub Pages run `27604274379` completed
+  successfully and the public production bundle was verified directly.

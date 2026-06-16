@@ -2,7 +2,7 @@
 id: "0008"
 title: "Explain the complete METAR anatomy"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0006", "0007"]
 tags: ["priority-high", "aviation", "metar", "onboarding", "reference"]
@@ -17,6 +17,13 @@ history:
       Created after user review showed that the active decoder explained the
       selected token but not the whole report grammar or the alternative codes
       that can occupy each section.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published the complete METAR anatomy, ten-section glossary, CAVOK
+      reference, responsive QA evidence, and passing automated checks in
+      commit 32e9324 and GitHub Pages run 27604274379.
 ---
 
 # Explain the complete METAR anatomy
@@ -47,7 +54,7 @@ even when it is absent from the currently selected report.
       negative temperatures, inHg pressure, trends, and remarks are represented.
 - [x] Every group in every current METAR scenario resolves to a section guide.
 - [x] The enhanced reference is comfortable at 390 px and desktop widths.
-- [ ] Tests, lesson audit, link audit, build, push, and Pages deployment pass.
+- [x] Tests, lesson audit, link audit, build, push, and Pages deployment pass.
 
 ## Design Decisions
 
@@ -72,3 +79,10 @@ even when it is absent from the currently selected report.
 - Extended content tests to require all ten section guides, multiple examples,
   complete CAVOK criteria, warnings, and group-to-section coverage.
 - Extended foundation tests to protect the whole-report anatomy and glossary UI.
+
+## Release
+
+- Source commit: `32e9324`
+- GitHub Pages run: `27604274379`
+- Public verification: the deployed bundle contains the whole-report heading,
+  section examples, and `Ceiling And Visibility OK`.
