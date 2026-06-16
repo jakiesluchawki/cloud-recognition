@@ -57,6 +57,12 @@ import {
   metarTrainingScenarios,
   tafTrainingScenarios,
 } from "./data/metar-training.js";
+import {
+  soundingGlossary,
+  soundingPressureGrid,
+  soundingScenarios,
+  soundingTemperatureGrid,
+} from "./data/soundings.js";
 import { fieldPrinciples, fieldQuestions } from "./data/field-guide.js";
 import { getSources, sourceList } from "./data/sources.js";
 import {
@@ -80,6 +86,7 @@ import {
   nomenclaturePresets,
 } from "./lib/nomenclature.js";
 import { calculatePlacement } from "./lib/placement.js";
+import { soundingPath, soundingPoint, soundingSummary } from "./lib/sounding.js";
 import {
   clearAviationReview,
   clearObservationDraft,
@@ -3902,21 +3909,511 @@ function HazardsPanel({ onSources }) {
 }
 
 function SoundingPanel({ onSources }) {
-  const [parcel, setParcel] = useState("stable");
+  const [scenarioId, setScenarioId] = useState(soundingScenarios[0].id);
+  const [visible, setVisible] = useState({
+    environment: true,
+    parcel: true,
+    layers: true,
+    wind: true,
+  });
+  const [answerIndex, setAnswerIndex] = useState(null);
+  const feedbackRef = useRef(null);
+  const scenario = soundingScenarios.find((item) => item.id === scenarioId);
+  const summary = soundingSummary(scenario);
+  const answered = answerIndex !== null;
+  const answerIsCorrect = answerIndex === scenario.check.correct;
+
+  useEffect(() => {
+    setAnswerIndex(null);
+  }, [scenarioId]);
+
+  useEffect(() => {
+    if (answered) feedbackRef.current?.focus();
+  }, [answered]);
+
+  const toggleLayer = (id) => {
+    setVisible((current) => ({ ...current, [id]: !current[id] }));
+  };
+
   return (
-    <section className="knowledge-panel">
-      <div className="panel-heading"><span className="panel-icon"><Gauge size={27} /></span><div><span className="eyebrow">Pierwsze czytanie profilu</span><h2>Skew-T to historia całej kolumny</h2></div></div>
-      <p className="panel-lead">Temperatura, punkt rosy i tor unoszonej parceli pomagają znaleźć warstwy wilgotne, inwersje, poziomy kondensacji i potencjalną energię konwekcji.</p>
-      <div className="concept-switch">
-        <button className={parcel === "stable" ? "active" : ""} onClick={() => setParcel("stable")}>Profil stabilny</button>
-        <button className={parcel === "unstable" ? "active" : ""} onClick={() => setParcel("unstable")}>Profil chwiejny</button>
+    <section className="sounding-lab">
+      <header className="sounding-intro">
+        <div>
+          <span className="eyebrow">Pracownia pionowego profilu</span>
+          <h2>Skew‑T czytaj jak argument, nie kolorowankę</h2>
+          <p>
+            Ciśnienie prowadzi od powierzchni ku górze. Temperatura i punkt rosy
+            pokazują stabilność oraz wilgoć, tor parceli ujawnia wyporność, a
+            wiatr dopowiada uskok i przepływ. Dopiero razem tworzą diagnozę.
+          </p>
+        </div>
+        <SourceButton ids={["nwsSkewT", "nwsRadiosonde", "nwsSkewTAviation", "faaWeather"]} onOpen={onSources} />
+      </header>
+
+      <section className="sounding-provenance" aria-label="Rodzaje profili atmosferycznych">
+        <article>
+          <span>01</span>
+          <div>
+            <strong>Radiosonda obserwowana</strong>
+            <p>Balon mierzy kolumnę podczas trwającego lotu i dryfuje z wiatrem. To nie jest idealnie pionowy ani jednoczesny przekrój.</p>
+          </div>
+        </article>
+        <article>
+          <span>02</span>
+          <div>
+            <strong>Profil prognozowany</strong>
+            <p>To kolumna modelu dla miejsca i terminu. Trzeba sprawdzić model, czas, reprezentację terenu i zgodność z obserwacjami.</p>
+          </div>
+        </article>
+        <article>
+          <span>03</span>
+          <div>
+            <strong>Profile w tej pracowni</strong>
+            <p>Idealizowane, deterministyczne przykłady dydaktyczne. Uczą struktury rozumowania, ale nie opisują bieżącej pogody.</p>
+          </div>
+        </article>
+      </section>
+
+      <nav className="sounding-scenarios" aria-label="Wybierz profil szkoleniowy">
+        {soundingScenarios.map((item) => (
+          <button
+            type="button"
+            key={item.id}
+            className={item.id === scenarioId ? "active" : ""}
+            aria-pressed={item.id === scenarioId}
+            onClick={() => setScenarioId(item.id)}
+          >
+            <span>{item.number}</span>
+            <div>
+              <small>{item.label}</small>
+              <strong>{item.title}</strong>
+              <p>{item.short}</p>
+            </div>
+          </button>
+        ))}
+      </nav>
+
+      <section className="sounding-protocol" aria-label="Kolejność czytania profilu">
+        <div>
+          <span className="eyebrow">Stała procedura</span>
+          <h3>Pięć przejść przez ten sam diagram</h3>
+        </div>
+        {[
+          ["1", "Oś", "Czas, miejsce, źródło i ciśnienie."],
+          ["2", "T i Td", "Stabilność, wilgoć i warstwy nasycone."],
+          ["3", "Parcel", "LCL, hamowanie, LFC i EL."],
+          ["4", "Wiatr", "Zmiana kierunku i prędkości z wysokością."],
+          ["5", "Granice", "Co profil wspiera, a czego nie dowodzi."],
+        ].map(([number, title, copy]) => (
+          <article key={number}>
+            <span>{number}</span>
+            <strong>{title}</strong>
+            <p>{copy}</p>
+          </article>
+        ))}
+      </section>
+
+      <div className="sounding-workbench">
+        <div className="sounding-visual-column">
+          <div className="sounding-toolbar" role="group" aria-label="Warstwy diagramu">
+            {[
+              ["environment", "Temperatura i Td"],
+              ["parcel", "Tor parceli"],
+              ["layers", "Warstwy i poziomy"],
+              ["wind", "Profil wiatru"],
+            ].map(([id, label]) => (
+              <button
+                type="button"
+                key={id}
+                className={visible[id] ? "active" : ""}
+                aria-pressed={visible[id]}
+                onClick={() => toggleLayer(id)}
+              >
+                {visible[id] && <Check size={14} />}
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <SoundingDiagram scenario={scenario} visible={visible} />
+
+          <div className="sounding-legend">
+            <span><i className="temperature" /> T · temperatura otoczenia</span>
+            <span><i className="dewpoint" /> Td · punkt rosy</span>
+            <span><i className="parcel" /> tor wybranej parceli</span>
+          </div>
+          <p className="sounding-plot-note">
+            Schemat zachowuje logarytmiczną oś ciśnienia i skośne izotermy.
+            Linie profili są idealizowane; nie odczytuj z nich wartości operacyjnych.
+          </p>
+        </div>
+
+        <aside className="sounding-analysis">
+          <span className="eyebrow">{scenario.sourceType}</span>
+          <h3>{scenario.reading.verdict}</h3>
+          <p className="sounding-analysis__lead">{scenario.short}</p>
+
+          <dl className="sounding-levels">
+            <div>
+              <dt>Źródło parceli</dt>
+              <dd>{summary.parcelOrigin}</dd>
+            </div>
+            <div>
+              <dt>LCL</dt>
+              <dd>{summary.lcl ? `${summary.lcl} hPa` : "brak"}</dd>
+            </div>
+            <div>
+              <dt>LFC</dt>
+              <dd>{summary.lfc ? `${summary.lfc} hPa` : "nie osiąga"}</dd>
+            </div>
+            <div>
+              <dt>EL</dt>
+              <dd>{summary.el ? `${summary.el} hPa` : "brak"}</dd>
+            </div>
+            <div>
+              <dt>0°C</dt>
+              <dd>{summary.freezing} hPa</dd>
+            </div>
+            <div>
+              <dt>T–Td przy dole</dt>
+              <dd>{summary.surfaceSpread}°C</dd>
+            </div>
+          </dl>
+        </aside>
+
+        <section className="sounding-interpretation">
+          <header>
+            <span className="eyebrow">Argument z całej kolumny</span>
+            <h3>Co wspiera tę diagnozę</h3>
+          </header>
+          <div className="sounding-reading-list">
+            {[
+              ["Stabilność i parcela", scenario.reading.stability],
+              ["Wilgoć i chmury", scenario.reading.moisture],
+              ["Wiatr z wysokością", scenario.reading.wind],
+              ["Znaczenie lotnicze", scenario.reading.aviation],
+            ].map(([title, copy], index) => (
+              <article key={title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div><strong>{title}</strong><p>{copy}</p></div>
+              </article>
+            ))}
+          </div>
+
+          <aside className="sounding-uncertainty">
+            <Warning size={21} />
+            <div>
+              <strong>Czego ten profil nie dowodzi</strong>
+              <p>{scenario.reading.uncertainty}</p>
+            </div>
+          </aside>
+        </section>
       </div>
-      <div className={`profile-explainer ${parcel}`}>
-        <div><strong>{parcel === "stable" ? "Parcel chłodniejsza od otoczenia" : "Parcel cieplejsza od otoczenia"}</strong><span>{parcel === "stable" ? "unoszenie wygasa bez dalszego wymuszenia" : "możliwe dalsze swobodne unoszenie po osiągnięciu LFC"}</span></div>
-        <p>{parcel === "stable" ? "Warstwa może sprzyjać chmurom warstwowym lub uwięzieniu wilgoci pod inwersją." : "Jeśli wilgoć i inicjacja wystarczą, rośnie potencjał głębokiej konwekcji. CAPE nadal nie jest prognozą burzy samą w sobie."}</p>
-      </div>
-      <SourceButton ids={["faaWeather"]} onOpen={onSources} />
+
+      <section className="sounding-check">
+        <div className="sounding-check__heading">
+          <span className="eyebrow">Sprawdź diagnozę</span>
+          <h3>Nie nazywaj jednej linii. Zinterpretuj kolumnę.</h3>
+          <p>{scenario.check.prompt}</p>
+        </div>
+        <div className="sounding-check__options" role="group" aria-label="Wybierz interpretację profilu">
+          {scenario.check.options.map((option, index) => {
+            const isCorrect = answered && index === scenario.check.correct;
+            const isWrong = answered && index === answerIndex && !isCorrect;
+            return (
+              <button
+                type="button"
+                key={option}
+                className={`${isCorrect ? "correct" : ""} ${isWrong ? "wrong" : ""}`}
+                disabled={answered}
+                onClick={() => setAnswerIndex(index)}
+              >
+                <span>{String.fromCharCode(65 + index)}</span>
+                {option}
+              </button>
+            );
+          })}
+        </div>
+        {answered && (
+          <div
+            ref={feedbackRef}
+            tabIndex="-1"
+            className={`sounding-feedback ${answerIsCorrect ? "correct" : "wrong"}`}
+            aria-live="polite"
+          >
+            <strong>
+              {answerIsCorrect
+                ? "Tak. Wniosek wynika z kilku zgodnych warstw dowodu."
+                : `Nie. Poprawna odpowiedź: ${String.fromCharCode(65 + scenario.check.correct)}.`}
+            </strong>
+            <p>{scenario.check.explanation}</p>
+            <button type="button" onClick={() => setAnswerIndex(null)}>Przeanalizuj ponownie</button>
+          </div>
+        )}
+      </section>
+
+      <section className="sounding-glossary">
+        <div>
+          <span className="eyebrow">Cztery skróty bez magii</span>
+          <h3>Poziomy opisują wybraną parcelę</h3>
+        </div>
+        <div>
+          {soundingGlossary.map((item) => (
+            <article key={item.id}>
+              <strong>{item.term}</strong>
+              <span>{item.polish}</span>
+              <p>{item.explanation}</p>
+            </article>
+          ))}
+        </div>
+      </section>
     </section>
+  );
+}
+
+const soundingChartLayout = {
+  left: 62,
+  top: 30,
+  width: 548,
+  height: 540,
+};
+
+function SoundingDiagram({ scenario, visible }) {
+  const titleId = `sounding-${scenario.id}-title`;
+  const descriptionId = `sounding-${scenario.id}-description`;
+  const pressureY = (pressure) => soundingPoint(0, pressure, soundingChartLayout).y;
+  const environmentTemperaturePath = soundingPath(
+    scenario.profile,
+    "temperature",
+    soundingChartLayout,
+  );
+  const dewpointPath = soundingPath(scenario.profile, "dewpoint", soundingChartLayout);
+  const parcelPath = soundingPath(scenario.profile, "parcel", soundingChartLayout);
+  const levelMarkers = [
+    ["LCL", scenario.levels.lcl, "condensation"],
+    ["LFC", scenario.levels.lfc, "buoyancy"],
+    ["EL", scenario.levels.el, "equilibrium"],
+    ["0°C", scenario.levels.freezing, "freezing"],
+  ].filter(([, pressure]) => pressure);
+  const windLevels = soundingPressureGrid
+    .map((pressure) => scenario.profile.find((level) => level.pressure === pressure))
+    .filter(Boolean);
+
+  return (
+    <figure className="sounding-diagram">
+      <svg
+        viewBox="0 0 820 620"
+        role="img"
+        aria-labelledby={`${titleId} ${descriptionId}`}
+      >
+        <title id={titleId}>{scenario.title}</title>
+        <desc id={descriptionId}>
+          Idealizowany diagram Skew-T przedstawiający temperaturę, punkt rosy,
+          tor parceli, poziomy termodynamiczne oraz wiatr z wysokością.
+        </desc>
+        <defs>
+          <clipPath id={`sounding-clip-${scenario.id}`}>
+            <rect
+              x={soundingChartLayout.left}
+              y={soundingChartLayout.top}
+              width={soundingChartLayout.width}
+              height={soundingChartLayout.height}
+            />
+          </clipPath>
+          <marker
+            id={`wind-arrow-${scenario.id}`}
+            markerWidth="6"
+            markerHeight="6"
+            refX="5"
+            refY="3"
+            orient="auto"
+          >
+            <path d="M0,0 L6,3 L0,6 Z" />
+          </marker>
+        </defs>
+
+        <rect
+          className="sounding-diagram__paper"
+          x={soundingChartLayout.left}
+          y={soundingChartLayout.top}
+          width={soundingChartLayout.width}
+          height={soundingChartLayout.height}
+        />
+
+        <g clipPath={`url(#sounding-clip-${scenario.id})`}>
+          {visible.layers && scenario.cloudLayers.map((layer) => {
+            const top = pressureY(layer.top);
+            const bottom = pressureY(layer.bottom);
+            return (
+              <rect
+                key={layer.label}
+                className="sounding-cloud-layer"
+                x={soundingChartLayout.left}
+                y={top}
+                width={soundingChartLayout.width}
+                height={Math.max(3, bottom - top)}
+              />
+            );
+          })}
+
+          {visible.layers && scenario.inversion && (
+            <rect
+              className="sounding-inversion-layer"
+              x={soundingChartLayout.left}
+              y={pressureY(scenario.inversion.top)}
+              width={soundingChartLayout.width}
+              height={pressureY(scenario.inversion.bottom) - pressureY(scenario.inversion.top)}
+            />
+          )}
+
+          {soundingTemperatureGrid.map((temperature) => {
+            const bottom = soundingPoint(temperature, 1000, soundingChartLayout);
+            const top = soundingPoint(temperature, 200, soundingChartLayout);
+            return (
+              <line
+                key={temperature}
+                className={`sounding-isotherm ${temperature === 0 ? "zero" : ""}`}
+                x1={bottom.x}
+                y1={bottom.y}
+                x2={top.x}
+                y2={top.y}
+              />
+            );
+          })}
+
+          {soundingPressureGrid.map((pressure) => (
+            <line
+              key={pressure}
+              className="sounding-isobar"
+              x1={soundingChartLayout.left}
+              x2={soundingChartLayout.left + soundingChartLayout.width}
+              y1={pressureY(pressure)}
+              y2={pressureY(pressure)}
+            />
+          ))}
+
+          {visible.layers && levelMarkers.map(([label, pressure, type]) => (
+            <line
+              key={label}
+              className={`sounding-level-line ${type}`}
+              x1={soundingChartLayout.left}
+              x2={soundingChartLayout.left + soundingChartLayout.width}
+              y1={pressureY(pressure)}
+              y2={pressureY(pressure)}
+            />
+          ))}
+
+          {visible.environment && (
+            <>
+              <path className="sounding-profile sounding-profile--temperature" d={environmentTemperaturePath} />
+              <path className="sounding-profile sounding-profile--dewpoint" d={dewpointPath} />
+              {scenario.profile.map((level) => {
+                const temperature = soundingPoint(level.temperature, level.pressure, soundingChartLayout);
+                const dewpoint = soundingPoint(level.dewpoint, level.pressure, soundingChartLayout);
+                return (
+                  <g key={level.pressure}>
+                    <circle className="temperature-point" cx={temperature.x} cy={temperature.y} r="3.5" />
+                    <circle className="dewpoint-point" cx={dewpoint.x} cy={dewpoint.y} r="3.5" />
+                  </g>
+                );
+              })}
+            </>
+          )}
+
+          {visible.parcel && parcelPath && (
+            <path className="sounding-profile sounding-profile--parcel" d={parcelPath} />
+          )}
+        </g>
+
+        {soundingPressureGrid.map((pressure) => (
+          <g key={pressure}>
+            <text
+              className="sounding-axis-label sounding-axis-label--pressure"
+              x={soundingChartLayout.left - 10}
+              y={pressureY(pressure) + 4}
+              textAnchor="end"
+            >
+              {pressure}
+            </text>
+          </g>
+        ))}
+        <text className="sounding-axis-title" x="7" y="18">hPa · log P</text>
+
+        {soundingTemperatureGrid.filter((temperature) => temperature % 20 === 0).map((temperature) => {
+          const point = soundingPoint(temperature, 1000, soundingChartLayout);
+          return (
+            <text
+              key={temperature}
+              className="sounding-axis-label sounding-axis-label--temperature"
+              x={point.x}
+              y={soundingChartLayout.top + soundingChartLayout.height + 20}
+              textAnchor="middle"
+            >
+              {temperature}°
+            </text>
+          );
+        })}
+
+        {visible.layers && levelMarkers.map(([label, pressure, type]) => (
+          <g key={label} className={`sounding-level-label ${type}`}>
+            <rect
+              x={soundingChartLayout.left + 5}
+              y={pressureY(pressure) - 10}
+              width={label === "0°C" ? 42 : 36}
+              height="18"
+            />
+            <text x={soundingChartLayout.left + 12} y={pressureY(pressure) + 3}>{label}</text>
+          </g>
+        ))}
+
+        {visible.layers && scenario.inversion && (
+          <text
+            className="sounding-layer-label inversion"
+            x={soundingChartLayout.left + soundingChartLayout.width - 8}
+            y={pressureY(Math.sqrt(scenario.inversion.bottom * scenario.inversion.top))}
+            textAnchor="end"
+          >
+            {scenario.inversion.label}
+          </text>
+        )}
+
+        {visible.layers && scenario.cloudLayers.map((layer) => (
+          <text
+            key={layer.label}
+            className="sounding-layer-label cloud"
+            x={soundingChartLayout.left + soundingChartLayout.width - 8}
+            y={pressureY(Math.sqrt(layer.bottom * layer.top))}
+            textAnchor="end"
+          >
+            {layer.label}
+          </text>
+        ))}
+
+        <g className={`sounding-wind-profile ${visible.wind ? "" : "hidden"}`}>
+          <text x="648" y="25">wiatr z kierunku · kt</text>
+          {windLevels.map((level) => {
+            const y = pressureY(level.pressure);
+            const rotation = level.windDirection + 90;
+            return (
+              <g key={level.pressure}>
+                <g transform={`translate(670 ${y}) rotate(${rotation})`}>
+                  <line
+                    x1="-12"
+                    x2="12"
+                    y1="0"
+                    y2="0"
+                    markerEnd={`url(#wind-arrow-${scenario.id})`}
+                  />
+                </g>
+                <text x="702" y={y + 4}>
+                  {String(level.windDirection).padStart(3, "0")}° / {level.windSpeed}
+                </text>
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+    </figure>
   );
 }
 

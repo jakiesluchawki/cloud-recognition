@@ -26,6 +26,9 @@ The application includes:
   height, and the vertical layers used in Windy;
 - a practical Windy decoder for eight common overlays, with reference frames,
   comparison fields, interpretation traps, and four-choice reasoning checks;
+- an interactive Skew-T laboratory with four contrasting vertical profiles,
+  log-pressure projection, parcel paths, cloud layers, wind, aviation readings,
+  uncertainty notes, and interpretation checks;
 - visible sources and confidence notes throughout the learning experience;
 - a mobile-first installable web app with offline learning support.
 

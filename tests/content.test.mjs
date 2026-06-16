@@ -31,6 +31,10 @@ import {
 } from "../src/data/metar-training.js";
 import { sources } from "../src/data/sources.js";
 import {
+  soundingPressureGrid,
+  soundingScenarios,
+} from "../src/data/soundings.js";
+import {
   cloudBands,
   pressureLevels,
   weatherLayers,
@@ -77,6 +81,14 @@ import {
   pressureSurfaceContext,
   weatherLayerReading,
 } from "../src/lib/weather-layers.js";
+import {
+  interpolatePressureAtTemperature,
+  pressurePosition,
+  soundingPath,
+  soundingPoint,
+  soundingSummary,
+  temperaturePosition,
+} from "../src/lib/sounding.js";
 
 test("the atlas contains exactly the ten WMO cloud genera", () => {
   assert.equal(clouds.length, 10);
@@ -95,6 +107,92 @@ test("the atlas contains exactly the ten WMO cloud genera", () => {
       "Stratus",
     ],
   );
+});
+
+test("training soundings cover four distinct, internally coherent profiles", () => {
+  assert.deepEqual(
+    soundingScenarios.map((scenario) => scenario.id),
+    [
+      "stratus-inversion",
+      "capped-warm-sector",
+      "deep-convection",
+      "elevated-convection",
+    ],
+  );
+  assert.deepEqual(soundingPressureGrid, [1000, 925, 850, 700, 500, 300, 200]);
+
+  for (const scenario of soundingScenarios) {
+    assert.match(scenario.sourceType, /Idealizowany profil dydaktyczny/);
+    assert.ok(scenario.profile.length >= 9, `${scenario.id} needs a deep column`);
+    assert.equal(scenario.check.options.length, 4);
+    assert.equal(new Set(scenario.check.options).size, 4);
+    assert.ok(scenario.check.correct >= 0 && scenario.check.correct < 4);
+    assert.ok(scenario.reading.aviation.length >= 90);
+    assert.ok(scenario.reading.uncertainty.length >= 90);
+
+    for (let index = 0; index < scenario.profile.length; index += 1) {
+      const level = scenario.profile[index];
+      assert.ok(level.temperature >= level.dewpoint, `${scenario.id} has supersaturation`);
+      assert.ok(level.windDirection >= 0 && level.windDirection < 360);
+      assert.ok(level.windSpeed >= 0);
+      if (index > 0) {
+        assert.ok(
+          scenario.profile[index - 1].pressure > level.pressure,
+          `${scenario.id} pressure levels must rise monotonically`,
+        );
+      }
+    }
+
+    for (const layer of scenario.cloudLayers) {
+      assert.ok(layer.bottom > layer.top, `${scenario.id} cloud layer must have depth`);
+    }
+
+    if (scenario.levels.lfc && scenario.levels.el) {
+      assert.ok(scenario.levels.lcl > scenario.levels.lfc);
+      assert.ok(scenario.levels.lfc > scenario.levels.el);
+    }
+
+    const computedFreezing = interpolatePressureAtTemperature(scenario.profile);
+    assert.ok(
+      Math.abs(computedFreezing - scenario.levels.freezing) <= 35,
+      `${scenario.id} freezing annotation must agree with its temperature trace`,
+    );
+  }
+
+  assert.equal(
+    soundingScenarios.find((scenario) => scenario.id === "stratus-inversion").levels.lfc,
+    null,
+  );
+  assert.equal(
+    soundingScenarios.find((scenario) => scenario.id === "elevated-convection")
+      .profile.filter((level) => level.parcel === null).length,
+    3,
+  );
+});
+
+test("the sounding projection uses log pressure and visibly skewed isotherms", () => {
+  assert.equal(pressurePosition(1000), 1);
+  assert.equal(pressurePosition(200), 0);
+  assert.ok(pressurePosition(500) > 0.5 && pressurePosition(500) < 0.6);
+  assert.ok(temperaturePosition(0, 200) > temperaturePosition(0, 1000));
+
+  const scenario = soundingScenarios[2];
+  for (const level of scenario.profile) {
+    const temperature = soundingPoint(level.temperature, level.pressure);
+    const dewpoint = soundingPoint(level.dewpoint, level.pressure);
+    assert.ok(temperature.x >= dewpoint.x);
+    assert.equal(temperature.y, dewpoint.y);
+  }
+
+  const path = soundingPath(scenario.profile, "temperature");
+  assert.match(path, /^M /);
+  assert.equal((path.match(/[ML] /g) || []).length, scenario.profile.length);
+
+  const summary = soundingSummary(scenario);
+  assert.equal(summary.parcelOrigin, "powierzchnia");
+  assert.equal(summary.surfaceSpread, 8);
+  assert.equal(summary.hasInversion, false);
+  assert.equal(summary.maximumWind.windSpeed, 82);
 });
 
 test("atlas search finds clouds by code, Polish observation and taxonomy", () => {

@@ -53,7 +53,7 @@ test("the installable app and offline shell use the Pages base path", async () =
   assert.equal(manifest.start_url, "/cloud-recognition/");
   assert.equal(manifest.scope, "/cloud-recognition/");
   assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
-  assert.match(worker, /cloud-recognition-v15/);
+  assert.match(worker, /cloud-recognition-v16/);
 });
 
 test("GitHub Pages deployment runs tests before publishing", async () => {
@@ -211,6 +211,34 @@ test("the Layers page exposes a practical, assessed Windy decoder", async () => 
   assert.match(data, /CAPE jest wynikiem obliczenia/);
   assert.match(styles, /\.windy-decoder\s*\{/);
   assert.match(styles, /\.decoder-feedback\.is-correct/);
+});
+
+test("the Layers page includes a source-aware interactive sounding laboratory", async () => {
+  const app = await read("src/App.jsx");
+  const data = await read("src/data/soundings.js");
+  const projection = await read("src/lib/sounding.js");
+  const styles = await read("src/styles.css");
+
+  assert.match(app, /Skew‑T czytaj jak argument, nie kolorowankę/);
+  assert.match(app, /Radiosonda obserwowana/);
+  assert.match(app, /Profil prognozowany/);
+  assert.match(app, /Profile w tej pracowni/);
+  assert.match(app, /Pięć przejść przez ten sam diagram/);
+  assert.match(app, /Temperatura i Td/);
+  assert.match(app, /Tor parceli/);
+  assert.match(app, /Czego ten profil nie dowodzi/);
+  assert.match(app, /Nie nazywaj jednej linii\. Zinterpretuj kolumnę\./);
+  assert.match(app, /aria-pressed=\{visible\[id\]\}/);
+  assert.match(app, /aria-live="polite"/);
+  assert.match(data, /Stratus uwięziony pod inwersją/);
+  assert.match(data, /Wilgotny dół pod ciepłą pokrywą/);
+  assert.match(data, /Głęboka chwiejność powierzchniowa/);
+  assert.match(data, /Chwiejność wyniesiona ponad stabilnym dołem/);
+  assert.match(projection, /Math\.log/);
+  assert.match(projection, /temperatureFraction/);
+  assert.match(styles, /\.sounding-workbench\s*\{/);
+  assert.match(styles, /\.sounding-profile--temperature/);
+  assert.match(styles, /\.sounding-feedback\.wrong/);
 });
 
 test("the cloud atlas exposes a prominent evidence-aware search", async () => {

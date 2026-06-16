@@ -148,6 +148,46 @@ export const sources = {
     checkText: "METAR",
     retrieved: "16 czerwca 2026 · monitoring automatyczny",
   },
+  nwsSkewT: {
+    id: "nwsSkewT",
+    organization: "NOAA National Weather Service",
+    title: "Skew-T Parameters and Indices",
+    label: "NWS: czytanie Skew-T",
+    url: "https://www.weather.gov/source/zhu/ZHU_Training_Page/convective_parameters/skewt/skewtinfo.html",
+    kind: "Materiał szkoleniowy meteorologów",
+    trust:
+      "Oficjalny materiał NWS objaśniający oś logarytmicznego ciśnienia, skośne izotermy, temperaturę, punkt rosy, parcelę oraz ograniczenia indeksów powierzchniowych.",
+    scope:
+      "Konstrukcja diagramu Skew-T Log-P, LCL/LFC/EL, dodatnia i ujemna wyporność oraz konwekcja wyniesiona.",
+    checkText: "Skew-T Parameters",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
+  },
+  nwsRadiosonde: {
+    id: "nwsRadiosonde",
+    organization: "NOAA National Weather Service",
+    title: "Radiosonde Observation",
+    label: "NWS: obserwacja radiosondażowa",
+    url: "https://www.weather.gov/upperair/factsheet",
+    kind: "Dokumentacja obserwacji",
+    trust:
+      "Oficjalny opis pomiaru balonowego, jego czasu trwania, zasięgu pionowego i dryfu poziomego.",
+    scope:
+      "Temperatura, wilgotność, ciśnienie i wiatr mierzone podczas wznoszenia radiosondy oraz ograniczenia reprezentatywności punktowej.",
+    checkText: "Radiosonde Observation",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
+  },
+  nwsSkewTAviation: {
+    id: "nwsSkewTAviation",
+    organization: "NOAA National Weather Service Aviation",
+    title: "Using Skew-Ts to Assess Icing and Wind Shear",
+    label: "NWS Aviation: Skew-T, oblodzenie i uskok",
+    url: "https://www.weather.gov/media/aviation/afp/Using%20Skew-Ts%20to%20Assess%20Icing%20_and%20Wind%20Shear.pptx",
+    kind: "Szkolenie lotnicze",
+    trust:
+      "Materiał szkoleniowy NWS Aviation pokazujący zastosowanie profilu temperatury, wilgoci i wiatru do oceny warstw oblodzenia oraz uskoku.",
+    scope: "Analiza potencjału oblodzenia, warstw chmurowych i zmian wiatru z wysokością.",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
+  },
   windyLevels: {
     id: "windyLevels",
     organization: "Windy Community",
