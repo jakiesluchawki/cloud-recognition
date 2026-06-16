@@ -36,6 +36,25 @@ test("the project records its visual source of truth", async () => {
   assert.match(design, /design\/reference\/atlas-swiatla-mobile\.png/);
 });
 
+test("responsive navigation and long scientific names stay bounded", async () => {
+  const styles = await read("src/styles.css");
+  const redesign = await read("src/zgrywa.css");
+
+  assert.match(redesign, /\.mobile-menu\s*\{[^}]*max-height: calc\(100svh - 95px\)/s);
+  assert.match(redesign, /\.mobile-menu\s*\{[^}]*overflow-y: auto/s);
+  assert.match(
+    redesign,
+    /@media \(max-width: 640px\)\s*\{[^}]*\.menu-button,\s*\.mobile-menu\s*\{\s*display: none/s,
+  );
+  assert.match(
+    redesign,
+    /@media \(max-width: 900px\)\s*\{[^}]*\.atlas-search\s*\{\s*grid-template-columns: 1fr/s,
+  );
+  assert.match(styles, /\.diagnostic-gallery__analysis h4\s*\{[^}]*overflow-wrap: anywhere/s);
+  assert.match(styles, /\.detail-body h2\s*\{[^}]*overflow-wrap: anywhere/s);
+  assert.match(styles, /\.term-detail-heading h2\s*\{[^}]*overflow-wrap: anywhere/s);
+});
+
 test("the public base path matches the repository", async () => {
   const config = await read("vite.config.mjs");
 

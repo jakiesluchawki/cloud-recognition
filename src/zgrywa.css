@@ -218,9 +218,14 @@ p {
   top: 80px;
   right: 15px;
   width: min(360px, calc(100vw - 30px));
+  max-width: calc(100vw - 30px);
+  max-height: calc(100svh - 95px);
   background: var(--ink);
   color: var(--paper);
   border-radius: 22px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   box-shadow: none;
 }
 
@@ -1142,6 +1147,30 @@ textarea {
 
   .bottom-nav button.active {
     color: var(--coral);
+  }
+}
+
+@media (max-width: 900px) {
+  .atlas-search {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .atlas-search__status {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .menu-button,
+  .mobile-menu {
+    display: none;
+  }
+
+  .detail-body h2,
+  .term-detail-heading h2 {
+    font-size: clamp(2.2rem, 11vw, 3.4rem);
+    line-height: 0.96;
   }
 }
 
