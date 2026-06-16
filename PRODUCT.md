@@ -1,0 +1,52 @@
+# Product
+
+## Purpose
+
+Cloud Recognition helps a person who knows nothing about clouds learn to
+observe, name, compare, and interpret them. It grows into an expert reference
+for sailors, photographers, weather enthusiasts, and aviation students without
+making the first screen feel like specialist software.
+
+## Audience
+
+- Primary: Polish-speaking beginners using a phone outdoors.
+- Secondary: sailors, pilots, aviation students, photographers, and weather
+  enthusiasts who should be placed above lessons they already understand.
+
+## Learning Promise
+
+The learner should become able to:
+
+1. notice shape, layer, texture, illumination, precipitation, and development;
+2. identify the ten WMO genera and progressively finer classifications;
+3. explain ambiguity instead of treating every photograph as having one
+   obvious label;
+4. connect clouds with air movement, fronts, stability, moisture, and hazards;
+5. read METAR/TAF cloud groups and reason about ceilings;
+6. understand what altitude and pressure-level controls in Windy reveal;
+7. record observations and justify identifications with visible evidence.
+
+## Product Principles
+
+1. Begin with observation, then introduce terminology.
+2. Diagnose prior knowledge without grading or embarrassing the learner.
+3. Reveal expert detail progressively and keep it available on demand.
+4. Distinguish observed facts, model output, interpretation, and uncertainty.
+5. Attach a source to every consequential scientific claim.
+6. Use real, properly licensed photographs for identification evidence.
+7. Treat mobile as the field instrument and larger screens as the study desk.
+8. Keep all core learning free and independent of paid weather APIs.
+
+## Version 1 Boundaries
+
+- No automatic cloud recognition from photographs or camera input.
+- No Windy integration, embedded Windy map, or Windy API.
+- No recorded or synthesized voice.
+- No accounts, analytics, advertising, or remote learner profiles.
+- Progress and journal data remain local to the device.
+
+## Deferred Opportunity
+
+Automatic photograph recognition is a promising later version. It must be
+designed separately around privacy, model transparency, confidence, offline
+fallbacks, and the danger of turning uncertain morphology into false certainty.

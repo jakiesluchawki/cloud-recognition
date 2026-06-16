@@ -1,0 +1,9 @@
+mieszko:
+  name: "Mieszko Mahboob"
+  role: "Product owner"
+  focus: "Product direction, educational usefulness, and release approval"
+
+codex:
+  name: "Codex"
+  role: "Design and engineering collaborator"
+  focus: "Research, product design, implementation, verification, and release"
