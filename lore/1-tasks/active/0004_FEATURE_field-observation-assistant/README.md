@@ -56,7 +56,7 @@ luminance, continuous evolution, and observing the whole sky.
 - [ ] The tool works comfortably at 390 px and with keyboard navigation.
 - [x] The former binary key is removed rather than left as a competing method.
 - [x] Automated tests cover scoring, ambiguity, and deterministic ordering.
-- [ ] Tests, production build, link audit, and Pages deployment pass.
+- [x] Tests, production build, link audit, and Pages deployment pass.
 
 ## Design Decisions
 
@@ -96,6 +96,8 @@ luminance, continuous evolution, and observing the whole sky.
   automated external-link monitor.
 - Added content, foundation, scoring, ambiguity, deterministic-ordering, and
   journal-draft tests.
+- Published commit `c478cd1` through GitHub Pages and verified the public HTML,
+  JavaScript bundle, CSS bundle, manifest, and service worker cache v2.
 
 ## Issues Encountered
 
