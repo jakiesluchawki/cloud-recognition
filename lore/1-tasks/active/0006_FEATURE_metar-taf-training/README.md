@@ -82,6 +82,14 @@ the first grid column and left the exercise vertically unbalanced.
 6. **Wide caveat rail:** Expert wind caveats moved below the two-column
    exercise on desktop, preventing a narrow text column from setting the whole
    section height.
+7. **TAF debrief after commitment:** The raw forecast and question come first.
+   A decoded timeline appears inside feedback only after an answer, so the
+   learning aid does not solve its own exercise.
+8. **Feedback owns keyboard focus:** Answer feedback receives focus, the next
+   `Tab` reaches the continuation action, and the new question heading receives
+   focus after navigation.
+9. **Quiet accessible timer:** The countdown exposes `role="timer"` and an
+   accessible remaining-time label without announcing every second.
 
 ## Implementation Notes
 
@@ -95,13 +103,21 @@ the first grid column and left the exercise vertically unbalanced.
   compass to a square no larger than 520 px.
 - Rendered measurements at 1280 px show 620/560 px exercise columns and a
   483 px square compass. At 390 px, document width remains exactly 390 px.
+- Moved the full TAF timeline into post-answer feedback and verified that no
+  timeline is present before commitment.
+- Added pressed-state semantics to the four mode controls and preserved focus
+  across feedback and question transitions.
+- Captured mobile METAR/TAF and desktop METAR/wind QA evidence under
+  `design/qa/current/`.
 
 ## Broken/Modified Tests
 
 - Extended `content.test.mjs` to require six METAR scenarios, four unique
   choices, substantive feedback, TAF timelines, and correct ceiling behavior.
+- Extended `foundation.test.mjs` to protect post-answer TAF disclosure, mode
+  pressed states, timer semantics, and feedback/question focus management.
 
 ## Future Work
 
-Add operationally realistic multi-report briefing sets and spaced review after
-the current static, free, no-account workshop has established a stable base.
+See backlog task `0007` for operationally realistic multi-report briefing sets
+and locally stored spaced review.

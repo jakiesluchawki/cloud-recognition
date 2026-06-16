@@ -52,7 +52,7 @@ test("the installable app and offline shell use the Pages base path", async () =
   assert.equal(manifest.start_url, "/cloud-recognition/");
   assert.equal(manifest.scope, "/cloud-recognition/");
   assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
-  assert.match(worker, /cloud-recognition-v6/);
+  assert.match(worker, /cloud-recognition-v7/);
 });
 
 test("GitHub Pages deployment runs tests before publishing", async () => {
@@ -111,6 +111,18 @@ test("lessons expose honest time plans, adaptive practice and keyboard-safe dial
   assert.match(app, /event\.key !== "Tab"/);
   assert.match(lessons, /METAR opisuje warunki obserwowane/);
   assert.match(lessons, /Pułap nie jest najniższą dowolną chmurą/);
+});
+
+test("the METAR and TAF workshop preserves active recall and keyboard context", async () => {
+  const app = await read("src/App.jsx");
+
+  assert.match(app, /aria-pressed=\{mode === "taf"\}/);
+  assert.match(app, /role="timer"/);
+  assert.match(app, /feedbackDetail=\{tafAnswerIndex !== null/);
+  assert.match(app, /Pełny rozbiór osi czasu/);
+  assert.match(app, /trainingHeadingRef/);
+  assert.match(app, /feedbackRef\.current\?\.focus/);
+  assert.doesNotMatch(app, /className=\{`metar-timer[^`]+aria-live="polite"/s);
 });
 
 test("the encyclopedia exposes formation, differential diagnosis and aviation context", async () => {

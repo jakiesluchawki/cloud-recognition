@@ -2156,11 +2156,14 @@ function TrainingQuestion({
   question,
   answerIndex,
   timedOut = false,
+  headingRef,
+  feedbackDetail = null,
   onAnswer,
   onNext,
   nextLabel,
 }) {
   const answered = answerIndex !== null || timedOut;
+  const feedbackRef = useRef(null);
   const result = answerIndex !== null
     ? evaluateTrainingAnswer(question, answerIndex)
     : timedOut
@@ -2171,10 +2174,14 @@ function TrainingQuestion({
         }
       : null;
 
+  useEffect(() => {
+    if (answered) feedbackRef.current?.focus();
+  }, [answered, question.id]);
+
   return (
     <div className="metar-question">
       <span className="metar-question__stage">{question.stage}</span>
-      <h3>{question.prompt}</h3>
+      <h3 ref={headingRef} tabIndex="-1">{question.prompt}</h3>
       <div className="metar-options" role="group" aria-label="Wybierz jedną odpowiedź">
         {question.options.map((option, index) => {
           const isCorrect = answered && index === question.correct;
@@ -2194,6 +2201,8 @@ function TrainingQuestion({
       </div>
       {result && (
         <div
+          ref={feedbackRef}
+          tabIndex="-1"
           className={`metar-feedback ${result.isCorrect ? "is-correct" : "is-wrong"}`}
           aria-live="polite"
         >
@@ -2205,6 +2214,7 @@ function TrainingQuestion({
                 : `Poprawna odpowiedź: ${result.correct}`}
           </strong>
           <p>{result.explanation}</p>
+          {feedbackDetail}
           <button className="button button--primary" onClick={onNext}>
             {nextLabel} <ArrowRight size={17} />
           </button>
@@ -2231,6 +2241,8 @@ function MetarPanel({ onSources }) {
   const [tafIndex, setTafIndex] = useState(0);
   const [tafQuestionIndex, setTafQuestionIndex] = useState(0);
   const [tafAnswerIndex, setTafAnswerIndex] = useState(null);
+  const trainingHeadingRef = useRef(null);
+  const hasTrainingNavigatedRef = useRef(false);
 
   const scenario = metarTrainingScenarios[scenarioIndex];
   const question = scenario.questions[questionIndex];
@@ -2239,6 +2251,11 @@ function MetarPanel({ onSources }) {
   const isSprint = mode === "sprint";
   const questionAnswered = answerIndex !== null || timedOut;
   const selectedGroup = scenario.groups.find((group) => group.token === selectedToken);
+
+  useEffect(() => {
+    if (!hasTrainingNavigatedRef.current || mode === "decode") return;
+    trainingHeadingRef.current?.focus();
+  }, [mode, questionIndex, tafQuestionIndex, scenarioIndex, tafIndex]);
 
   useEffect(() => {
     if (!isSprint || questionAnswered) return undefined;
@@ -2258,6 +2275,7 @@ function MetarPanel({ onSources }) {
   }, [isSprint, questionAnswered, secondsLeft]);
 
   const startMode = (nextMode) => {
+    hasTrainingNavigatedRef.current = nextMode !== "decode";
     setMode(nextMode);
     setQuestionIndex(0);
     setAnswerIndex(null);
@@ -2267,6 +2285,7 @@ function MetarPanel({ onSources }) {
   };
 
   const chooseScenario = (index) => {
+    hasTrainingNavigatedRef.current = mode !== "decode";
     setScenarioIndex(index);
     setQuestionIndex(0);
     setAnswerIndex(null);
@@ -2288,6 +2307,7 @@ function MetarPanel({ onSources }) {
   };
 
   const nextMetarQuestion = () => {
+    hasTrainingNavigatedRef.current = true;
     if (questionIndex < scenario.questions.length - 1) {
       setQuestionIndex((current) => current + 1);
     } else {
@@ -2308,6 +2328,7 @@ function MetarPanel({ onSources }) {
   };
 
   const nextTafQuestion = () => {
+    hasTrainingNavigatedRef.current = true;
     if (tafQuestionIndex < tafScenario.questions.length - 1) {
       setTafQuestionIndex((current) => current + 1);
     } else {
@@ -2339,10 +2360,10 @@ function MetarPanel({ onSources }) {
       </div>
 
       <div className="metar-mode-switch" aria-label="Tryb pracowni">
-        <button className={mode === "decode" ? "active" : ""} onClick={() => startMode("decode")}>Rozbiór aktywny</button>
-        <button className={mode === "practice" ? "active" : ""} onClick={() => startMode("practice")}>Trening METAR</button>
-        <button className={mode === "sprint" ? "active" : ""} onClick={() => startMode("sprint")}>Odprawa 30 s</button>
-        <button className={mode === "taf" ? "active" : ""} onClick={() => startMode("taf")}>Oś czasu TAF</button>
+        <button aria-pressed={mode === "decode"} className={mode === "decode" ? "active" : ""} onClick={() => startMode("decode")}>Rozbiór aktywny</button>
+        <button aria-pressed={mode === "practice"} className={mode === "practice" ? "active" : ""} onClick={() => startMode("practice")}>Trening METAR</button>
+        <button aria-pressed={mode === "sprint"} className={mode === "sprint" ? "active" : ""} onClick={() => startMode("sprint")}>Odprawa 30 s</button>
+        <button aria-pressed={mode === "taf"} className={mode === "taf" ? "active" : ""} onClick={() => startMode("taf")}>Oś czasu TAF</button>
       </div>
 
       {mode !== "taf" && (
@@ -2412,7 +2433,8 @@ function MetarPanel({ onSources }) {
             {isSprint && (
               <div
                 className={`metar-timer ${secondsLeft <= 8 ? "is-urgent" : ""}`}
-                aria-live="polite"
+                role="timer"
+                aria-label={`Pozostało ${secondsLeft} sekund`}
               >
                 <Gauge size={20} />
                 <strong>{secondsLeft}s</strong>
@@ -2428,6 +2450,7 @@ function MetarPanel({ onSources }) {
             question={question}
             answerIndex={answerIndex}
             timedOut={timedOut}
+            headingRef={trainingHeadingRef}
             onAnswer={chooseAnswer}
             onNext={nextMetarQuestion}
             nextLabel={questionIndex < scenario.questions.length - 1 ? "Następne pytanie" : "Następna depesza"}
@@ -2448,18 +2471,28 @@ function MetarPanel({ onSources }) {
             focusTokens={tafQuestion.focusTokens}
             revealed={tafAnswerIndex !== null}
           />
-          <div className="taf-timeline" aria-label="Oś czasu prognozy TAF">
-            {tafScenario.timeline.map((period) => (
-              <article key={period.time}>
-                <span>{period.time}</span>
-                <strong>{period.label}</strong>
-                <p>{period.detail}</p>
-              </article>
-            ))}
-          </div>
+          <p className="taf-instruction">
+            Najpierw odczytaj depeszę i odpowiedz. Pełny rozbiór osi czasu
+            pojawi się w informacji zwrotnej po Twojej decyzji.
+          </p>
           <TrainingQuestion
             question={tafQuestion}
             answerIndex={tafAnswerIndex}
+            headingRef={trainingHeadingRef}
+            feedbackDetail={tafAnswerIndex !== null ? (
+              <div className="taf-debrief">
+                <span className="eyebrow">Rozbiór osi czasu</span>
+                <div className="taf-timeline" aria-label="Oś czasu prognozy TAF">
+                  {tafScenario.timeline.map((period) => (
+                    <article key={period.time}>
+                      <span>{period.time}</span>
+                      <strong>{period.label}</strong>
+                      <p>{period.detail}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             onAnswer={chooseTafAnswer}
             onNext={nextTafQuestion}
             nextLabel={tafQuestionIndex < tafScenario.questions.length - 1 ? "Następne pytanie" : "Następna prognoza"}

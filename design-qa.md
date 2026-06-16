@@ -42,6 +42,18 @@
   `design/qa/current/field-observer-desktop-start.png`
 - Desktop field result:
   `design/qa/current/field-observer-desktop-result.png`
+- Mobile METAR practice:
+  `design/qa/current/metar-mobile-practice.png`
+- Mobile TAF before an answer:
+  `design/qa/current/metar-mobile-taf-concealed.png`
+- Mobile TAF committed answer:
+  `design/qa/current/metar-mobile-taf-revealed.png`
+- Mobile TAF debrief:
+  `design/qa/current/metar-mobile-taf-debrief.png`
+- Desktop METAR workshop:
+  `design/qa/current/metar-desktop-workshop.png`
+- Desktop wind laboratory:
+  `design/qa/current/wind-desktop-lab.png`
 
 The source visual and lesson are different product states, so the full-view
 comparison evaluates design language rather than identical composition.
@@ -107,6 +119,24 @@ actions, and no prematurely visible recap, final check, or practice.
      Stratocumulus and Altocumulus. The result ranks Cumulonimbus, Cumulus,
      then Stratocumulus and exposes the dedicated discriminator.
 
+10. **P1 fixed — TAF displayed the decoded timeline before the question**
+    - Before: the three timeline cards gave away the period labels and weather
+      groups before the learner committed an interpretation.
+    - Patch: the learner now sees the raw TAF, an instruction, and the
+      four-choice question. The full timeline is inserted into the feedback
+      only after an answer.
+
+11. **P2 fixed — Answering could return keyboard focus to the page body**
+    - Patch: immediate feedback receives programmatic focus, `Tab` reaches the
+      next-question action, and that action focuses the next question heading.
+    - Verified for both METAR and TAF flows with keyboard input.
+
+12. **P2 fixed — The countdown announced every second**
+    - Before: `aria-live="polite"` could produce repetitive screen-reader
+      announcements throughout the 30-second briefing.
+    - Patch: the visual countdown uses `role="timer"` and an updated accessible
+      label; timeout feedback remains announced.
+
 ## Required Fidelity Surfaces
 
 - **Typography:** Newsreader and Manrope remain consistent with Atlas Światła.
@@ -128,7 +158,8 @@ actions, and no prematurely visible recap, final check, or practice.
   active state and progress are visible, resume state survives reload, recall
   answers expose `aria-expanded`, the global test opens from mobile
   navigation, dialogs retain focus trapping and Escape handling, and the field
-  assistant preserves keyboard focus across all five evidence steps.
+  assistant preserves keyboard focus across all five evidence steps. METAR/TAF
+  feedback and next-question transitions preserve the same keyboard context.
 
 ## Residual Risk
 
@@ -140,6 +171,8 @@ actions, and no prematurely visible recap, final check, or practice.
 - The field result summary is intentionally horizontally scrollable on mobile
   so all five answers remain revisable without shrinking them into illegible
   columns.
+- TAF debrief cards are deliberately detailed and may extend beyond one mobile
+  viewport after an answer; they no longer delay the question itself.
 
 ## Final Result
 
