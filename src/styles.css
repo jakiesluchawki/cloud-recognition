@@ -4353,6 +4353,140 @@ p {
   font-size: 1.35rem;
 }
 
+.metar-anatomy {
+  margin-bottom: 28px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.metar-anatomy__heading {
+  padding: clamp(24px, 4vw, 38px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  align-items: end;
+  gap: 32px;
+}
+
+.metar-anatomy__heading h3 {
+  max-width: 680px;
+  margin: 5px 0 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 3vw, 2.35rem);
+  font-weight: 560;
+  line-height: 1.08;
+}
+
+.metar-anatomy__heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.metar-structure-phases {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-block: 1px solid var(--line);
+  background: var(--line);
+  gap: 1px;
+}
+
+.metar-structure-phases article {
+  min-height: 205px;
+  padding: 22px;
+  background: var(--paper);
+}
+
+.metar-structure-phases article > span {
+  color: var(--coral);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.metar-structure-phases h4 {
+  margin: 10px 0 14px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.16rem;
+  font-weight: 580;
+}
+
+.metar-structure-phases code,
+.cavok-quick-guide code,
+.metar-guide-examples code,
+.metar-spotlight code {
+  color: var(--blue);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
+.metar-structure-phases p {
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+.cavok-quick-guide {
+  padding: 20px clamp(24px, 4vw, 38px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  background: var(--mist);
+}
+
+.cavok-quick-guide > code {
+  border: 1px solid rgba(8, 47, 79, 0.2);
+  padding: 9px 11px;
+  background: var(--white);
+  font-size: 0.94rem;
+}
+
+.cavok-quick-guide strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.8rem;
+}
+
+.cavok-quick-guide p {
+  max-width: 660px;
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.metar-section-index {
+  margin-bottom: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.metar-section-index button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--white);
+  padding: 7px 12px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 740;
+}
+
+.metar-section-index button:hover,
+.metar-section-index button:focus-visible,
+.metar-section-index button.active {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: var(--white);
+}
+
 .metar-instruction {
   max-width: 760px;
   margin: 0 0 20px;
@@ -4390,20 +4524,23 @@ p {
 }
 
 .metar-group-answer {
-  min-height: 190px;
   border: 1px solid var(--line);
   border-top: 0;
   padding: clamp(22px, 4vw, 36px);
   background: var(--paper);
 }
 
-.metar-group-answer span,
-.metar-group-answer strong,
-.metar-group-answer small {
+.metar-group-answer > span,
+.metar-group-answer > strong,
+.metar-group-answer > small,
+.metar-guide-explanation > span,
+.metar-guide-explanation > strong,
+.metar-guide-explanation > small {
   display: block;
 }
 
-.metar-group-answer span {
+.metar-group-answer > span,
+.metar-guide-explanation > span {
   color: var(--coral);
   font-size: 0.68rem;
   font-weight: 780;
@@ -4411,14 +4548,16 @@ p {
   text-transform: uppercase;
 }
 
-.metar-group-answer strong {
+.metar-group-answer > strong,
+.metar-guide-explanation > strong {
   margin: 7px 0 10px;
   color: var(--blue);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 1.45rem;
 }
 
-.metar-group-answer p {
+.metar-group-answer > p,
+.metar-guide-explanation > p {
   max-width: 720px;
   margin: 0;
   color: var(--ink);
@@ -4427,12 +4566,123 @@ p {
   line-height: 1.55;
 }
 
-.metar-group-answer small {
+.metar-group-answer > small,
+.metar-guide-explanation > small {
   width: fit-content;
   margin-top: 18px;
   border-left: 3px solid var(--coral);
   padding: 3px 0 3px 10px;
   color: var(--muted);
+}
+
+.metar-guide-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+  gap: clamp(28px, 5vw, 58px);
+}
+
+.metar-guide-explanation h4 {
+  margin: 26px 0 8px;
+  color: var(--ink);
+  font-size: 0.76rem;
+}
+
+.metar-guide-explanation .metar-guide-copy {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.metar-guide-examples {
+  border-left: 1px solid var(--line);
+  padding-left: clamp(22px, 4vw, 38px);
+}
+
+.metar-guide-examples > span {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 780;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.metar-guide-examples > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.metar-guide-examples article {
+  min-height: 82px;
+  border: 1px solid var(--line);
+  padding: 12px;
+  background: var(--white);
+}
+
+.metar-guide-examples p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.metar-spotlight {
+  margin-top: 28px;
+  border: 1px solid rgba(8, 47, 79, 0.18);
+  padding: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  background: var(--mist);
+}
+
+.metar-spotlight > code {
+  align-self: start;
+  border: 1px solid rgba(8, 47, 79, 0.2);
+  padding: 9px 11px;
+  background: var(--white);
+  font-size: 0.94rem;
+}
+
+.metar-spotlight strong,
+.metar-spotlight small {
+  display: block;
+}
+
+.metar-spotlight strong {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.15rem;
+}
+
+.metar-spotlight p {
+  margin: 6px 0;
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.metar-spotlight small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.metar-watch {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 9px;
+  color: #6a453d;
+}
+
+.metar-watch p {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.55;
 }
 
 .metar-practice,
@@ -4738,6 +4988,31 @@ p {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .metar-anatomy__heading,
+  .metar-guide-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .metar-structure-phases {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cavok-quick-guide {
+    grid-template-columns: auto 1fr;
+  }
+
+  .cavok-quick-guide .button {
+    grid-column: 1 / -1;
+    width: fit-content;
+  }
+
+  .metar-guide-examples {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+    padding-top: 24px;
+    padding-left: 0;
+  }
+
   .metar-mode-switch button:nth-child(2) {
     border-right: 0;
   }
@@ -4772,6 +5047,46 @@ p {
     font-size: 0.69rem;
   }
 
+  .metar-anatomy {
+    margin-inline: -1px;
+  }
+
+  .metar-anatomy__heading {
+    gap: 16px;
+  }
+
+  .metar-structure-phases {
+    grid-template-columns: 1fr;
+  }
+
+  .metar-structure-phases article {
+    min-height: 0;
+  }
+
+  .cavok-quick-guide {
+    grid-template-columns: 1fr;
+  }
+
+  .cavok-quick-guide .button {
+    grid-column: auto;
+  }
+
+  .metar-section-index {
+    flex-wrap: nowrap;
+    margin-right: -20px;
+    padding-right: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .metar-section-index::-webkit-scrollbar {
+    display: none;
+  }
+
+  .metar-section-index button {
+    flex: 0 0 auto;
+  }
+
   .metar-token-board {
     gap: 6px;
   }
@@ -4793,6 +5108,14 @@ p {
   .metar-options button {
     min-height: 72px;
     padding: 13px;
+  }
+
+  .metar-guide-examples > div {
+    grid-template-columns: 1fr;
+  }
+
+  .metar-spotlight {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -137,6 +137,18 @@ actions, and no prematurely visible recap, final check, or practice.
     - Patch: the visual countdown uses `role="timer"` and an updated accessible
       label; timeout feedback remains announced.
 
+13. **P1 fixed — Active decode explained tokens without teaching the report grammar**
+    - Before: a beginner could reveal one selected group but had no persistent
+      map of the full METAR order or the codes absent from that report.
+    - Patch: active decode now opens with four reading phases, a ten-section
+      glossary, multiple code variants, interpretation traps, and an always
+      discoverable CAVOK explanation.
+    - Evidence: `metar-anatomy-mobile-top.png`,
+      `metar-anatomy-mobile-cavok.png`, and
+      `metar-anatomy-desktop.png`. At 390 px the document width remains
+      390 px, body copy is 16 px, mode controls are 50 px high, and all ten
+      glossary sections remain reachable.
+
 ## Required Fidelity Surfaces
 
 - **Typography:** Newsreader and Manrope remain consistent with Atlas Światła.
@@ -160,6 +172,8 @@ actions, and no prematurely visible recap, final check, or practice.
   navigation, dialogs retain focus trapping and Escape handling, and the field
   assistant preserves keyboard focus across all five evidence steps. METAR/TAF
   feedback and next-question transitions preserve the same keyboard context.
+  The METAR glossary uses native buttons, pressed states, and a horizontally
+  scrollable mobile index without introducing page-level overflow.
 
 ## Residual Risk
 

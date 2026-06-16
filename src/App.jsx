@@ -49,7 +49,13 @@ import {
   quizQuestions,
 } from "./data/learning.js";
 import { lessons } from "./data/lessons.js";
-import { metarTrainingScenarios, tafTrainingScenarios } from "./data/metar-training.js";
+import {
+  metarDecodeSections,
+  metarSectionByGroupLabel,
+  metarStructurePhases,
+  metarTrainingScenarios,
+  tafTrainingScenarios,
+} from "./data/metar-training.js";
 import { fieldPrinciples, fieldQuestions } from "./data/field-guide.js";
 import { getSources, sourceList } from "./data/sources.js";
 import {
@@ -2228,6 +2234,7 @@ function MetarPanel({ onSources }) {
   const [mode, setMode] = useState("decode");
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [selectedToken, setSelectedToken] = useState(null);
+  const [guideSectionId, setGuideSectionId] = useState(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answerIndex, setAnswerIndex] = useState(null);
   const [timedOut, setTimedOut] = useState(false);
@@ -2251,6 +2258,9 @@ function MetarPanel({ onSources }) {
   const isSprint = mode === "sprint";
   const questionAnswered = answerIndex !== null || timedOut;
   const selectedGroup = scenario.groups.find((group) => group.token === selectedToken);
+  const selectedGuide = metarDecodeSections.find((section) => (
+    section.id === (guideSectionId || metarSectionByGroupLabel[selectedGroup?.label])
+  ));
 
   useEffect(() => {
     if (!hasTrainingNavigatedRef.current || mode === "decode") return;
@@ -2282,6 +2292,7 @@ function MetarPanel({ onSources }) {
     setTimedOut(false);
     setSecondsLeft(METAR_SPRINT_SECONDS);
     setSelectedToken(null);
+    setGuideSectionId(null);
   };
 
   const chooseScenario = (index) => {
@@ -2292,6 +2303,7 @@ function MetarPanel({ onSources }) {
     setTimedOut(false);
     setSecondsLeft(METAR_SPRINT_SECONDS);
     setSelectedToken(null);
+    setGuideSectionId(null);
   };
 
   const chooseAnswer = (index) => {
@@ -2386,9 +2398,67 @@ function MetarPanel({ onSources }) {
 
       {mode === "decode" && (
         <div className="metar-decode">
+          <section className="metar-anatomy" aria-labelledby="metar-anatomy-title">
+            <div className="metar-anatomy__heading">
+              <div>
+                <span className="eyebrow">Anatomia całej depeszy</span>
+                <h3 id="metar-anatomy-title">METAR jest zdaniem czytanym od lewej do prawej</h3>
+              </div>
+              <p>
+                Rdzeń ma stałą logikę, ale nie każda sekcja musi wystąpić.
+                Jedna grupa może też zastąpić kilka następnych, jak CAVOK.
+              </p>
+            </div>
+            <div className="metar-structure-phases">
+              {metarStructurePhases.map((phase) => (
+                <article key={phase.id}>
+                  <span>{phase.number}</span>
+                  <h4>{phase.title}</h4>
+                  <code>{phase.pattern}</code>
+                  <p>{phase.detail}</p>
+                </article>
+              ))}
+            </div>
+            <div className="cavok-quick-guide">
+              <code>CAVOK</code>
+              <div>
+                <strong>Ceiling And Visibility OK</strong>
+                <p>
+                  Jeden skrót może zastąpić osobne grupy widzialności,
+                  aktualnych zjawisk i chmur, gdy wszystkie wymagane kryteria są spełnione.
+                </p>
+              </div>
+              <button
+                className="button button--secondary"
+                onClick={() => {
+                  setSelectedToken(null);
+                  setGuideSectionId("visibility");
+                }}
+              >
+                Wyjaśnij dokładnie
+              </button>
+            </div>
+          </section>
+
+          <div className="metar-section-index" role="group" aria-label="Słownik sekcji METAR">
+            {metarDecodeSections.map((section) => (
+              <button
+                key={section.id}
+                aria-pressed={guideSectionId === section.id && !selectedToken}
+                className={guideSectionId === section.id && !selectedToken ? "active" : ""}
+                onClick={() => {
+                  setSelectedToken(null);
+                  setGuideSectionId(section.id);
+                }}
+              >
+                {section.shortLabel}
+              </button>
+            ))}
+          </div>
+
           <p className="metar-instruction">
-            Kliknij grupę, nazwij ją własnymi słowami, dopiero potem sprawdź
-            znaczenie. Grupy tworzące pułap są oznaczane dopiero po wyborze.
+            Teraz zastosuj mapę do konkretnego raportu. Kliknij grupę, nazwij
+            ją własnymi słowami, a potem sprawdź znaczenie i możliwe warianty tej sekcji.
           </p>
           <div className="metar-token-board">
             {scenario.groups.map((group) => (
@@ -2396,25 +2466,74 @@ function MetarPanel({ onSources }) {
                 key={group.token}
                 className={selectedToken === group.token ? "active" : ""}
                 aria-pressed={selectedToken === group.token}
-                onClick={() => setSelectedToken(group.token)}
+                onClick={() => {
+                  setSelectedToken(group.token);
+                  setGuideSectionId(metarSectionByGroupLabel[group.label]);
+                }}
               >
                 {group.token}
               </button>
             ))}
           </div>
           <div className="metar-group-answer" aria-live="polite">
-            {selectedGroup ? (
+            {selectedGroup || selectedGuide ? (
               <>
-                <span>{selectedGroup.label}</span>
-                <strong>{selectedGroup.token}</strong>
-                <p>{selectedGroup.meaning}</p>
-                {selectedGroup.ceiling && <small>Ta grupa może tworzyć pułap.</small>}
+                <div className="metar-guide-layout">
+                  <div className="metar-guide-explanation">
+                    <span>
+                      {selectedGroup
+                        ? `${selectedGroup.label} · ${selectedGuide?.position || "sekcja raportu"}`
+                        : `Słownik sekcji · ${selectedGuide.position}`}
+                    </span>
+                    <strong>{selectedGroup?.token || selectedGuide.title}</strong>
+                    <p>{selectedGroup?.meaning || selectedGuide.purpose}</p>
+                    {selectedGuide && (
+                      <>
+                        <h4>Jak jest zbudowana ta sekcja?</h4>
+                        <p className="metar-guide-copy">{selectedGuide.syntax}</p>
+                      </>
+                    )}
+                    {selectedGroup?.ceiling && <small>Ta grupa może tworzyć pułap.</small>}
+                  </div>
+                  {selectedGuide && (
+                    <aside className="metar-guide-examples">
+                      <span>Co jeszcze możesz tu spotkać</span>
+                      <div>
+                        {selectedGuide.examples.map((example) => (
+                          <article key={example.code}>
+                            <code>{example.code}</code>
+                            <p>{example.meaning}</p>
+                          </article>
+                        ))}
+                      </div>
+                    </aside>
+                  )}
+                </div>
+                {selectedGuide?.spotlight && (
+                  <div className="metar-spotlight">
+                    <code>{selectedGuide.spotlight.code}</code>
+                    <div>
+                      <strong>{selectedGuide.spotlight.expansion}</strong>
+                      <p>{selectedGuide.spotlight.meaning}</p>
+                      <small>{selectedGuide.spotlight.limits}</small>
+                    </div>
+                  </div>
+                )}
+                {selectedGuide && (
+                  <div className="metar-watch">
+                    <Warning size={18} />
+                    <p><strong>Uważaj:</strong> {selectedGuide.watchFor}</p>
+                  </div>
+                )}
               </>
             ) : (
               <>
                 <span>Zadanie</span>
-                <strong>Wybierz pierwszą grupę</strong>
-                <p>{scenario.context}</p>
+                <strong>Wybierz grupę raportu albo sekcję słownika</strong>
+                <p>
+                  {scenario.context} Słownik powyżej pozwala też sprawdzić
+                  elementy, których akurat nie ma w tej depeszy.
+                </p>
               </>
             )}
           </div>

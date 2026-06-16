@@ -52,7 +52,7 @@ test("the installable app and offline shell use the Pages base path", async () =
   assert.equal(manifest.start_url, "/cloud-recognition/");
   assert.equal(manifest.scope, "/cloud-recognition/");
   assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
-  assert.match(worker, /cloud-recognition-v7/);
+  assert.match(worker, /cloud-recognition-v8/);
 });
 
 test("GitHub Pages deployment runs tests before publishing", async () => {
@@ -116,6 +116,11 @@ test("lessons expose honest time plans, adaptive practice and keyboard-safe dial
 test("the METAR and TAF workshop preserves active recall and keyboard context", async () => {
   const app = await read("src/App.jsx");
 
+  assert.match(app, /Anatomia całej depeszy/);
+  assert.match(app, /METAR jest zdaniem czytanym od lewej do prawej/);
+  assert.match(app, /Słownik sekcji METAR/);
+  assert.match(app, /Co jeszcze możesz tu spotkać/);
+  assert.match(app, /Wyjaśnij dokładnie/);
   assert.match(app, /aria-pressed=\{mode === "taf"\}/);
   assert.match(app, /role="timer"/);
   assert.match(app, /feedbackDetail=\{tafAnswerIndex !== null/);

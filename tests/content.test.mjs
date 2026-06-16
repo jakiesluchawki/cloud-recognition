@@ -20,6 +20,9 @@ import {
 } from "../src/data/learning.js";
 import { lessonMinutes, lessons } from "../src/data/lessons.js";
 import {
+  metarDecodeSections,
+  metarSectionByGroupLabel,
+  metarStructurePhases,
   metarTrainingScenarios,
   tafTrainingScenarios,
 } from "../src/data/metar-training.js";
@@ -396,6 +399,49 @@ test("the METAR workshop offers varied reports and four plausible answers", () =
       assert.ok(question.correct >= 0 && question.correct < 4);
       assert.ok(question.explanation.length >= 45, `${question.id} needs teaching feedback`);
       assert.ok(question.focusTokens.length >= 1, `${question.id} needs evidence highlighting`);
+    }
+  }
+});
+
+test("the active decode explains the complete METAR structure and section variants", () => {
+  assert.equal(metarStructurePhases.length, 4);
+  assert.equal(metarDecodeSections.length, 10);
+  assert.deepEqual(
+    metarDecodeSections.map((section) => section.id),
+    [
+      "type",
+      "station",
+      "time",
+      "wind",
+      "visibility",
+      "weather",
+      "clouds",
+      "temperature",
+      "pressure",
+      "supplements",
+    ],
+  );
+
+  for (const section of metarDecodeSections) {
+    assert.ok(section.purpose.length >= 60, `${section.id} needs a clear purpose`);
+    assert.ok(section.syntax.length >= 60, `${section.id} needs syntax guidance`);
+    assert.ok(section.examples.length >= 3, `${section.id} needs multiple examples`);
+    assert.ok(section.watchFor.length >= 60, `${section.id} needs an interpretation warning`);
+  }
+
+  const visibility = metarDecodeSections.find((section) => section.id === "visibility");
+  assert.equal(visibility.spotlight.code, "CAVOK");
+  assert.match(visibility.spotlight.expansion, /Ceiling And Visibility OK/);
+  assert.match(visibility.spotlight.meaning, /co najmniej 10 km/);
+  assert.match(visibility.spotlight.meaning, /CB ani TCU/);
+  assert.match(visibility.spotlight.limits, /nie znaczy „bezchmurnie”/);
+
+  for (const scenario of metarTrainingScenarios) {
+    for (const group of scenario.groups) {
+      assert.ok(
+        metarSectionByGroupLabel[group.label],
+        `${scenario.id}.${group.token} needs a section guide`,
+      );
     }
   }
 });
