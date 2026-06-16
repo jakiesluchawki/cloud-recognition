@@ -52,7 +52,7 @@ test("the installable app and offline shell use the Pages base path", async () =
   assert.equal(manifest.start_url, "/cloud-recognition/");
   assert.equal(manifest.scope, "/cloud-recognition/");
   assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
-  assert.match(worker, /cloud-recognition-v10/);
+  assert.match(worker, /cloud-recognition-v11/);
 });
 
 test("GitHub Pages deployment runs tests before publishing", async () => {
@@ -158,11 +158,16 @@ test("the cloud atlas exposes a prominent evidence-aware search", async () => {
   assert.match(app, /Szukaj po nazwie albo po tym, co widzisz/);
   assert.match(app, /type="search"/);
   assert.match(app, /Wyczyść wyszukiwanie/);
-  assert.match(app, /Filtry poziomu są wstrzymane podczas wyszukiwania/);
+  assert.match(app, /Wyniki w całej klasyfikacji/);
+  assert.match(app, /Hasła WMO/);
+  assert.match(app, /Rodzaje chmur/);
+  assert.match(app, /Cała klasyfikacja · filtry poziomu są pomijane/);
   assert.match(app, /if \(nextQuery\.trim\(\)\) setLevel\("wszystkie"\)/);
   assert.match(app, /searchCloudAtlas/);
+  assert.match(app, /searchTaxonomyTerms/);
   assert.match(styles, /\.atlas-search\s*\{/);
   assert.match(styles, /\.atlas-search__field:focus-within/);
+  assert.match(styles, /\.atlas-term-results\s*\{/);
 });
 
 test("the field observer replaces the shallow binary key with transparent hypotheses", async () => {

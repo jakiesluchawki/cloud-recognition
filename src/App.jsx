@@ -103,7 +103,7 @@ import {
   evaluateTrainingAnswer,
   updateAviationReview,
 } from "./lib/metar-training.js";
-import { searchCloudAtlas } from "./lib/cloud-search.js";
+import { searchCloudAtlas, searchTaxonomyTerms } from "./lib/cloud-search.js";
 import { windFromCloudMotion } from "./lib/wind.js";
 
 const navItems = [
@@ -1018,6 +1018,10 @@ function AtlasPage({
     getProfile: getCloudProfile,
     taxonomyTerms,
   });
+  const matchedTerms = searchTaxonomyTerms(taxonomyTerms, {
+    query,
+    cloudList: clouds,
+  });
 
   useEffect(() => {
     setTab(initialTab);
@@ -1102,66 +1106,48 @@ function AtlasPage({
             <div className="atlas-search__status">
               <span aria-live="polite">
                 {hasAtlasQuery
-                  ? `${formatResultCount(filtered.length)} w całym atlasie dla „${query.trim()}”`
-                  : "Przeszukujesz pełny atlas 10 rodzajów"}
+                  ? `${formatPolishCount(filtered.length, "rodzaj", "rodzaje", "rodzajów")} · ${formatPolishCount(matchedTerms.length, "hasło WMO", "hasła WMO", "haseł WMO")}`
+                  : "Przeszukujesz 10 rodzajów i 49 formalnych haseł WMO"}
               </span>
               {hasAtlasQuery
-                ? <small>Filtry poziomu są wstrzymane podczas wyszukiwania</small>
+                ? <small>Cała klasyfikacja · filtry poziomu są pomijane</small>
                 : level !== "wszystkie" && <small>Filtr wysokości: {level}</small>}
             </div>
           </section>
-          <div className="encyclopedia-stats" aria-label="Zakres encyklopedii">
-            <article><strong>10</strong><span>rodzajów troposferycznych</span></article>
-            <article><strong>15</strong><span>gatunków WMO</span></article>
-            <article><strong>9</strong><span>odmian</span></article>
-            <article><strong>25</strong><span>cech, chmur towarzyszących i klas specjalnych</span></article>
-          </div>
-          <div className="atlas-tools">
-            <span className="atlas-tools__label">Filtruj według typowego poziomu</span>
-            <div
-              className={`filter-scroll ${hasAtlasQuery ? "is-disabled" : ""}`}
-              aria-label={hasAtlasQuery
-                ? "Filtry poziomu są dostępne po wyczyszczeniu wyszukiwania"
-                : "Filtruj według typowego poziomu"}
-            >
-              {cloudLevels.map((item) => (
-                <button
-                  key={item}
-                  className={level === item ? "active" : ""}
-                  disabled={hasAtlasQuery}
-                  onClick={() => setLevel(item)}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="cloud-grid">
-            {filtered.map((cloud) => (
-              <button className="cloud-card" key={cloud.id} onClick={() => setSelected(cloud.id)}>
-                <span className="cloud-image-wrap">
-                  <img
-                    src={publicAsset(cloud.image.src)}
-                    alt={`${cloud.name}, ${cloud.polish}`}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <span className="cloud-code">{cloud.code}</span>
-                  <span className="cloud-level">{cloud.level}</span>
-                </span>
-                <span className="cloud-card-body">
-                  <span>
-                    <strong>{cloud.name}</strong>
-                    <i>{cloud.polish}</i>
-                  </span>
-                  <small>{cloud.headline}</small>
-                  <span className="cloud-card-count">{cloud.species.length + cloud.varieties.length + cloud.features.length + cloud.accessoryClouds.length} powiązanych terminów</span>
-                  <span className="card-link">Otwórz monografię <ArrowRight size={16} /></span>
-                </span>
-              </button>
-            ))}
-          </div>
-          {!filtered.length && <div className="empty-state"><Cloud size={32} /><h2>Nie znaleźliśmy takiej nazwy</h2><button onClick={() => { setQuery(""); setLevel("wszystkie"); }}>Wyczyść filtry</button></div>}
+          {hasAtlasQuery ? (
+            <AtlasSearchResults
+              query={query.trim()}
+              cloudResults={filtered}
+              termResults={matchedTerms}
+              onSelectCloud={setSelected}
+              onSelectTerm={setSelectedTerm}
+              onClear={() => setQuery("")}
+            />
+          ) : (
+            <>
+              <div className="encyclopedia-stats" aria-label="Zakres encyklopedii">
+                <article><strong>10</strong><span>rodzajów troposferycznych</span></article>
+                <article><strong>15</strong><span>gatunków WMO</span></article>
+                <article><strong>9</strong><span>odmian</span></article>
+                <article><strong>25</strong><span>cech, chmur towarzyszących i klas specjalnych</span></article>
+              </div>
+              <div className="atlas-tools">
+                <span className="atlas-tools__label">Filtruj według typowego poziomu</span>
+                <div className="filter-scroll" aria-label="Filtruj według typowego poziomu">
+                  {cloudLevels.map((item) => (
+                    <button
+                      key={item}
+                      className={level === item ? "active" : ""}
+                      onClick={() => setLevel(item)}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <CloudCardGrid items={filtered} onSelect={setSelected} />
+            </>
+          )}
         </>
       )}
       {tab === "encyclopedia" && (
@@ -1212,6 +1198,129 @@ function AtlasPage({
         />
       )}
     </main>
+  );
+}
+
+function CloudCardGrid({ items, onSelect }) {
+  return (
+    <div className="cloud-grid">
+      {items.map((cloud) => (
+        <button className="cloud-card" key={cloud.id} onClick={() => onSelect(cloud.id)}>
+          <span className="cloud-image-wrap">
+            <img
+              src={publicAsset(cloud.image.src)}
+              alt={`${cloud.name}, ${cloud.polish}`}
+              loading="lazy"
+              decoding="async"
+            />
+            <span className="cloud-code">{cloud.code}</span>
+            <span className="cloud-level">{cloud.level}</span>
+          </span>
+          <span className="cloud-card-body">
+            <span>
+              <strong>{cloud.name}</strong>
+              <i>{cloud.polish}</i>
+            </span>
+            <small>{cloud.headline}</small>
+            <span className="cloud-card-count">
+              {cloud.species.length + cloud.varieties.length + cloud.features.length + cloud.accessoryClouds.length} powiązanych terminów
+            </span>
+            <span className="card-link">Otwórz monografię <ArrowRight size={16} /></span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function AtlasSearchResults({
+  query,
+  cloudResults,
+  termResults,
+  onSelectCloud,
+  onSelectTerm,
+  onClear,
+}) {
+  const hasResults = cloudResults.length > 0 || termResults.length > 0;
+
+  return (
+    <section className="atlas-results" aria-labelledby="atlas-results-title">
+      <header className="atlas-results__heading">
+        <div>
+          <span className="eyebrow">Wyniki w całej klasyfikacji</span>
+          <h2 id="atlas-results-title">„{query}”</h2>
+          <p>
+            Rodzaj jest podstawową nazwą chmury. Gatunki, odmiany i cechy
+            doprecyzowują jej wygląd, budowę albo pochodzenie.
+          </p>
+        </div>
+        <button className="text-button" onClick={onClear}>Wyczyść wyszukiwanie</button>
+      </header>
+
+      {termResults.length > 0 && (
+        <section className="atlas-result-group" aria-labelledby="term-results-title">
+          <header>
+            <span>01</span>
+            <div>
+              <h3 id="term-results-title">Hasła WMO</h3>
+              <p>
+                To formalne elementy klasyfikacji. Otwórz hasło, aby zobaczyć
+                cechę diagnostyczną i wszystkie zgodne rodzaje.
+              </p>
+            </div>
+          </header>
+          <div className="atlas-term-results">
+            {termResults.map((term) => {
+              const category = taxonomyCategories.find((item) => item.id === term.category);
+              return (
+                <button
+                  className="atlas-term-result"
+                  key={term.id}
+                  onClick={() => onSelectTerm(term.id)}
+                  aria-label={`Otwórz hasło ${term.name}, ${category?.singular || "klasyfikacja WMO"}`}
+                >
+                  <span className="term-kind">{category?.singular}</span>
+                  <span className="atlas-term-result__name">
+                    <strong>{term.name}</strong>
+                    <i>{term.polish}</i>
+                  </span>
+                  <p>{term.definition}</p>
+                  <span className="atlas-term-result__footer">
+                    <small>{taxonomyTermContext(term)}</small>
+                    <span className="card-link">Czytaj hasło <ArrowRight size={16} /></span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {cloudResults.length > 0 && (
+        <section className="atlas-result-group" aria-labelledby="cloud-results-title">
+          <header>
+            <span>{termResults.length ? "02" : "01"}</span>
+            <div>
+              <h3 id="cloud-results-title">Rodzaje chmur</h3>
+              <p>
+                Monografie rodzajów, których nazwa, kod, wygląd albo
+                powiązane hasła odpowiadają zapytaniu.
+              </p>
+            </div>
+          </header>
+          <CloudCardGrid items={cloudResults} onSelect={onSelectCloud} />
+        </section>
+      )}
+
+      {!hasResults && (
+        <div className="empty-state atlas-results__empty">
+          <BookOpen size={32} />
+          <h2>Nie znaleźliśmy tego w klasyfikacji</h2>
+          <p>Spróbuj nazwy łacińskiej, polskiej cechy albo opisu wyglądu.</p>
+          <button onClick={onClear}>Pokaż cały atlas</button>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -1655,25 +1764,35 @@ function formatResultCount(count) {
   return `${count} wyników`;
 }
 
+function formatPolishCount(count, singular, few, many) {
+  if (count === 1) return `1 ${singular}`;
+  if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 12 || count % 100 > 14)) {
+    return `${count} ${few}`;
+  }
+  return `${count} ${many}`;
+}
+
+function taxonomyTermContext(term) {
+  if (term.genera.length) {
+    return `Zgodne rodzaje: ${term.genera.map((id) => getCloud(id)?.code).filter(Boolean).join(", ")}`;
+  }
+  if (term.category === "special") {
+    return "Klasa specjalna: nazwa opisuje źródło powstania";
+  }
+  if (term.category === "upper") {
+    return "Klasa górnej atmosfery poza troposferycznymi rodzajami WMO";
+  }
+  return "Zgodność pełnej nazwy wynika z reguł WMO";
+}
+
 function EncyclopediaIndex({ onSelectTerm, onSelectCloud, onSources }) {
   const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
-  const normalized = query.trim().toLowerCase();
-  const filtered = taxonomyTerms.filter((term) => {
-    const matchesCategory = category === "all" || term.category === category;
-    const genusNames = term.genera.map((id) => {
-      const cloud = getCloud(id);
-      return cloud ? `${cloud.name} ${cloud.polish} ${cloud.code}` : "";
-    });
-    const haystack = [
-      term.name,
-      term.polish,
-      term.definition,
-      term.diagnostic,
-      ...(term.searchTerms || []),
-      ...genusNames,
-    ].join(" ").toLowerCase();
-    return matchesCategory && haystack.includes(normalized);
+  const filtered = searchTaxonomyTerms(taxonomyTerms, {
+    query,
+    category,
+    cloudList: clouds,
+    includeCompatibleGenera: true,
   });
   const activeCategory = taxonomyCategories.find((item) => item.id === category);
 
@@ -1739,7 +1858,7 @@ function EncyclopediaIndex({ onSelectTerm, onSelectCloud, onSources }) {
           return (
             <article className="term-card" key={term.id}>
               <button className="term-card-main" onClick={() => onSelectTerm(term.id)}>
-                <span className="term-kind">{categoryRecord?.label}</span>
+                <span className="term-kind">{categoryRecord?.singular}</span>
                 <strong>{term.name}</strong>
                 <i>{term.polish}</i>
                 <p>{term.definition}</p>
@@ -1981,7 +2100,7 @@ function TermDetail({ term, onClose, onOpenCloud, onSources }) {
       >
         <button className="icon-button detail-close" onClick={onClose} aria-label="Zamknij hasło"><X size={22} /></button>
         <div className="term-detail-heading">
-          <span className="term-kind">{category?.label}</span>
+          <span className="term-kind">{category?.singular}</span>
           <h2>{term.name}</h2>
           <p>{term.polish}</p>
         </div>

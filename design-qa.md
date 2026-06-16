@@ -56,6 +56,10 @@
   `design/qa/current/wind-desktop-lab.png`
 - Mobile full-atlas name search after selecting a level:
   `design/qa/current/atlas-search-all-levels-mobile.png`
+- Mobile unified atlas search:
+  `design/qa/current/atlas-unified-search-mobile-kowadlo.png`
+- Desktop unified atlas search:
+  `design/qa/current/atlas-unified-search-desktop-soczewka.png`
 
 The source visual and lesson are different product states, so the full-view
 comparison evaluates design language rather than identical composition.
@@ -183,6 +187,22 @@ actions, and no prematurely visible recap, final check, or practice.
     - Evidence: `atlas-search-all-levels-mobile.png`. At 390 px the exact
       regression sequence returns only Nimbostratus and Cumulonimbus, reports
       two results in the full atlas, and keeps document width at 390 px.
+
+17. **P1 fixed — The primary search hid the 49-term encyclopedia**
+    - Before: a query could use taxonomy text to find a genus, but the matching
+      WMO term itself was available only through a separate index and a second
+      search field. Statistics and browse filters also delayed active results
+      on mobile.
+    - Patch: one ranked search now presents formal WMO terms and cloud genera
+      as distinct result groups directly below the field. Individual results
+      identify whether they are a genus, species, variety, supplementary
+      feature, accessory cloud, origin notation, special cloud, or
+      upper-atmosphere class.
+    - Evidence: `atlas-unified-search-mobile-kowadlo.png` and
+      `atlas-unified-search-desktop-soczewka.png`. `kowadło` returns `incus`
+      plus Cumulonimbus; `soczewka` returns `lenticularis` plus Cc, Ac, and Sc.
+      Mobile explanatory prose is 16 px, focus returns to the term card after
+      closing its dialog, and both target widths have no horizontal overflow.
 
 ## Required Fidelity Surfaces
 

@@ -39,7 +39,13 @@ function cloudSearchScore(cloud, profile, taxonomyTerms, query) {
 
   const taxonomyText = normalizeCloudSearch(
     relatedTerms
-      .flatMap((term) => [term.name, term.polish, term.definition, term.diagnostic])
+      .flatMap((term) => [
+        term.name,
+        term.polish,
+        term.definition,
+        term.diagnostic,
+        ...(term.searchTerms || []),
+      ])
       .join(" "),
   );
   if (includesSearchTokens(taxonomyText, query)) return 40;
@@ -84,4 +90,82 @@ export function searchCloudAtlas(
     .filter(({ score }) => !directMatchScore || score >= 80)
     .sort((first, second) => second.score - first.score || first.index - second.index)
     .map(({ cloud }) => cloud);
+}
+
+function taxonomySearchScore(
+  term,
+  query,
+  {
+    cloudList,
+    includeCompatibleGenera,
+  },
+) {
+  if (!query) return 1;
+
+  const directFields = [term.name, term.polish, term.id].map(normalizeCloudSearch);
+  if (directFields.includes(query)) return 100;
+  if (query.length >= 3 && directFields.some((field) => field.includes(query))) return 90;
+
+  const aliasText = normalizeCloudSearch(term.searchTerms || []);
+  if (aliasText && includesSearchTokens(aliasText, query)) return 80;
+
+  const allowsExplanatorySearch = query.includes(" ") || query.length >= 6;
+  const explanatoryText = normalizeCloudSearch([
+    term.definition,
+    term.diagnostic,
+  ].join(" "));
+  if (allowsExplanatorySearch && includesSearchTokens(explanatoryText, query)) return 50;
+
+  if (includeCompatibleGenera) {
+    const compatibleFields = term.genera.flatMap((id) => {
+      const cloud = cloudList.find((candidate) => candidate.id === id);
+      return cloud ? [cloud.id, cloud.name, cloud.polish, cloud.code] : [id];
+    }).map(normalizeCloudSearch);
+    if (compatibleFields.includes(query)) return 30;
+  }
+
+  return 0;
+}
+
+export function searchTaxonomyTerms(
+  terms,
+  {
+    query = "",
+    category = "all",
+    cloudList = [],
+    includeCompatibleGenera = false,
+  } = {},
+) {
+  const normalizedQuery = normalizeCloudSearch(query);
+  const isDirectGenusQuery = normalizedQuery
+    && !includeCompatibleGenera
+    && cloudList.some((cloud) => {
+      const fields = [cloud.id, cloud.name, cloud.polish, cloud.code]
+        .map(normalizeCloudSearch);
+      return fields.includes(normalizedQuery)
+        || (normalizedQuery.length >= 3 && fields.some((field) => field.includes(normalizedQuery)));
+    });
+  if (isDirectGenusQuery) return [];
+
+  const candidates = terms
+    .map((term, index) => ({
+      term,
+      index,
+      score: taxonomySearchScore(term, normalizedQuery, {
+        cloudList,
+        includeCompatibleGenera,
+      }),
+    }))
+    .filter(({ term, score }) => (
+      (category === "all" || term.category === category) && score > 0
+    ));
+  const directMatchScore = candidates.reduce(
+    (highest, { score }) => (score >= 80 ? Math.max(highest, score) : highest),
+    0,
+  );
+
+  return candidates
+    .filter(({ score }) => !directMatchScore || score >= 80)
+    .sort((first, second) => second.score - first.score || first.index - second.index)
+    .map(({ term }) => term);
 }

@@ -4,6 +4,7 @@ export const taxonomyCategories = [
   {
     id: "species",
     label: "Gatunki",
+    singular: "Gatunek",
     count: 15,
     description:
       "Opisują kształt i strukturę chmury. Jeden rodzaj może mieć kilka gatunków, ale nie każdy rodzaj ma gatunki.",
@@ -11,6 +12,7 @@ export const taxonomyCategories = [
   {
     id: "varieties",
     label: "Odmiany",
+    singular: "Odmiana",
     count: 9,
     description:
       "Doprecyzowują układ elementów albo stopień przejrzystości. Niektóre odmiany mogą występować jednocześnie.",
@@ -18,6 +20,7 @@ export const taxonomyCategories = [
   {
     id: "features",
     label: "Cechy dodatkowe",
+    singular: "Cecha dodatkowa",
     count: 11,
     description:
       "Nazwy szczególnych części chmury lub zjawisk bezpośrednio z nią związanych, takich jak kowadło, wał czy virga.",
@@ -25,6 +28,7 @@ export const taxonomyCategories = [
   {
     id: "accessory",
     label: "Chmury towarzyszące",
+    singular: "Chmura towarzysząca",
     count: 4,
     description:
       "Mniejsze chmury związane z główną chmurą, odrębne albo częściowo z nią złączone.",
@@ -32,6 +36,7 @@ export const taxonomyCategories = [
   {
     id: "mother",
     label: "Chmury macierzyste",
+    singular: "Oznaczenie pochodzenia",
     count: 2,
     description:
       "Końcówki genitus i mutatus zapisują pochodzenie albo przemianę chmury. To informacja o historii rozwoju.",
@@ -39,6 +44,7 @@ export const taxonomyCategories = [
   {
     id: "special",
     label: "Chmury specjalne",
+    singular: "Chmura specjalna",
     count: 5,
     description:
       "Nazwy związane z lokalnym źródłem powstania, takim jak pożar, wodospad, las lub działalność człowieka.",
@@ -46,6 +52,7 @@ export const taxonomyCategories = [
   {
     id: "upper",
     label: "Górna atmosfera",
+    singular: "Chmura górnej atmosfery",
     count: 3,
     description:
       "Rzadkie chmury polarnej stratosfery i mezosfery, klasyfikowane poza dziesięcioma rodzajami troposferycznymi.",
@@ -571,6 +578,7 @@ export const taxonomyTerms = [
       "Chmura konwekcyjna rozwinięta nad pożarem lub erupcją wulkaniczną wskutek silnego lokalnego ogrzewania i unoszenia.",
     diagnostic:
       "Źródło termiczne jest częścią pełnej nazwy; rozwój może prowadzić do głębokiej, niebezpiecznej konwekcji.",
+    searchTerms: ["pożar", "wulkan", "pyrocumulus", "pyrocumulonimbus"],
     genera: [],
     sourceIds: ["wmoPrinciples", "faaWeather"],
   },
@@ -631,6 +639,7 @@ export const taxonomyTerms = [
       "Chmury powstające zimą w bardzo zimnej polarnej stratosferze, obejmujące różne składy cząstek i mające znaczenie dla chemii ozonu.",
     diagnostic:
       "Nie wszystkie polarne chmury stratosferyczne są efektownie perłowe; typ optyczny i skład nie są tym samym podziałem.",
+    searchTerms: ["PSC", "stratosfera polarna", "ozon"],
     genera: [],
     sourceIds: ["wmoUpperAtmosphere"],
   },
@@ -643,6 +652,7 @@ export const taxonomyTerms = [
       "Najwyższe obserwowane chmury, zwykle około 80–85 km w mezosferze, złożone z drobnych kryształków lodu i widoczne podczas zmierzchu.",
     diagnostic:
       "Świecą srebrzyście lub niebieskawo po zachodzie, gdy mezosfera jest jeszcze oświetlona, a dolna atmosfera pozostaje w cieniu.",
+    searchTerms: ["NLC", "mezosfera", "nocne obłoki"],
     genera: [],
     sourceIds: ["wmoUpperAtmosphere"],
   },

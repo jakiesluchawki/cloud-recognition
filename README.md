@@ -6,8 +6,9 @@ the weather from first observation through advanced aviation interpretation.
 The application includes:
 
 - adaptive knowledge placement instead of forcing everyone through lesson one;
-- a WMO-based encyclopedia with 10 genera, 49 formal taxonomy terms, and
-  evidence-aware search across names, codes, morphology, and diagnostic clues;
+- a WMO-based encyclopedia with 10 genera, 49 formal taxonomy terms, and one
+  ranked search across names, codes, Polish aliases, morphology, diagnostic
+  clues, and classification levels;
 - an evidence-based field observer with three transparent hypotheses;
 - a differential comparison laboratory for two or three cloud genera;
 - nine full lessons with honest time plans, sourced chapters, worked examples,

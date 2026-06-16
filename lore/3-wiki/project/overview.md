@@ -8,9 +8,10 @@ application for learning cloud identification and vertical weather analysis.
 - Adaptive five-question placement or an explicit beginner start.
 - Nine learning modules from visual observation to aviation hazards and WMO
   expert classification.
-- Complete ten-genus WMO atlas plus a searchable 49-term index covering
-  species, varieties, supplementary features, accessory clouds, mother-cloud
-  notation, special clouds, and upper-atmosphere classes.
+- Complete ten-genus WMO atlas plus 49 formal terms covering species,
+  varieties, supplementary features, accessory clouds, mother-cloud notation,
+  special clouds, and upper-atmosphere classes. One ranked search presents
+  genus monographs and formal terms as distinct classification levels.
 - Professional genus monographs explain formation, microphysics, weather,
   aviation significance, evolution, optics, look-alikes, and field procedure.
 - Visual decision key, difficult cases, global adaptive four-choice image

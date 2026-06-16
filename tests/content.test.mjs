@@ -40,7 +40,11 @@ import {
   parseSkyGroup,
   updateAviationReview,
 } from "../src/lib/metar-training.js";
-import { normalizeCloudSearch, searchCloudAtlas } from "../src/lib/cloud-search.js";
+import {
+  normalizeCloudSearch,
+  searchCloudAtlas,
+  searchTaxonomyTerms,
+} from "../src/lib/cloud-search.js";
 import { calculatePlacement } from "../src/lib/placement.js";
 import {
   createRecognitionQuestion,
@@ -109,6 +113,40 @@ test("atlas search finds clouds by code, Polish observation and taxonomy", () =>
   );
 });
 
+test("taxonomy search ranks formal terms, aliases and compatible genera", () => {
+  const search = (query, options = {}) => searchTaxonomyTerms(taxonomyTerms, {
+    query,
+    cloudList: clouds,
+    ...options,
+  });
+
+  assert.deepEqual(search("kowadło").map((term) => term.id), ["incus"]);
+  assert.deepEqual(search("soczewka").map((term) => term.id), ["lenticularis"]);
+  assert.deepEqual(search("pożar").map((term) => term.id), ["flammagenitus"]);
+  assert.deepEqual(search("NLC").map((term) => term.id), ["noctilucent"]);
+  assert.deepEqual(
+    search("włóknisty", { category: "species" }).map((term) => term.id),
+    ["fibratus", "capillatus"],
+  );
+  assert.ok(search("parujące przed dotarciem")[0]?.id === "virga");
+  assert.equal(
+    search("Cb", { includeCompatibleGenera: true }).every(
+      (term) => term.genera.includes("cumulonimbus"),
+    ),
+    true,
+  );
+  assert.deepEqual(
+    search("Cb", { includeCompatibleGenera: false }),
+    [],
+    "the primary search must not flood results with every term compatible with a genus",
+  );
+  assert.deepEqual(
+    search("Cumulonimbus", { includeCompatibleGenera: false }),
+    [],
+    "a direct genus query must lead to its monograph rather than incidental term mentions",
+  );
+});
+
 test("each cloud record exposes evidence, taxonomy, sources and image provenance", () => {
   for (const cloud of clouds) {
     assert.ok(cloud.observe.length >= 3, `${cloud.name} needs observable evidence`);
@@ -139,6 +177,7 @@ test("the encyclopedia exposes the complete formal term inventory", () => {
   );
 
   for (const category of taxonomyCategories) {
+    assert.ok(category.singular, `${category.label} needs a singular result label`);
     assert.equal(
       taxonomyTerms.filter((term) => term.category === category.id).length,
       category.count,
