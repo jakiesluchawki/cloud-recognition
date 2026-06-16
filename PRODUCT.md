@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Cloud Recognition helps a person who knows nothing about clouds learn to
+Chmurnik helps a person who knows nothing about clouds learn to
 observe, name, compare, and interpret them. It grows into an expert reference
 for sailors, photographers, weather enthusiasts, and aviation students without
 making the first screen feel like specialist software.

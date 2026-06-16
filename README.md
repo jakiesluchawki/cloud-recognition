@@ -1,4 +1,4 @@
-# CLOUD RECOGNITION
+# CHMURNIK
 
 Polish, source-backed education for learning to identify clouds and understand
 the weather from first observation through advanced aviation interpretation.

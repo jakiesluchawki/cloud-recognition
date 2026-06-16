@@ -292,9 +292,10 @@ function AppHeader({ route, navigate }) {
 
   return (
     <header className="app-header">
-      <button className="brand" onClick={() => navigate("home")} aria-label="Cloud Recognition, strona główna">
-        <span className="brand-mark"><Cloud size={21} weight="fill" /></span>
-        <span>CLOUD RECOGNITION</span>
+      <button className="brand" onClick={() => navigate("home")} aria-label="Chmurnik, strona główna">
+        <span className="brand-wordmark-mark" aria-hidden="true" />
+        <span className="sr-only">Chmurnik</span>
+        <span className="brand-descriptor"><i aria-hidden="true" /> atlas chmur i atmosfery</span>
       </button>
       <nav className="desktop-nav" aria-label="Główna nawigacja">
         {navItems.map((item) => (
@@ -380,10 +381,13 @@ function HomePage({ navigate, profile, onPlacement, onBeginner, completed, onSou
     <>
       <section className="hero">
         <img
-          src={publicAsset("assets/hero-atlas-swiatla.png")}
+          src={publicAsset("assets/atmosphere-still-life.png")}
           alt=""
           className="hero-image"
           fetchPriority="high"
+          decoding="async"
+          width="1536"
+          height="1024"
         />
         <div className="hero-shade" />
         <HeightScale />
@@ -434,6 +438,48 @@ function HomePage({ navigate, profile, onPlacement, onBeginner, completed, onSou
             <Notebook size={25} />
             <span><strong>Dziennik</strong> obserwacji</span>
             <ArrowRight size={18} />
+          </button>
+        </div>
+      </section>
+
+      <section className="home-visual-folio" aria-labelledby="home-folio-title">
+        <header>
+          <span className="eyebrow">Pracownie</span>
+          <h2 id="home-folio-title">Atmosferę poznajesz przez obserwację, porównanie i działanie.</h2>
+        </header>
+        <div>
+          <button onClick={() => navigate("learn/procesy")}>
+            <img
+              src={publicAsset("assets/convection-still-life.png")}
+              alt=""
+              decoding="async"
+              width="1586"
+              height="992"
+            />
+            <span>Procesy</span>
+            <strong>Jak rośnie konwekcja</strong>
+          </button>
+          <button onClick={() => navigate("layers")}>
+            <img
+              src={publicAsset("assets/wind-profile-still-life.png")}
+              alt=""
+              decoding="async"
+              width="1586"
+              height="992"
+            />
+            <span>Warstwy</span>
+            <strong>Wiatr na różnych wysokościach</strong>
+          </button>
+          <button onClick={() => navigate("atlas")}>
+            <img
+              src={publicAsset("assets/clouds/cumulonimbus-incus-krakow.jpg")}
+              alt=""
+              decoding="async"
+              width="1600"
+              height="763"
+            />
+            <span>Atlas</span>
+            <strong>Prawdziwe niebo jako dowód</strong>
           </button>
         </div>
       </section>
@@ -4693,7 +4739,11 @@ function RecognitionTest({
 function Footer({ navigate }) {
   return (
     <footer className="app-footer">
-      <div className="brand brand--footer"><span className="brand-mark"><Cloud size={20} weight="fill" /></span><span>CLOUD RECOGNITION</span></div>
+      <div className="brand brand--footer">
+        <span className="brand-wordmark-mark" aria-hidden="true" />
+        <span className="sr-only">Chmurnik</span>
+        <span className="brand-descriptor"><i aria-hidden="true" /> atlas chmur i atmosfery</span>
+      </div>
       <p>Polski, bezpłatny atlas i pracownia obserwacji chmur. Bez kont, reklam, śledzenia i dźwięku.</p>
       <div>
         <button onClick={() => navigate("sources")}>Źródła</button>

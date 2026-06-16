@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "title": "Chmurnik wordmark exploration",
+    "stage": "Selected identity direction",
+    "brand_name": "CHMURNIK",
+    "anchor": "Polish cloud and atmosphere atlas for beginners through expert aviation study",
+    "summary": "A romantic Polish name paired with a rigorous educational descriptor.",
+    "base_asset": "design/logo/chmurnik-wordmark-board.png"
+  },
+  "constraints": {
+    "preserve": [
+      "exact spelling: CHMURNIK",
+      "muted olive and powder-pink identity",
+      "massive modular letters with negative-space cuts",
+      "readability at mobile header size",
+      "descriptor: atlas chmur i atmosfery"
+    ],
+    "avoid": [
+      "literal cloud icons",
+      "children's branding",
+      "copying the Zgrywa wordmark or Z symbol",
+      "thin generic typesetting",
+      "unverified trademark claims"
+    ]
+  },
+  "routes": [
+    {
+      "id": "constructed-chmurnik",
+      "label": "Constructed Chmurnik",
+      "family": "geometric wordmark",
+      "usage_contexts": [
+        "web app header",
+        "mobile navigation shell",
+        "footer",
+        "social preview"
+      ],
+      "rationale": "The short Polish name supports a bold custom silhouette while the descriptor keeps the expert category explicit.",
+      "best_for": "A distinctive cultural identity that can sit beside Romie and Roobert without competing with them.",
+      "decision_advice": "Use this direction if the product should feel like a field atlas with folklore in its name and scientific discipline in its content.",
+      "watch_out": "The name and generated letter construction still require formal trademark review and production vectorization.",
+      "next_step": "Redraw the selected wordmark as controlled vector paths and test favicon and monochrome variants.",
+      "final_owner": "external-production-identity"
+    }
+  ],
+  "handoff": {
+    "default_owner": "external-production-identity"
+  }
+}

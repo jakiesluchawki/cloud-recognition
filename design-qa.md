@@ -1,5 +1,51 @@
 # Design QA
 
+## 2026-06-16 — CHMURNIK editorial prototype
+
+### Comparison target
+
+- Primary visual reference: the product owner's Zgrywa desktop screenshots and
+  owned geometric wordmark.
+- Implementation:
+  `http://127.0.0.1:5186/cloud-recognition/`
+- Desktop viewport: 1280 x 800 CSS px.
+- Mobile viewport: 390 x 844 CSS px.
+- Representative routes: home, atlas, Layers/METAR, and Layers/Skew-T.
+
+### Evidence
+
+- Desktop home: `design/qa/current/chmurnik-home-desktop.png`
+- Mobile home: `design/qa/current/chmurnik-home-mobile.png`
+- Desktop atlas: `design/qa/current/zgrywa-atlas-desktop.png`
+- Wordmark exploration: `design/logo/chmurnik-wordmark-board.png`
+
+### Findings and patches
+
+1. **P1 fixed — Generated imagery inherited intrinsic pixel heights**
+   - Explicit `height: auto` restored the intended editorial landscape ratio.
+2. **P1 fixed — The hero still referenced the previous illustration**
+   - The new atmosphere still life now leads the opening composition.
+3. **P1 fixed — Romie clipped at 390 px**
+   - The mobile scale was reduced without replacing or compressing the font.
+4. **P1 fixed — Old typography survived in METAR tokens**
+   - Computed-style audit now finds only Roobert and Romie in the workshop.
+5. **P2 fixed — The first wordmark treatment was visually undersized**
+   - Transparent padding was cropped and the mark enlarged for desktop and
+     mobile headers.
+
+### Verification
+
+- Home, atlas, METAR, and Skew-T report no page-level horizontal overflow at
+  390 px.
+- The Skew-T figure renders at 340 px inside the 390 px viewport.
+- Browser font checks confirm the local Romie and Roobert files are loaded.
+- METAR computed typography: 76 leaf nodes in Roobert, 8 editorial nodes in
+  Romie, and no remaining legacy or monospace family.
+- `npm test`: 60 passed.
+- `npm run check:lessons`: 9 modules passed.
+- `npm run check:links`: 52 links passed.
+- `npm run build`: passed.
+
 ## Comparison Target
 
 - Source visual truth: `design/reference/atlas-swiatla-mobile.png`

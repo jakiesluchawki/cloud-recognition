@@ -1,7 +1,7 @@
 :root {
   color: #253642;
   background: #f7f2e8;
-  font-family: "Manrope Variable", "Segoe UI", sans-serif;
+  font-family: "Roobert", Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --ink: #082f4f;
@@ -15,7 +15,7 @@
   --graphite: #253642;
   --line: rgba(8, 47, 79, 0.16);
   --soft-line: rgba(8, 47, 79, 0.09);
-  --serif: "Newsreader Variable", Georgia, serif;
+  --serif: "Romie", Georgia, serif;
 }
 
 * {
@@ -7295,7 +7295,7 @@ p {
 .sounding-layer-label,
 .sounding-wind-profile text {
   fill: rgba(255, 255, 255, 0.72);
-  font-family: "Manrope Variable", sans-serif;
+  font-family: "Roobert", Arial, sans-serif;
   font-size: 13px;
 }
 
@@ -7316,7 +7316,7 @@ p {
 
 .sounding-level-label text {
   fill: var(--white);
-  font-family: "Manrope Variable", sans-serif;
+  font-family: "Roobert", Arial, sans-serif;
   font-size: 10px;
   font-weight: 800;
 }
@@ -7880,7 +7880,7 @@ p {
 
 .entry-date small {
   color: #748188;
-  font-family: "Manrope Variable", sans-serif;
+  font-family: "Roobert", Arial, sans-serif;
   font-size: 0.63rem;
 }
 
