@@ -2,7 +2,7 @@
 id: "0013"
 title: "Build a validated WMO nomenclature workshop"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0003", "0005", "0012"]
 tags: ["priority-high", "atlas", "taxonomy", "active-learning", "mobile"]
@@ -30,6 +30,13 @@ history:
       nine lesson audits, 49 external links, the production build, and
       headless Brave QA at 1440 x 1000 and 390 x 844 pass. Public Pages
       verification remains.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published the nomenclature workshop in commit 7380e90. All 57 tests,
+      nine lesson audits, 49 link checks, local and public Brave QA, and
+      GitHub Pages run 27608935600 passed.
 ---
 
 # Build a validated WMO nomenclature workshop
@@ -82,7 +89,7 @@ from one still image.
       390 px.
 - [x] Existing atlas search, term index, comparison, and monographs remain
       intact.
-- [ ] Automated tests, lesson audit, link audit, production build, Brave QA,
+- [x] Automated tests, lesson audit, link audit, production build, Brave QA,
       and public GitHub Pages verification pass.
 
 ## Design Decisions
@@ -165,3 +172,11 @@ from one still image.
 ## Future Work
 
 No follow-up was required to complete this feature.
+
+## Release
+
+- Feature commit: `7380e90`
+- GitHub Pages run: `27608935600`
+- Public JavaScript: `index-c7YYx6n7.js`
+- Public CSS: `index-LN2mz109.css`
+- Offline cache: `cloud-recognition-v15`

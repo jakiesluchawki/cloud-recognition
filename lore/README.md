@@ -1,6 +1,6 @@
 # Lore Index
 
-> Auto-generated on 2026-06-16 11:34. Do not edit manually.
+> Auto-generated on 2026-06-16 11:49. Do not edit manually.
 > Use `lore_generate-index` tool to regenerate.
 
 Quick reference for task dependencies, status, and ADR relationships.
@@ -9,7 +9,32 @@ Quick reference for task dependencies, status, and ADR relationships.
 
 | Active | Blocked | Backlog | Completed | ADRs |
 |:------:|:-------:|:-------:|:---------:|:----:|
-| 0 | 0 | 1 | 11 | 0 |
+| 0 | 0 | 1 | 12 | 0 |
+
+## Dependency Graph
+
+```mermaid
+flowchart LR
+    subgraph Completed
+        T0001["0001: Build and publish Cloud R..."]
+        T0003["0003: Expand the cloud atlas in..."]
+        T0004["0004: Add an evidence-based fie..."]
+        T0005["0005: Replace lesson summaries ..."]
+        T0006["0006: Build an active METAR and..."]
+        T0007["0007: Add multi-report briefing..."]
+        T0008["0008: Explain the complete META..."]
+        T0009["0009: Unify search across the c..."]
+        T0010["0010: Build a practical Windy l..."]
+        T0011["0011: Build a multi-image cloud..."]
+        T0012["0012: Teach within-genus variat..."]
+        T0013["0013: Build a validated WMO nom..."]
+    end
+    subgraph Backlog
+        T0002["0002: Research automatic cloud ..."]
+    end
+
+
+```
 
 ## Task Status
 
@@ -27,3 +52,21 @@ Quick reference for task dependencies, status, and ADR relationships.
 | 0010 | [Build a practical Windy layer decod...](lore/1-tasks/archive/0010_FEATURE_windy-layer-decoder.md) | FEATURE | completed | — | — | — |
 | 0011 | [Build a multi-image cloud recogniti...](lore/1-tasks/archive/0011_FEATURE_multi-image-recognition-bank.md) | FEATURE | completed | — | — | — |
 | 0012 | [Teach within-genus variation with a...](lore/1-tasks/archive/0012_FEATURE_diagnostic-photo-gallery.md) | FEATURE | completed | — | — | — |
+| 0013 | [Build a validated WMO nomenclature ...](lore/1-tasks/archive/0013_FEATURE_wmo-nomenclature-workshop.md) | FEATURE | completed | — | — | — |
+
+## Architecture Decision Records
+
+| ID | Title | Status | Related Tasks |
+|:---|:------|:-------|:--------------|
+
+## Legend
+
+**Task Status:**
+- `active` — Work can proceed
+- `blocked` — Waiting on dependencies
+- `backlog` — Planned but not yet started
+- `completed` — Done, in archive
+
+**Graph Arrows:**
+- `A --> B` — A blocks B (B depends on A)
+- `ADR -.-> Task` — ADR informs Task
