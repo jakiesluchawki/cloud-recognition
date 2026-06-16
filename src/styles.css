@@ -450,7 +450,7 @@ p {
 }
 
 .source-button {
-  min-height: 40px;
+  min-height: 44px;
   border: 0;
   border-bottom: 1px solid currentColor;
   background: transparent;
@@ -466,7 +466,7 @@ p {
 }
 
 .source-button--compact {
-  min-height: 32px;
+  min-height: 44px;
 }
 
 .feature-strip {
@@ -789,7 +789,7 @@ p {
 
 .back-button,
 .text-button {
-  min-height: 42px;
+  min-height: 44px;
   border: 0;
   background: transparent;
   color: var(--blue);
@@ -940,7 +940,7 @@ p {
 }
 
 .filter-scroll button {
-  min-height: 38px;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 99px;
   background: transparent;
@@ -1327,7 +1327,7 @@ p {
 
 .source-record a,
 .photo-record a {
-  min-height: 38px;
+  min-height: 44px;
   color: var(--blue);
   display: inline-flex;
   align-items: center;
@@ -1803,7 +1803,7 @@ p {
 }
 
 .pressure-picker button {
-  min-height: 43px;
+  min-height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   border-right: 0;
   background: transparent;
@@ -2126,7 +2126,7 @@ p {
 }
 
 .empty-state button {
-  min-height: 40px;
+  min-height: 44px;
   border: 0;
   border-bottom: 1px solid var(--blue);
   background: transparent;
@@ -2196,7 +2196,7 @@ p {
 
 .app-footer button,
 .app-footer a {
-  min-height: 40px;
+  min-height: 44px;
   border: 0;
   background: transparent;
   color: var(--white);
