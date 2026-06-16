@@ -2,7 +2,7 @@
 id: "0007"
 title: "Add multi-report briefings and spaced review"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0006"]
 tags: ["phase-future", "priority-medium", "aviation", "assessment", "local-data"]
@@ -37,6 +37,12 @@ history:
     note: >
       Reopened after public use showed that a previously selected height filter
       could silently hide otherwise valid search results.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published and production-verified full-atlas search behavior in commit
+      6000d3a and GitHub Pages run 27605102413.
 ---
 
 # Add multi-report briefings and spaced review
@@ -156,3 +162,10 @@ step is practice across several reports and repeated retrieval of weak rules.
 - Public assets: `index-DpjTwUZa.js`, `index-BOSGWx8I.css`, service worker `v9`
 - Public mobile verification: `kowadlo` returns only Cumulonimbus at 390 px
   with no horizontal overflow or runtime errors.
+- Search correction commit: `6000d3a`
+- Search correction Pages run: `27605102413`
+- Current public assets: `index-D7rRQ3RX.js`, `index-Bf3Gcaa3.css`, service
+  worker `v10`
+- Public regression verification: after selecting `średnie`, `nimb` resets
+  the filter to `wszystkie`, disables level controls, returns only
+  Nimbostratus and Cumulonimbus, and remains overflow-free at 390 px.
