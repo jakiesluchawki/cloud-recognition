@@ -4,6 +4,23 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
+function relativeLuminance(hex) {
+  const channels = hex
+    .slice(1)
+    .match(/.{2}/g)
+    .map((channel) => Number.parseInt(channel, 16) / 255)
+    .map((channel) => channel <= 0.03928
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4);
+
+  return (0.2126 * channels[0]) + (0.7152 * channels[1]) + (0.0722 * channels[2]);
+}
+
+function contrastRatio(first, second) {
+  const luminances = [relativeLuminance(first), relativeLuminance(second)].sort((a, b) => b - a);
+  return (luminances[0] + 0.05) / (luminances[1] + 0.05);
+}
+
 test("version 1 boundaries remain explicit", async () => {
   const product = await read("PRODUCT.md");
 
@@ -48,4 +65,15 @@ test("npm configuration remains portable across local and CI machines", async ()
 
   assert.doesNotMatch(npmrc, /\/Users\//);
   assert.match(npmrc, /cache=\.npm-cache/);
+});
+
+test("small annotation colors meet WCAG AA against their surfaces", async () => {
+  const styles = await read("src/styles.css");
+  const token = (name) => styles.match(new RegExp(`--${name}: (#[0-9a-f]{6})`))[1];
+  const paper = token("paper");
+  const white = token("white");
+
+  assert.ok(contrastRatio(token("coral"), paper) >= 4.5);
+  assert.ok(contrastRatio(token("coral"), white) >= 4.5);
+  assert.ok(contrastRatio(token("moss"), paper) >= 4.5);
 });

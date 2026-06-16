@@ -22,9 +22,9 @@ worksheet, generic dashboard, or children's game.
 - Deep ultramarine: `#064f82`
 - Paper: `#f7f2e8`
 - Warm white: `#fffdf8`
-- Coral annotation: `#e7664c`
+- Coral annotation: `#be432f`
 - Mist blue: `#dcebf0`
-- Moss source accent: `#617466`
+- Moss source accent: `#5e7163`
 - Graphite body: `#253642`
 
 Colors communicate meaning in addition to decoration. Coral marks the learner's
