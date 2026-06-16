@@ -2,7 +2,7 @@
 id: "0009"
 title: "Unify search across the complete cloud atlas"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0003", "0007"]
 tags: ["priority-high", "atlas", "search", "taxonomy", "mobile"]
@@ -15,6 +15,13 @@ history:
     note: >
       Created after a product audit found that the primary atlas search
       promised the full classification but returned only the ten genera.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published one ranked search across ten genera and 49 WMO terms in commit
+      e56ceac and GitHub Pages run 27605866769. All 47 tests, nine lesson
+      audits, 22 external links, mobile and desktop QA states passed.
 ---
 
 # Unify search across the complete cloud atlas
@@ -61,7 +68,7 @@ answer on mobile.
       filters on mobile and desktop.
 - [x] Clearing a query restores the complete browse interface.
 - [x] The 49-term index uses the same normalized ranking behavior.
-- [ ] Automated tests, lesson audit, link audit, production build, and public
+- [x] Automated tests, lesson audit, link audit, production build, and public
       mobile verification pass.
 
 ## Design Decisions
@@ -127,6 +134,10 @@ answer on mobile.
   exactly 390 px wide and produced no runtime errors.
 - Verified the term dialog focus trap, Escape close, and focus restoration to
   the invoking result card.
+- Public GitHub Pages verification used a clean service-worker state and
+  production asset `index-A-qu__iF.js`. `kowadło`, `soczewka`,
+  `Cumulonimbus`, `pożar`, and `NLC` all returned their intended result types
+  at 390 px without horizontal overflow or runtime errors.
 
 ## Issues Encountered
 
@@ -145,3 +156,11 @@ answer on mobile.
 
 No follow-up is required within this scope. Automatic photograph recognition
 remains separately parked in task 0002.
+
+## Release
+
+- Source commit: `e56ceac`
+- GitHub Pages run: `27605866769`
+- Public JavaScript: `index-A-qu__iF.js`
+- Public CSS: `index-C4Nn2G1h.css`
+- Offline cache: `cloud-recognition-v11`
