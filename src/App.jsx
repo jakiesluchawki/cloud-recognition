@@ -1320,7 +1320,10 @@ function LayersPage({ onSources }) {
           <h1>Warstwy bez tajemnic</h1>
           <p>Zrozum, co naprawdę zmieniasz w aplikacjach pogodowych, gdy przesuwasz wysokość albo wybierasz poziom hPa.</p>
         </div>
-        <SourceButton ids={["faaWeather", "windyLevels", "windyClouds"]} onOpen={onSources} />
+        <SourceButton
+          ids={["faaWeather", "windyLevels", "windyClouds", "windyCloudBase"]}
+          onOpen={onSources}
+        />
       </header>
 
       <div className="segmented-control layers-tabs">

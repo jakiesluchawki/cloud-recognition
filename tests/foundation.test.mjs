@@ -96,3 +96,31 @@ test("the encyclopedia exposes formation, differential diagnosis and aviation co
   assert.match(app, /Znaczenie lotnicze/);
   assert.match(app, /Wiatr z nieba/);
 });
+
+test("authoritative source links use verified current destinations", async () => {
+  const sources = await read("src/data/sources.js");
+
+  assert.match(
+    sources,
+    /faa\.gov\/regulationspolicies\/handbooksmanuals\/aviation\/faa-h-8083-28b-aviation-weather-handbook/,
+  );
+  assert.doesNotMatch(sources, /regulations_policies|handbooks_manuals/);
+  assert.match(sources, /cloudatlas\.wmo\.int\/en\/upper-atmospheric-clouds\.html/);
+  assert.match(sources, /aviationweather\.gov\/help\/data\//);
+  assert.match(sources, /community\.windy\.com\/topic\/43145\/cloud-tops-lower-than-cloud-base/);
+  assert.match(sources, /community\.windy\.com\/topic\/7102\/is-the-cloud-base-layer-in-agl-or-msl/);
+});
+
+test("external sources and image provenance have a scheduled link monitor", async () => {
+  const packageJson = JSON.parse(await read("package.json"));
+  const workflow = await read(".github/workflows/check-links.yml");
+  const monitor = await read("scripts/check-links.mjs");
+
+  assert.equal(packageJson.scripts["check:links"], "node scripts/check-links.mjs");
+  assert.match(workflow, /schedule:/);
+  assert.match(workflow, /npm run check:links/);
+  assert.match(monitor, /sourceList/);
+  assert.match(monitor, /cloud\.image\.page/);
+  assert.match(monitor, /page or file you requested cannot be found/i);
+  assert.match(monitor, /expected content marker/);
+});

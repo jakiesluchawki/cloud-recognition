@@ -10,6 +10,7 @@ export const sources = {
       "Oficjalny, międzynarodowy wzorzec nazw i opisu chmur używany w meteorologii.",
     scope:
       "Rodzaje, gatunki, odmiany, cechy dodatkowe, chmury towarzyszące i zasady identyfikacji.",
+    checkText: "International Cloud Atlas",
     retrieved: "16 czerwca 2026",
   },
   wmoSummary: {
@@ -22,6 +23,7 @@ export const sources = {
     trust:
       "Zwięzła tabela urzędowej klasyfikacji WMO, w tym dopuszczalnych kombinacji nazw.",
     scope: "Dziesięć rodzajów oraz przypisane gatunki, odmiany i cechy.",
+    checkText: "Cloud classification summary",
     retrieved: "16 czerwca 2026",
   },
   wmoPrinciples: {
@@ -35,6 +37,7 @@ export const sources = {
       "Oficjalne zasady tworzenia pełnych nazw: rodzaj, gatunek, odmiana, cecha dodatkowa, chmura towarzysząca, chmura macierzysta i chmura specjalna.",
     scope:
       "Definicje warstw taksonomii, reguły genitus i mutatus oraz pięć kategorii chmur specjalnych.",
+    checkText: "Principles of cloud classification",
     retrieved: "16 czerwca 2026",
   },
   wmoUpperAtmosphere: {
@@ -48,6 +51,7 @@ export const sources = {
       "Oficjalny atlas odróżniający chmury polarnej stratosfery i mezosfery od dziesięciu rodzajów troposferycznych.",
     scope:
       "Chmury perłowe, polarne chmury stratosferyczne i obłoki srebrzyste.",
+    checkText: "Upper atmospheric clouds",
     retrieved: "16 czerwca 2026",
   },
   faaWeather: {
@@ -55,13 +59,14 @@ export const sources = {
     organization: "Federal Aviation Administration",
     title: "Aviation Weather Handbook FAA-H-8083-28B",
     label: "FAA Aviation Weather Handbook",
-    url: "https://www.faa.gov/regulations_policies/handbooks_manuals/aviation/faa-h-8083-28-aviation-weather-handbook",
+    url: "https://www.faa.gov/regulationspolicies/handbooksmanuals/aviation/faa-h-8083-28b-aviation-weather-handbook",
     kind: "Podręcznik lotniczy",
     trust:
       "Aktualny podręcznik FAA łączący meteorologię z podejmowaniem decyzji w lotnictwie.",
     scope:
       "Stabilność, fronty, konwekcja, oblodzenie, turbulencja, burze i interpretacja pogody.",
-    retrieved: "16 czerwca 2026",
+    checkText: "FAA-H-8083-28B",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
   },
   easaAircrew: {
     id: "easaAircrew",
@@ -73,19 +78,21 @@ export const sources = {
     trust:
       "Oficjalne europejskie wymagania i materiały konsolidujące zakres wiedzy załóg lotniczych.",
     scope: "Zakres szkolenia meteorologicznego pilotów w Europie.",
+    checkText: "Easy Access Rules for Aircrew",
     retrieved: "16 czerwca 2026",
   },
   awcCodes: {
     id: "awcCodes",
     organization: "NOAA Aviation Weather Center",
-    title: "METAR and TAF data help",
+    title: "METAR and TAF product information",
     label: "AWC: METAR i TAF",
-    url: "https://aviationweather.gov/help/faq/data/",
+    url: "https://aviationweather.gov/help/data/",
     kind: "Wskazówki operacyjne",
     trust:
       "Oficjalny serwis NOAA wyjaśniający format i wykorzystanie lotniczych danych pogodowych.",
     scope: "Grupy zachmurzenia, pułap, widzialność oraz struktura raportów.",
-    retrieved: "16 czerwca 2026",
+    checkText: "METAR",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
   },
   windyLevels: {
     id: "windyLevels",
@@ -97,19 +104,36 @@ export const sources = {
     trust:
       "Dokumentacja społeczności Windy pomaga zrozumieć kontrolki produktu; nie jest normą meteorologiczną.",
     scope: "Przełączanie poziomów ciśnienia i przybliżonych wysokości.",
+    checkText: "Display wind at various altitudes instead of pressure",
     retrieved: "16 czerwca 2026",
   },
   windyClouds: {
     id: "windyClouds",
     organization: "Windy Community",
-    title: "Cloud base and cloud tops",
+    title: "Cloud tops lower than cloud base",
     label: "Windy: podstawa i wierzchołki",
-    url: "https://community.windy.com/topic/37207/clouds-base-cloud-tops",
+    url: "https://community.windy.com/topic/43145/cloud-tops-lower-than-cloud-base",
     kind: "Objaśnienie interfejsu",
     trust:
-      "Wyjaśnia różnicę między parametrami modelu widocznymi w aplikacji; nie zastępuje obserwacji.",
-    scope: "Podstawa, wierzchołki, zachmurzenie warstw i ograniczenia modelu.",
-    retrieved: "16 czerwca 2026",
+      "Odpowiedź zespołu Windy wyjaśnia, że warstwy podstawy i wierzchołków opisują różne pola modelu; nie zastępują obserwacji.",
+    scope:
+      "Wierzchołki chmur konwekcyjnych, najniższa warstwa zachmurzenia przekraczająca 50% i ograniczenia porównywania obu pól.",
+    checkText: "Cloud tops lower than cloud base",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
+  },
+  windyCloudBase: {
+    id: "windyCloudBase",
+    organization: "Windy Community",
+    title: "Is the cloud base layer in AGL or MSL?",
+    label: "Windy: podstawa chmur AGL",
+    url: "https://community.windy.com/topic/7102/is-the-cloud-base-layer-in-agl-or-msl",
+    kind: "Objaśnienie interfejsu",
+    trust:
+      "Odpowiedź moderatora Windy potwierdza odniesienie AGL i opisuje wpływ uproszczonego modelu wysokości terenu.",
+    scope:
+      "Wysokość podstawy chmur nad gruntem, rozdzielczość orografii modelu i możliwe rozbieżności w górach.",
+    checkText: "above ground level",
+    retrieved: "16 czerwca 2026 · monitoring automatyczny",
   },
   commons: {
     id: "commons",
@@ -121,6 +145,7 @@ export const sources = {
     trust:
       "Każde zdjęcie ma osobną stronę pliku z autorem, licencją i historią.",
     scope: "Fotografie identyfikacyjne użyte w atlasie.",
+    checkText: "Wikimedia Commons",
     retrieved: "16 czerwca 2026",
   },
 };

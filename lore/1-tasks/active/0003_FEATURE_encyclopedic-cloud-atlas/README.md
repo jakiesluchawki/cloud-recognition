@@ -43,6 +43,7 @@ of a much larger knowledge system.
 6. Add cloud-motion wind interpretation and an adaptive recognition test.
 7. Extend automated completeness and source-integrity tests.
 8. Verify responsive behavior and publish the revised Pages release.
+9. Monitor authoritative source and image-provenance links for dead pages.
 
 ## Acceptance Criteria
 
@@ -62,6 +63,7 @@ of a much larger knowledge system.
 - [ ] Scientific and taxonomic claims expose primary or authoritative sources.
 - [ ] Mobile and desktop navigation remain practical with the larger corpus.
 - [ ] Automated tests, production build, and public Pages deployment pass.
+- [ ] A scheduled link monitor checks sources and photograph provenance pages.
 
 ## Design Decisions
 
@@ -92,6 +94,9 @@ of a much larger knowledge system.
 8. **Search includes natural-language aliases:** Polish terms such as
    "soczewka", "wał", "turbulencja", and "chmura ścienna" lead to formal WMO
    entries without requiring prior Latin vocabulary.
+9. **Source availability is tested:** A visible citation is not reliable when
+   its destination is dead. Scheduled CI inspects status codes and common
+   soft-404 page markers without coupling external availability to deployment.
 
 ## Implementation Notes
 
@@ -112,6 +117,9 @@ of a much larger knowledge system.
   adjective "soczewkowaty". Added natural-language search aliases.
 - Browser screenshot capture timed out; DOM, interaction, console, dimensions,
   and public-deployment visual checks remain the release evidence path.
+- The FAA moved handbook pages from underscored path segments to compact
+  `regulationspolicies/handbooksmanuals` paths. The previous citation rendered
+  an official soft-404 page and was replaced with the verified 28B landing page.
 
 ## Broken/Modified Tests
 
@@ -119,6 +127,8 @@ of a much larger knowledge system.
   species.
 - Added reverse-link, source-integrity, profile-depth, recognition-method, and
   wind-direction tests. Existing expectations were not weakened.
+- Added a daily external-link workflow covering the source registry and every
+  photograph provenance page.
 
 ## Future Work
 
