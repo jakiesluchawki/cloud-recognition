@@ -18,6 +18,13 @@ history:
       Created after an audit found that the vertical-atmosphere lesson was
       substantive, but the practical Layers tool only demonstrated one
       pressure surface and did not teach how to read common Windy overlays.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published an eight-field Windy decoder in commits deafc7d and d449a58.
+      All 50 tests, nine lesson audits, 26 external links, mobile and desktop
+      QA states, and GitHub Pages runs 27606625871 and 27606729537 passed.
 ---
 
 # Build a practical Windy layer decoder
@@ -63,7 +70,7 @@ weather application.
 - [x] Every overlay names useful comparison fields and one common trap.
 - [x] Every overlay has four unique, plausible answer choices and explanatory
       feedback.
-- [ ] Automated tests, lesson audit, link audit, production build, mobile QA,
+- [x] Automated tests, lesson audit, link audit, production build, mobile QA,
       desktop QA, and public Pages verification pass.
 
 ## Design Decisions
@@ -142,10 +149,21 @@ weather application.
 - Mobile QA passed at 390 x 844 with exact document width of 390 px.
 - Desktop QA passed at 1440 x 1000 with the intended three-column workbench.
 - Keyboard focus moves to answer feedback after a committed choice.
-- Public GitHub Pages verification remains before completion.
+- Public GitHub Pages verification passed with a clean cache, no HTTP errors,
+  no runtime errors, the declared project favicon, and a 390 px document.
 
 ## Future Work
 
 No follow-up is required within this scope. Live map integration and automatic
 cloud recognition remain outside the free, privacy-preserving version-one
 boundary and automatic recognition is already tracked in backlog task 0002.
+
+## Release
+
+- Feature commit: `deafc7d`
+- Public-error fix: `d449a58`
+- Feature Pages run: `27606625871`
+- Final Pages run: `27606729537`
+- Public JavaScript: `index-l527Xq37.js`
+- Public CSS: `index-ByqAVXGH.css`
+- Offline cache: `cloud-recognition-v12`
