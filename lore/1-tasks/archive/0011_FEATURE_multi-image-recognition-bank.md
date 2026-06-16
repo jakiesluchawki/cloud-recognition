@@ -2,7 +2,7 @@
 id: "0011"
 title: "Build a multi-image cloud recognition bank"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0003", "0005", "0009"]
 tags: ["priority-high", "recognition", "photography", "methodology", "licensing", "mobile"]
@@ -25,6 +25,13 @@ history:
       nine passing lesson audits, 46 verified external links, production build,
       and Brave QA at desktop and mobile widths. Public Pages verification
       remains before completion.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published the 30-photo recognition bank in commit cdd52eb. All 51 tests,
+      nine lesson audits, 46 external links, image audit, production build,
+      desktop and mobile Brave QA, and GitHub Pages run 27607672208 passed.
 ---
 
 # Build a multi-image cloud recognition bank
@@ -70,7 +77,7 @@ assessment must sample a broader image bank.
 - [x] Atlas cards and monographs retain a stable lead photograph.
 - [x] Link monitoring checks every photograph page, not only one per genus.
 - [x] Synthetic images are not used as identification evidence.
-- [ ] Automated tests, image audit, link audit, production build, mobile QA,
+- [x] Automated tests, image audit, link audit, production build, mobile QA,
       desktop QA, and public Pages verification pass.
 
 ## Design Decisions
@@ -152,3 +159,11 @@ assessment must sample a broader image bank.
 
 No follow-up is required within this scope. Automatic recognition from an
 uploaded photograph remains separately parked in backlog task 0002.
+
+## Release
+
+- Feature commit: `cdd52eb`
+- GitHub Pages run: `27607672208`
+- Public JavaScript: `index-9U_4INtE.js`
+- Public CSS: `index-ifpXQZ81.css`
+- Offline cache: `cloud-recognition-v13`
