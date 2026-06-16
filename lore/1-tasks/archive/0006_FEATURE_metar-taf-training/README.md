@@ -2,7 +2,7 @@
 id: "0006"
 title: "Build an active METAR and TAF training workshop"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0005"]
 tags: ["priority-high", "aviation", "metar", "taf", "assessment", "responsive-design"]
@@ -17,6 +17,13 @@ history:
       Created after the user asked to turn the static METAR example into an
       active exercise requiring interpretation, ceiling decisions, TAF
       timeline reasoning, and optional timed performance.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Completed four workshop modes, six METAR and two TAF scenarios,
+      post-answer timeline debrief, mobile and keyboard QA, 41 passing tests,
+      and successful GitHub Pages deployment in run 27603769955.
 ---
 
 # Build an active METAR and TAF training workshop
@@ -58,7 +65,7 @@ the first grid column and left the exercise vertically unbalanced.
 - [x] Automated tests protect question structure and ceiling interpretation.
 - [x] The wind laboratory has balanced desktop columns and no forced compass overflow.
 - [x] The wind and METAR workshops have no horizontal overflow at 390 px.
-- [ ] Tests, lesson audit, production build, GitHub push, and Pages deployment pass.
+- [x] Tests, lesson audit, production build, GitHub push, and Pages deployment pass.
 
 ## Design Decisions
 
@@ -109,6 +116,21 @@ the first grid column and left the exercise vertically unbalanced.
   across feedback and question transitions.
 - Captured mobile METAR/TAF and desktop METAR/wind QA evidence under
   `design/qa/current/`.
+- Published commits `62f1f26` and `a113425`; GitHub Pages run `27603769955`
+  completed successfully.
+- Verified the public 390 px flow against `index-AUHjiBX5.js`,
+  `index-i578FUNy.css`, and service worker cache `cloud-recognition-v7`.
+
+## Issues Encountered
+
+- The first TAF render exposed decoded timeline cards before the question,
+  weakening active recall. The timeline now appears only inside post-answer
+  feedback.
+- Disabling a selected answer button could move keyboard focus to the page
+  body. Feedback now receives focus, followed by the continuation action and
+  the next question heading.
+- Keeping the service worker at cache `v6` would have left returning users on
+  the pre-fix shell. The release boundary was bumped to `v7`.
 
 ## Broken/Modified Tests
 
