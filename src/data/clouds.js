@@ -21,6 +21,7 @@ export const clouds = [
     species: ["fibratus", "uncinus", "spissatus", "castellanus", "floccus"],
     varieties: ["intortus", "radiatus", "vertebratus", "duplicatus"],
     features: ["mamma", "fluctus"],
+    accessoryClouds: [],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/cirrus.jpg",
@@ -50,6 +51,7 @@ export const clouds = [
     species: ["stratiformis", "lenticularis", "castellanus", "floccus"],
     varieties: ["undulatus", "lacunosus"],
     features: ["virga", "mamma", "cavum"],
+    accessoryClouds: [],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/cirrocumulus.jpg",
@@ -79,6 +81,7 @@ export const clouds = [
     species: ["fibratus", "nebulosus"],
     varieties: ["duplicatus", "undulatus"],
     features: [],
+    accessoryClouds: [],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/cirrostratus.jpg",
@@ -116,6 +119,7 @@ export const clouds = [
       "lacunosus",
     ],
     features: ["virga", "mamma", "cavum", "fluctus", "asperitas"],
+    accessoryClouds: [],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/altocumulus.jpg",
@@ -144,7 +148,8 @@ export const clouds = [
       "Jeśli Słońce jest ostre i pojawia się halo, rozważ Cirrostratus. Jeśli opad stał się ciągły i podstawa całkiem nieczytelna, rozważ Nimbostratus.",
     species: [],
     varieties: ["translucidus", "opacus", "duplicatus", "undulatus", "radiatus"],
-    features: ["virga", "praecipitatio", "mamma", "pannus"],
+    features: ["virga", "praecipitatio", "mamma"],
+    accessoryClouds: ["pannus"],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/altostratus.jpg",
@@ -174,7 +179,8 @@ export const clouds = [
       "Niska poszarpana warstwa pod opadem nie musi być główną chmurą. Oddziel pannus od rozległego Nimbostratus powyżej.",
     species: [],
     varieties: [],
-    features: ["praecipitatio", "virga", "pannus"],
+    features: ["praecipitatio", "virga"],
+    accessoryClouds: ["pannus"],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/nimbostratus.jpg",
@@ -212,6 +218,7 @@ export const clouds = [
       "lacunosus",
     ],
     features: ["virga", "mamma", "praecipitatio", "fluctus", "asperitas", "cavum"],
+    accessoryClouds: [],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/stratocumulus.jpg",
@@ -241,6 +248,7 @@ export const clouds = [
     species: ["nebulosus", "fractus"],
     varieties: ["opacus", "translucidus", "undulatus"],
     features: ["praecipitatio", "fluctus"],
+    accessoryClouds: [],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/stratus.jpg",
@@ -269,7 +277,8 @@ export const clouds = [
       "Granica congestus–Cumulonimbus nie zależy wyłącznie od wielkości. Szukaj włóknistego lub gładkiego, lodowego wierzchołka.",
     species: ["humilis", "mediocris", "congestus", "fractus"],
     varieties: ["radiatus"],
-    features: ["virga", "praecipitatio", "arcus", "fluctus", "tuba", "pileus", "velum", "pannus"],
+    features: ["virga", "praecipitatio", "arcus", "fluctus", "tuba"],
+    accessoryClouds: ["pileus", "velum", "pannus"],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/cumulus.jpg",
@@ -307,11 +316,8 @@ export const clouds = [
       "murus",
       "cauda",
       "tuba",
-      "pannus",
-      "pileus",
-      "velum",
-      "flumen",
     ],
+    accessoryClouds: ["pileus", "velum", "pannus", "flumen"],
     sourceIds: commonSources,
     image: {
       src: "assets/clouds/cumulonimbus.jpg",

@@ -77,3 +77,22 @@ test("small annotation colors meet WCAG AA against their surfaces", async () => 
   assert.ok(contrastRatio(token("coral"), white) >= 4.5);
   assert.ok(contrastRatio(token("moss"), paper) >= 4.5);
 });
+
+test("the recognition test is globally available and explains its methodology", async () => {
+  const app = await read("src/App.jsx");
+
+  assert.match(app, /className="quick-test-button"/);
+  assert.match(app, /function RecognitionTest/);
+  assert.match(app, /cztery prawdopodobne odpowiedzi/i);
+  assert.match(app, /Dystraktory pochodzą z grup rzeczywiście mylonych wizualnie/);
+  assert.match(app, /formatResultCount/);
+});
+
+test("the encyclopedia exposes formation, differential diagnosis and aviation context", async () => {
+  const app = await read("src/App.jsx");
+
+  assert.match(app, /Najczęstsze mechanizmy powstawania/);
+  assert.match(app, /Diagnostyka różnicowa/);
+  assert.match(app, /Znaczenie lotnicze/);
+  assert.match(app, /Wiatr z nieba/);
+});

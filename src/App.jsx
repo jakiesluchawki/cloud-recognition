@@ -30,6 +30,12 @@ import {
 } from "@phosphor-icons/react";
 import { cloudLevels, clouds, getCloud } from "./data/clouds.js";
 import {
+  getCloudProfile,
+  getTaxonomyTerm,
+  taxonomyCategories,
+  taxonomyTerms,
+} from "./data/encyclopedia.js";
+import {
   hardCases,
   learningModules,
   placementQuestions,
@@ -41,10 +47,19 @@ import {
   loadJournal,
   loadProfile,
   loadProgress,
+  loadRecognitionStats,
   saveJournal,
   saveProfile,
   saveProgress,
+  saveRecognitionStats,
 } from "./lib/storage.js";
+import {
+  createRecognitionQuestion,
+  recognitionSummary,
+  selectRecognitionCloud,
+  updateRecognitionStats,
+} from "./lib/recognition.js";
+import { windFromCloudMotion } from "./lib/wind.js";
 
 const navItems = [
   { id: "home", label: "Start", icon: House },
@@ -133,6 +148,42 @@ const lessonContent = {
         title: "Po przejściu",
         body:
           "Napływ chłodniejszego powietrza nad cieplejsze podłoże często daje pola Cumulus i Stratocumulus z przelotnymi opadami.",
+      },
+    ],
+  },
+  wiatr: {
+    lead:
+      "Chmura nie mierzy wiatru tak jak anemometr. Pokazuje ruch i deformację na własnej wysokości, a wynik trzeba oddzielić od perspektywy, opadania hydrometeorów, propagacji fali i rozwoju samej chmury.",
+    blocks: [
+      {
+        title: "Wiatr jest „z”, ruch jest „do”",
+        body:
+          "Jeżeli element chmury przemieszcza się ku północnemu wschodowi, prosty dryf adwekcyjny wskazuje wiatr z południowego zachodu. Najpierw nazwij kierunek ruchu, potem odwróć go o 180°.",
+      },
+      {
+        title: "Każda warstwa może płynąć inaczej",
+        body:
+          "Stratus, Altocumulus i Cirrus mogą jednocześnie poruszać się w różnych kierunkach. To obserwacja uskoku pionowego, nie błąd oka. Zawsze zapisuj rodzaj albo przybliżony poziom obserwowanej chmury.",
+      },
+      {
+        title: "Perspektywa zbiega pasma",
+        body:
+          "Radiatus wygląda tak, jakby pasma zbiegały się nad horyzontem, choć często są prawie równoległe. Obserwuj ruch fragmentów wysoko nad głową i korzystaj z kilku punktów odniesienia.",
+      },
+      {
+        title: "Chmura może stać mimo silnego wiatru",
+        body:
+          "Lenticularis jest wytwarzany w stałym obszarze wznoszenia fali: krople kondensują po stronie napływu i zanikają po zawietrznej. Kształt stoi, ale powietrze przepływa przez niego.",
+      },
+      {
+        title: "Virga nie pokazuje samego wiatru",
+        body:
+          "Smuga opadu opada i jednocześnie jest znoszona. Jej nachylenie łączy prędkość opadania, parowanie oraz zmianę wiatru z wysokością, dlatego nie należy odczytywać go jak prostej chorągiewki.",
+      },
+      {
+        title: "Burza także się propaguje",
+        body:
+          "Cumulonimbus jest sterowany przepływem, ale nowe komórki mogą rosnąć po jednej stronie układu, a stare zanikać po drugiej. Ruch echa i ruch powietrza nie są zawsze tym samym.",
       },
     ],
   },
@@ -713,9 +764,21 @@ function AtlasPage({ onSources }) {
   const [level, setLevel] = useState("wszystkie");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
+  const [selectedTerm, setSelectedTerm] = useState(null);
   const filtered = clouds.filter((cloud) => {
     const matchesLevel = level === "wszystkie" || cloud.level === level;
-    const haystack = `${cloud.name} ${cloud.polish} ${cloud.code}`.toLowerCase();
+    const profile = getCloudProfile(cloud.id);
+    const haystack = [
+      cloud.name,
+      cloud.polish,
+      cloud.code,
+      cloud.headline,
+      profile?.essence,
+      ...cloud.species,
+      ...cloud.varieties,
+      ...cloud.features,
+      ...(cloud.accessoryClouds || []),
+    ].join(" ").toLowerCase();
     return matchesLevel && haystack.includes(query.toLowerCase());
   });
 
@@ -724,15 +787,16 @@ function AtlasPage({ onSources }) {
       <header className="page-heading page-heading--inline">
         <div>
           <span className="eyebrow">Międzynarodowa klasyfikacja WMO</span>
-          <h1>Atlas chmur</h1>
-          <p>Dziesięć rodzajów to dopiero pierwsza warstwa. Otwórz kartę, by zobaczyć pełną nazwę i pułapki.</p>
+          <h1>Encyklopedia chmur</h1>
+          <p>Dziesięć rodzajów jest mapą wejścia. Dalej czeka 49 formalnych pojęć, reguły pochodzenia, fizyka, pogoda i znaczenie lotnicze.</p>
         </div>
-        <SourceButton ids={["wmoAtlas", "wmoSummary"]} onOpen={onSources} />
+        <SourceButton ids={["wmoAtlas", "wmoSummary", "wmoPrinciples", "wmoUpperAtmosphere"]} onOpen={onSources} />
       </header>
 
       <div className="segmented-control" role="tablist">
         {[
-          ["atlas", "Atlas"],
+          ["atlas", "Rodzaje · 10"],
+          ["encyclopedia", "Indeks · 49"],
           ["key", "Klucz rozpoznawania"],
           ["cases", "Trudne przypadki"],
         ].map(([id, label]) => (
@@ -742,10 +806,16 @@ function AtlasPage({ onSources }) {
 
       {tab === "atlas" && (
         <>
+          <div className="encyclopedia-stats" aria-label="Zakres encyklopedii">
+            <article><strong>10</strong><span>rodzajów troposferycznych</span></article>
+            <article><strong>15</strong><span>gatunków WMO</span></article>
+            <article><strong>9</strong><span>odmian</span></article>
+            <article><strong>25</strong><span>cech, chmur towarzyszących i klas specjalnych</span></article>
+          </div>
           <div className="atlas-tools">
             <label className="search-field">
               <MagnifyingGlass size={20} />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj nazwy lub kodu" />
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Szukaj nazwy, kodu albo terminu WMO" />
             </label>
             <div className="filter-scroll">
               {cloudLevels.map((item) => (
@@ -772,7 +842,8 @@ function AtlasPage({ onSources }) {
                     <i>{cloud.polish}</i>
                   </span>
                   <small>{cloud.headline}</small>
-                  <span className="card-link">Otwórz kartę <ArrowRight size={16} /></span>
+                  <span className="cloud-card-count">{cloud.species.length + cloud.varieties.length + cloud.features.length + cloud.accessoryClouds.length} powiązanych terminów</span>
+                  <span className="card-link">Otwórz monografię <ArrowRight size={16} /></span>
                 </span>
               </button>
             ))}
@@ -780,10 +851,164 @@ function AtlasPage({ onSources }) {
           {!filtered.length && <div className="empty-state"><Cloud size={32} /><h2>Nie znaleźliśmy takiej nazwy</h2><button onClick={() => { setQuery(""); setLevel("wszystkie"); }}>Wyczyść filtry</button></div>}
         </>
       )}
+      {tab === "encyclopedia" && (
+        <EncyclopediaIndex
+          onSelectTerm={setSelectedTerm}
+          onSelectCloud={setSelected}
+          onSources={onSources}
+        />
+      )}
       {tab === "key" && <DecisionKey onOpenCloud={setSelected} onSources={onSources} />}
       {tab === "cases" && <HardCases onSources={onSources} />}
-      {selected && <CloudDetail cloud={getCloud(selected)} onClose={() => setSelected(null)} onSources={onSources} />}
+      {selected && (
+        <CloudDetail
+          cloud={getCloud(selected)}
+          onClose={() => setSelected(null)}
+          onOpenTerm={(id) => {
+            setSelected(null);
+            setSelectedTerm(id);
+          }}
+          onSources={onSources}
+        />
+      )}
+      {selectedTerm && (
+        <TermDetail
+          term={getTaxonomyTerm(selectedTerm)}
+          onClose={() => setSelectedTerm(null)}
+          onOpenCloud={(id) => {
+            setSelectedTerm(null);
+            setSelected(id);
+          }}
+          onSources={onSources}
+        />
+      )}
     </main>
+  );
+}
+
+function formatResultCount(count) {
+  if (count === 1) return "1 wynik";
+  if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 12 || count % 100 > 14)) {
+    return `${count} wyniki`;
+  }
+  return `${count} wyników`;
+}
+
+function EncyclopediaIndex({ onSelectTerm, onSelectCloud, onSources }) {
+  const [category, setCategory] = useState("all");
+  const [query, setQuery] = useState("");
+  const normalized = query.trim().toLowerCase();
+  const filtered = taxonomyTerms.filter((term) => {
+    const matchesCategory = category === "all" || term.category === category;
+    const genusNames = term.genera.map((id) => {
+      const cloud = getCloud(id);
+      return cloud ? `${cloud.name} ${cloud.polish} ${cloud.code}` : "";
+    });
+    const haystack = [
+      term.name,
+      term.polish,
+      term.definition,
+      term.diagnostic,
+      ...(term.searchTerms || []),
+      ...genusNames,
+    ].join(" ").toLowerCase();
+    return matchesCategory && haystack.includes(normalized);
+  });
+  const activeCategory = taxonomyCategories.find((item) => item.id === category);
+
+  return (
+    <section className="encyclopedia-index">
+      <div className="encyclopedia-intro">
+        <div>
+          <span className="eyebrow">Pełny indeks pojęć</span>
+          <h2>Od kształtu do pełnej nazwy</h2>
+          <p>
+            Nazwa WMO może łączyć rodzaj, gatunek, odmianę, cechę dodatkową,
+            chmurę towarzyszącą i historię przemiany. Indeks pokazuje każdą
+            warstwę osobno oraz rodzaje, z którymi może występować.
+          </p>
+        </div>
+        <aside className="naming-formula">
+          <span>Składnia obserwacji</span>
+          <strong>rodzaj + gatunek + odmiana + cecha + pochodzenie</strong>
+          <small>Nie każda kombinacja jest dopuszczalna. Zgodność wynika z tabel WMO.</small>
+        </aside>
+      </div>
+
+      <div className="atlas-tools encyclopedia-tools">
+        <label className="search-field">
+          <MagnifyingGlass size={20} />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Szukaj: soczewka, virga, turbulencja, Cb…"
+          />
+        </label>
+        <SourceButton ids={["wmoSummary", "wmoPrinciples", "wmoUpperAtmosphere"]} onOpen={onSources} />
+      </div>
+
+      <div className="taxonomy-category-grid">
+        <button className={category === "all" ? "active" : ""} onClick={() => setCategory("all")}>
+          <strong>49</strong>
+          <span>wszystkie pojęcia</span>
+        </button>
+        {taxonomyCategories.map((item) => (
+          <button
+            key={item.id}
+            className={category === item.id ? "active" : ""}
+            onClick={() => setCategory(item.id)}
+          >
+            <strong>{item.count}</strong>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="index-context">
+        <div>
+          <span className="eyebrow">{activeCategory ? activeCategory.label : "Cała klasyfikacja"}</span>
+          <p>{activeCategory?.description || "Formalne warstwy klasyfikacji WMO oraz trzy klasy chmur górnej atmosfery."}</p>
+        </div>
+        <strong>{formatResultCount(filtered.length)}</strong>
+      </div>
+
+      <div className="term-grid">
+        {filtered.map((term) => {
+          const categoryRecord = taxonomyCategories.find((item) => item.id === term.category);
+          return (
+            <article className="term-card" key={term.id}>
+              <button className="term-card-main" onClick={() => onSelectTerm(term.id)}>
+                <span className="term-kind">{categoryRecord?.label}</span>
+                <strong>{term.name}</strong>
+                <i>{term.polish}</i>
+                <p>{term.definition}</p>
+                <span className="card-link">Czytaj hasło <ArrowRight size={16} /></span>
+              </button>
+              {term.genera.length > 0 && (
+                <div className="term-genera">
+                  {term.genera.map((id) => {
+                    const cloud = getCloud(id);
+                    return (
+                      <button key={id} onClick={() => onSelectCloud(id)} title={`Otwórz ${cloud.name}`}>
+                        {cloud.code}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+
+      {!filtered.length && (
+        <div className="empty-state">
+          <BookOpen size={32} />
+          <h2>Brak hasła dla tego zapytania</h2>
+          <button onClick={() => { setQuery(""); setCategory("all"); }}>Pokaż cały indeks</button>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -904,7 +1129,9 @@ function HardCases({ onSources }) {
   );
 }
 
-function CloudDetail({ cloud, onClose, onSources }) {
+function CloudDetail({ cloud, onClose, onOpenTerm, onSources }) {
+  const profile = getCloudProfile(cloud.id);
+
   return (
     <div className="modal-backdrop" onMouseDown={onClose}>
       <article className="cloud-detail" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
@@ -918,6 +1145,7 @@ function CloudDetail({ cloud, onClose, onSources }) {
           <h2>{cloud.name}</h2>
           <p className="detail-polish">{cloud.polish}</p>
           <p className="detail-lead">{cloud.headline}</p>
+          <p className="detail-essence">{profile.essence}</p>
           <section>
             <h3>Na co patrzeć</h3>
             <ul>{cloud.observe.map((item) => <li key={item}><Check size={16} />{item}</li>)}</ul>
@@ -926,30 +1154,142 @@ function CloudDetail({ cloud, onClose, onSources }) {
             <article><span>Pogodowo</span><p>{cloud.meaning}</p></article>
             <article className="detail-trap"><span>Pułapka</span><p>{cloud.trap}</p></article>
           </div>
-          <section className="taxonomy">
-            <h3>Pełna warstwa WMO</h3>
-            <TaxonomyRow label="Gatunki" values={cloud.species} />
-            <TaxonomyRow label="Odmiany" values={cloud.varieties} />
-            <TaxonomyRow label="Cechy dodatkowe" values={cloud.features} />
+          <section className="encyclopedic-section">
+            <span className="eyebrow">Budowa i geneza</span>
+            <h3>Mikrofizyka</h3>
+            <p>{profile.composition}</p>
+            <h4>Najczęstsze mechanizmy powstawania</h4>
+            <ul>{profile.formation.map((item) => <li key={item}><CaretRight size={15} />{item}</li>)}</ul>
           </section>
+          <div className="knowledge-columns">
+            <section>
+              <span className="eyebrow">Interpretacja</span>
+              <h3>Pogoda i ewolucja</h3>
+              <ul>{profile.weather.map((item) => <li key={item}><CaretRight size={15} />{item}</li>)}</ul>
+              <h4>Typowe przemiany</h4>
+              <ul>{profile.evolution.map((item) => <li key={item}><CaretRight size={15} />{item}</li>)}</ul>
+            </section>
+            <section className="aviation-reference">
+              <span className="eyebrow">Znaczenie lotnicze</span>
+              <h3>Co ta nazwa mówi, a czego nie mówi</h3>
+              <ul>{profile.aviation.map((item) => <li key={item}><AirplaneTilt size={16} />{item}</li>)}</ul>
+              <small>Materiał edukacyjny. Nie zastępuje odprawy, prognoz, depesz, ostrzeżeń ani procedur operacyjnych.</small>
+            </section>
+          </div>
+          <section className="taxonomy">
+            <span className="eyebrow">Formalna klasyfikacja</span>
+            <h3>Warstwy nazwy WMO</h3>
+            <p className="section-intro">Każdy termin jest osobnym hasłem. Otwórz go, aby zobaczyć definicję i wszystkie zgodne rodzaje.</p>
+            <TaxonomyRow label="Gatunki" values={cloud.species} onOpen={onOpenTerm} />
+            <TaxonomyRow label="Odmiany" values={cloud.varieties} onOpen={onOpenTerm} />
+            <TaxonomyRow label="Cechy dodatkowe" values={cloud.features} onOpen={onOpenTerm} />
+            <TaxonomyRow label="Chmury towarzyszące" values={cloud.accessoryClouds} onOpen={onOpenTerm} />
+          </section>
+          <section className="naming-examples">
+            <span className="eyebrow">Przykłady pełnych nazw</span>
+            <div>{profile.namingExamples.map((item) => <code key={item}>{item}</code>)}</div>
+          </section>
+          <section className="mother-clouds">
+            <span className="eyebrow">Historia chmury</span>
+            <h3>Genitus i mutatus</h3>
+            <div>
+              <article>
+                <button onClick={() => onOpenTerm("genitus")}>genitus <ArrowRight size={14} /></button>
+                <p>{profile.motherClouds.genitus.join(" · ")}</p>
+              </article>
+              <article>
+                <button onClick={() => onOpenTerm("mutatus")}>mutatus <ArrowRight size={14} /></button>
+                <p>{profile.motherClouds.mutatus.join(" · ")}</p>
+              </article>
+            </div>
+          </section>
+          <section className="look-alikes">
+            <span className="eyebrow">Diagnostyka różnicowa</span>
+            <h3>Z czym najłatwiej pomylić</h3>
+            <div>
+              {profile.lookAlikes.map((item) => (
+                <article key={item.name}><strong>{item.name}</strong><p>{item.rule}</p></article>
+              ))}
+            </div>
+          </section>
+          <div className="knowledge-columns compact">
+            <section>
+              <span className="eyebrow">Zjawiska optyczne</span>
+              <ul>{profile.optics.map((item) => <li key={item}><Eye size={16} />{item}</li>)}</ul>
+            </section>
+            <section>
+              <span className="eyebrow">Protokół terenowy</span>
+              <ul>{profile.fieldChecklist.map((item) => <li key={item}><Check size={16} />{item}</li>)}</ul>
+            </section>
+          </div>
           <section className="photo-record">
             <span className="eyebrow">Metryka fotografii</span>
             <p>{cloud.image.note}</p>
             <p><strong>{cloud.image.author}</strong> · {cloud.image.license}</p>
             <a href={cloud.image.page} target="_blank" rel="noreferrer">Strona pliku i licencja <ArrowSquareOut size={15} /></a>
           </section>
-          <SourceButton ids={[...cloud.sourceIds, "commons"]} onOpen={onSources} />
+          <SourceButton ids={[...cloud.sourceIds, "wmoPrinciples", "faaWeather", "commons"]} onOpen={onSources} />
         </div>
       </article>
     </div>
   );
 }
 
-function TaxonomyRow({ label, values }) {
+function TaxonomyRow({ label, values, onOpen }) {
   return (
     <div className="taxonomy-row">
       <span>{label}</span>
-      <p>{values.length ? values.map((value) => <i key={value}>{value}</i>) : <small>nie występują w tej warstwie klasyfikacji</small>}</p>
+      <p>
+        {values.length
+          ? values.map((value) => <button key={value} onClick={() => onOpen(value)}>{value}</button>)
+          : <small>nie występują w tej warstwie klasyfikacji</small>}
+      </p>
+    </div>
+  );
+}
+
+function TermDetail({ term, onClose, onOpenCloud, onSources }) {
+  if (!term) return null;
+  const category = taxonomyCategories.find((item) => item.id === term.category);
+
+  return (
+    <div className="modal-backdrop" onMouseDown={onClose}>
+      <article className="term-detail" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
+        <button className="icon-button detail-close" onClick={onClose} aria-label="Zamknij hasło"><X size={22} /></button>
+        <div className="term-detail-heading">
+          <span className="term-kind">{category?.label}</span>
+          <h2>{term.name}</h2>
+          <p>{term.polish}</p>
+        </div>
+        <div className="term-detail-body">
+          <span className="eyebrow">Definicja</span>
+          <p className="term-definition">{term.definition}</p>
+          <aside>
+            <Eye size={24} />
+            <div><strong>Cecha diagnostyczna</strong><p>{term.diagnostic}</p></div>
+          </aside>
+          <section>
+            <h3>{term.genera.length ? "W jakich rodzajach występuje" : "Miejsce w klasyfikacji"}</h3>
+            {term.genera.length ? (
+              <div className="compatible-clouds">
+                {term.genera.map((id) => {
+                  const cloud = getCloud(id);
+                  return (
+                    <button key={id} onClick={() => onOpenCloud(id)}>
+                      <span>{cloud.code}</span>
+                      <div><strong>{cloud.name}</strong><small>{cloud.polish}</small></div>
+                      <ArrowRight size={17} />
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p>{category?.description}</p>
+            )}
+          </section>
+          <SourceButton ids={term.sourceIds} onOpen={onSources} />
+        </div>
+      </article>
     </div>
   );
 }
@@ -984,7 +1324,7 @@ function LayersPage({ onSources }) {
       </header>
 
       <div className="segmented-control layers-tabs">
-        {[["lab", "Laboratorium"], ["metar", "METAR / TAF"], ["hazards", "Zagrożenia"], ["sounding", "Sondaż i Skew-T"]].map(([id, label]) => (
+        {[["lab", "Wysokość"], ["wind", "Wiatr z nieba"], ["metar", "METAR / TAF"], ["hazards", "Zagrożenia"], ["sounding", "Sondaż i Skew-T"]].map(([id, label]) => (
           <button key={id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>
@@ -1031,10 +1371,95 @@ function LayersPage({ onSources }) {
         </div>
       )}
 
+      {tab === "wind" && <WindPanel onSources={onSources} />}
       {tab === "metar" && <MetarPanel onSources={onSources} />}
       {tab === "hazards" && <HazardsPanel onSources={onSources} />}
       {tab === "sounding" && <SoundingPanel onSources={onSources} />}
     </main>
+  );
+}
+
+function WindPanel({ onSources }) {
+  const [motion, setMotion] = useState(45);
+  const [level, setLevel] = useState("niskie");
+  const result = windFromCloudMotion(motion);
+  const directionNames = {
+    N: "północy",
+    NE: "północnego wschodu",
+    E: "wschodu",
+    SE: "południowego wschodu",
+    S: "południa",
+    SW: "południowego zachodu",
+    W: "zachodu",
+    NW: "północnego zachodu",
+  };
+  const towardNames = {
+    N: "północ",
+    NE: "północny wschód",
+    E: "wschód",
+    SE: "południowy wschód",
+    S: "południe",
+    SW: "południowy zachód",
+    W: "zachód",
+    NW: "północny zachód",
+  };
+
+  return (
+    <section className="wind-lab">
+      <div className="wind-compass">
+        <span className="compass-point compass-point--n">N</span>
+        <span className="compass-point compass-point--e">E</span>
+        <span className="compass-point compass-point--s">S</span>
+        <span className="compass-point compass-point--w">W</span>
+        <div className="motion-arrow" style={{ transform: `rotate(${result.toward}deg)` }}>
+          <ArrowRight weight="bold" />
+        </div>
+        <div className="wind-compass-center">
+          <Cloud size={34} weight="fill" />
+          <small>{level}</small>
+        </div>
+      </div>
+      <div className="wind-controls">
+        <span className="eyebrow">Pracownia ruchu chmur</span>
+        <h2>Najpierw „dokąd”, potem „skąd”</h2>
+        <p>
+          Ustaw kierunek, w którym przemieszcza się rozpoznawalny fragment
+          chmury. Dla prostego dryfu wynik odwracamy o 180°. To informacja o
+          przepływie na wysokości tej chmury, nie automatycznie o wietrze przy ziemi.
+        </p>
+        <label className="wind-range">
+          <span>Chmura przemieszcza się na <strong>{towardNames[result.towardLabel]}</strong></span>
+          <input
+            type="range"
+            min="0"
+            max="315"
+            step="45"
+            value={motion}
+            onChange={(event) => setMotion(Number(event.target.value))}
+          />
+        </label>
+        <div className="concept-switch wind-levels">
+          {["niskie", "średnie", "wysokie"].map((item) => (
+            <button key={item} className={level === item ? "active" : ""} onClick={() => setLevel(item)}>{item}</button>
+          ))}
+        </div>
+        <div className="wind-result">
+          <Wind size={30} />
+          <div>
+            <span>Wniosek dla tej warstwy</span>
+            <strong>wiatr z {directionNames[result.fromLabel]} ({result.fromLabel})</strong>
+            <small>ruch chmury do {result.towardLabel} · kierunek wiatru podajemy „z”</small>
+          </div>
+        </div>
+        <div className="wind-caveats">
+          <article><strong>Lenticularis</strong><p>Kształt może stać w miejscu, gdy powietrze szybko przepływa przez falę.</p></article>
+          <article><strong>Virga</strong><p>Nachylenie łączy znoszenie z opadaniem i parowaniem hydrometeorów.</p></article>
+          <article><strong>Cumulonimbus</strong><p>Nowe komórki mogą rozwijać się w innym kierunku niż przepływa samo powietrze.</p></article>
+          <article><strong>Radiatus</strong><p>Pasma pozornie zbiegają się przez perspektywę, choć są prawie równoległe.</p></article>
+        </div>
+        <SourceButton ids={["faaWeather", "wmoAtlas"]} onOpen={onSources} />
+      </div>
+    </section>
   );
 }
 
@@ -1195,7 +1620,7 @@ function SourcesPage({ onSources }) {
       <header className="page-heading">
         <span className="eyebrow">Jawny warsztat</span>
         <h1>Biblioteka źródeł</h1>
-        <p>Pełna lista materiałów wykorzystanych w wersji pierwszej. Fotografie mają dodatkowo osobne metryki na kartach atlasu.</p>
+        <p>Pełna lista materiałów wykorzystanych w encyklopedii. Fotografie mają dodatkowo osobne metryki na kartach atlasu.</p>
       </header>
       <div className="source-library">
         {sourceList.map((source) => (
@@ -1208,6 +1633,87 @@ function SourcesPage({ onSources }) {
         ))}
       </div>
     </main>
+  );
+}
+
+function RecognitionTest({ stats, onUpdateStats, onClose, onSources }) {
+  const cloudIds = clouds.map((cloud) => cloud.id);
+  const [question, setQuestion] = useState(() => {
+    const id = selectRecognitionCloud(cloudIds, stats);
+    return createRecognitionQuestion(id);
+  });
+  const [answer, setAnswer] = useState(null);
+  const cloud = getCloud(question.cloudId);
+  const summary = recognitionSummary(stats);
+
+  const choose = (id) => {
+    if (answer) return;
+    const correct = id === question.cloudId;
+    setAnswer(id);
+    onUpdateStats(updateRecognitionStats(stats, question.cloudId, correct));
+  };
+
+  const next = () => {
+    const id = selectRecognitionCloud(cloudIds, stats, question.cloudId);
+    setQuestion(createRecognitionQuestion(id));
+    setAnswer(null);
+  };
+
+  return (
+    <div className="modal-backdrop modal-backdrop--center" onMouseDown={onClose}>
+      <section className="recognition-test" role="dialog" aria-modal="true" aria-label="Test rozpoznawania chmur" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="recognition-header">
+          <div>
+            <span className="eyebrow">Test wyrywkowy · cztery prawdopodobne odpowiedzi</span>
+            <h2>Co widzisz?</h2>
+          </div>
+          <button className="icon-button" onClick={onClose} aria-label="Zamknij test"><X size={22} /></button>
+        </div>
+        <div className="recognition-photo">
+          <img src={publicAsset(cloud.image.src)} alt="Chmura do rozpoznania" />
+          <span>{cloud.level}</span>
+        </div>
+        <div className="recognition-options">
+          {question.choices.map((id) => {
+            const option = getCloud(id);
+            let state = "";
+            if (answer && id === question.cloudId) state = "correct";
+            if (answer === id && id !== question.cloudId) state = "wrong";
+            return (
+              <button key={id} className={state} onClick={() => choose(id)}>
+                <span>{option.code}</span>
+                <div><strong>{option.name}</strong><small>{option.polish}</small></div>
+                {state === "correct" && <Check size={20} />}
+                {state === "wrong" && <X size={20} />}
+              </button>
+            );
+          })}
+        </div>
+        {answer && (
+          <div className={`recognition-feedback ${answer === question.cloudId ? "is-correct" : "is-wrong"}`}>
+            <span className="eyebrow">{answer === question.cloudId ? "Trafnie" : `Poprawna odpowiedź: ${cloud.name}`}</span>
+            <h3>{cloud.headline}</h3>
+            <ul>{cloud.observe.map((item) => <li key={item}><Eye size={16} />{item}</li>)}</ul>
+            <p><strong>Pułapka:</strong> {cloud.trap}</p>
+            <div className="recognition-feedback-actions">
+              <SourceButton ids={cloud.sourceIds} onOpen={onSources} compact />
+              <button className="button button--primary" onClick={next}>Następna chmura <ArrowRight size={17} /></button>
+            </div>
+          </div>
+        )}
+        <footer className="recognition-method">
+          <div>
+            <strong>{summary.correct + summary.wrong}</strong>
+            <span>odpowiedzi lokalnie</span>
+          </div>
+          <p>
+            Dystraktory pochodzą z grup rzeczywiście mylonych wizualnie.
+            Algorytm częściej wraca do rodzajów, przy których popełniasz błędy.
+            Wynik zostaje wyłącznie w tej przeglądarce.
+          </p>
+        </footer>
+      </section>
+    </div>
   );
 }
 
@@ -1231,6 +1737,8 @@ export function App() {
   const [placementOpen, setPlacementOpen] = useState(false);
   const [sourceIds, setSourceIds] = useState(null);
   const [entryModule, setEntryModule] = useState(null);
+  const [recognitionOpen, setRecognitionOpen] = useState(false);
+  const [recognitionStats, setRecognitionStats] = useState(loadRecognitionStats);
 
   const validRoute = useMemo(
     () => [...navItems.map((item) => item.id), "sources"].includes(route) ? route : "home",
@@ -1254,6 +1762,11 @@ export function App() {
     const next = completed.includes(id) ? completed.filter((item) => item !== id) : [...completed, id];
     setCompleted(next);
     saveProgress(next);
+  };
+
+  const updateRecognition = (stats) => {
+    setRecognitionStats(stats);
+    saveRecognitionStats(stats);
   };
 
   const pageProps = { navigate, onSources: setSourceIds };
@@ -1289,8 +1802,23 @@ export function App() {
       </div>
       <Footer navigate={navigate} />
       <BottomNav route={validRoute} navigate={navigate} />
+      <button className="quick-test-button" onClick={() => setRecognitionOpen(true)}>
+        <Eye size={20} weight="bold" />
+        <span>Sprawdź się</span>
+      </button>
       {placementOpen && <PlacementModal onClose={() => setPlacementOpen(false)} onFinish={chooseProfile} />}
       {sourceIds && <SourceDrawer ids={sourceIds} onClose={() => setSourceIds(null)} />}
+      {recognitionOpen && (
+        <RecognitionTest
+          stats={recognitionStats}
+          onUpdateStats={updateRecognition}
+          onClose={() => setRecognitionOpen(false)}
+          onSources={(ids) => {
+            setRecognitionOpen(false);
+            setSourceIds(ids);
+          }}
+        />
+      )}
     </div>
   );
 }

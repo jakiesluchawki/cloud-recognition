@@ -24,6 +24,32 @@ export const sources = {
     scope: "Dziesięć rodzajów oraz przypisane gatunki, odmiany i cechy.",
     retrieved: "16 czerwca 2026",
   },
+  wmoPrinciples: {
+    id: "wmoPrinciples",
+    organization: "World Meteorological Organization",
+    title: "Principles of cloud classification",
+    label: "WMO: zasady klasyfikacji",
+    url: "https://cloudatlas.wmo.int/en/principles-of-cloud-classification.html",
+    kind: "Norma klasyfikacyjna",
+    trust:
+      "Oficjalne zasady tworzenia pełnych nazw: rodzaj, gatunek, odmiana, cecha dodatkowa, chmura towarzysząca, chmura macierzysta i chmura specjalna.",
+    scope:
+      "Definicje warstw taksonomii, reguły genitus i mutatus oraz pięć kategorii chmur specjalnych.",
+    retrieved: "16 czerwca 2026",
+  },
+  wmoUpperAtmosphere: {
+    id: "wmoUpperAtmosphere",
+    organization: "World Meteorological Organization",
+    title: "Upper atmospheric clouds",
+    label: "WMO: chmury górnej atmosfery",
+    url: "https://cloudatlas.wmo.int/en/upper-atmospheric-clouds.html",
+    kind: "Norma klasyfikacyjna",
+    trust:
+      "Oficjalny atlas odróżniający chmury polarnej stratosfery i mezosfery od dziesięciu rodzajów troposferycznych.",
+    scope:
+      "Chmury perłowe, polarne chmury stratosferyczne i obłoki srebrzyste.",
+    retrieved: "16 czerwca 2026",
+  },
   faaWeather: {
     id: "faaWeather",
     organization: "Federal Aviation Administration",

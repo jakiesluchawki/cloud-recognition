@@ -2,6 +2,7 @@ const KEYS = {
   profile: "cloud-recognition:profile",
   progress: "cloud-recognition:progress",
   journal: "cloud-recognition:journal",
+  recognition: "cloud-recognition:recognition",
 };
 
 function read(key, fallback) {
@@ -43,4 +44,12 @@ export function loadJournal() {
 
 export function saveJournal(entries) {
   write(KEYS.journal, entries);
+}
+
+export function loadRecognitionStats() {
+  return read(KEYS.recognition, {});
+}
+
+export function saveRecognitionStats(stats) {
+  write(KEYS.recognition, stats);
 }

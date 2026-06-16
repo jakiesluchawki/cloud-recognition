@@ -44,8 +44,19 @@ export const learningModules = [
     sourceIds: ["faaWeather"],
   },
   {
-    id: "lotnictwo",
+    id: "wiatr",
     number: "05",
+    level: "Obserwacja",
+    title: "Czytanie wiatru z ruchu chmur",
+    minutes: 24,
+    summary:
+      "Kierunek, uskoki, fale i pozorny ruch: jak wyciągać wnioski z nieba bez udawania, że chmura jest anemometrem.",
+    outcomes: ["wiatr z kierunku", "dryf chmur", "uskok", "fala górska", "perspektywa"],
+    sourceIds: ["faaWeather", "wmoAtlas"],
+  },
+  {
+    id: "lotnictwo",
+    number: "06",
     level: "Lotnictwo",
     title: "Chmury w METAR i TAF",
     minutes: 26,
@@ -56,7 +67,7 @@ export const learningModules = [
   },
   {
     id: "warstwy",
-    number: "06",
+    number: "07",
     level: "Modele",
     title: "Czytanie atmosfery w pionie",
     minutes: 28,
@@ -67,7 +78,7 @@ export const learningModules = [
   },
   {
     id: "zagrozenia",
-    number: "07",
+    number: "08",
     level: "Operacyjne",
     title: "Oblodzenie, turbulencja i burze",
     minutes: 32,
@@ -78,7 +89,7 @@ export const learningModules = [
   },
   {
     id: "ekspert",
-    number: "08",
+    number: "09",
     level: "Eksperckie",
     title: "Gatunki, odmiany i sporne granice",
     minutes: 35,
