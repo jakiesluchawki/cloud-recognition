@@ -36,6 +36,8 @@ The learner should become able to:
 6. Use real, properly licensed photographs for identification evidence.
 7. Treat mobile as the field instrument and larger screens as the study desk.
 8. Keep all core learning free and independent of paid weather APIs.
+9. Treat every advertised lesson duration as a contract backed by real
+   reading, examples, practice, and assessment.
 
 ## Version 1 Boundaries
 

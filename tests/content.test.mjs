@@ -12,14 +12,22 @@ import {
   taxonomyTerms,
 } from "../src/data/encyclopedia.js";
 import { fieldQuestions, pairDiscriminators } from "../src/data/field-guide.js";
-import { hardCases, learningModules } from "../src/data/learning.js";
+import {
+  hardCases,
+  learningModules,
+  lessonPractices,
+  moduleChecks,
+} from "../src/data/learning.js";
+import { lessonMinutes, lessons } from "../src/data/lessons.js";
 import { sources } from "../src/data/sources.js";
 import { calculatePlacement } from "../src/lib/placement.js";
 import {
   createRecognitionQuestion,
+  recognitionMastery,
   recognitionWeight,
   selectRecognitionCloud,
   updateRecognitionStats,
+  weakestRecognitionCloud,
 } from "../src/lib/recognition.js";
 import {
   degreesToCompass,
@@ -162,6 +170,51 @@ test("the learning path includes wind interpretation as a full module", () => {
   assert.ok(wind.sourceIds.includes("faaWeather"));
 });
 
+test("every advertised lesson has honest timing and substantive teaching material", () => {
+  assert.deepEqual(Object.keys(lessons).sort(), learningModules.map((module) => module.id).sort());
+  assert.deepEqual(Object.keys(lessonPractices).sort(), learningModules.map((module) => module.id).sort());
+  assert.deepEqual(Object.keys(moduleChecks).sort(), learningModules.map((module) => module.id).sort());
+
+  for (const module of learningModules) {
+    const lesson = lessons[module.id];
+    const practice = lessonPractices[module.id];
+    const check = moduleChecks[module.id];
+    const prose = lesson.chapters
+      .flatMap((chapter) => chapter.paragraphs)
+      .join(" ");
+    const wordCount = prose.trim().split(/\s+/).length;
+    const readingMinutes = lesson.timePlan
+      .find((item) => item.label.startsWith("Czytanie"))
+      .minutes;
+    const chapterMinutes = lesson.chapters
+      .reduce((sum, chapter) => sum + chapter.minutes, 0);
+    const wordsPerMinute = wordCount / readingMinutes;
+
+    assert.equal(lessonMinutes(lesson), module.minutes, `${module.id} timing must match its label`);
+    assert.equal(chapterMinutes, readingMinutes, `${module.id} chapter timing must match reading time`);
+    assert.ok(
+      wordsPerMinute >= 45 && wordsPerMinute <= 100,
+      `${module.id} reading allocation must be credible`,
+    );
+    assert.ok(lesson.objectives.length >= 4, `${module.id} needs explicit outcomes`);
+    assert.ok(lesson.chapters.length >= 4, `${module.id} needs a real chapter structure`);
+    assert.ok(prose.length >= 1800, `${module.id} needs substantive explanatory prose`);
+    assert.ok(lesson.recap.length >= 4, `${module.id} needs a useful recap`);
+    assert.equal(practice.steps.length, 3, `${module.id} needs a structured practice`);
+    assert.equal(check.options.length, 4, `${module.id} check needs four choices`);
+    assert.equal(new Set(check.options).size, 4, `${module.id} check choices must be unique`);
+    assert.ok(check.explanation.length >= 80, `${module.id} check needs reasoning`);
+
+    for (const chapter of lesson.chapters) {
+      assert.ok(chapter.paragraphs.length >= 2, `${module.id}.${chapter.number} needs depth`);
+      assert.ok(chapter.sourceIds.length > 0, `${module.id}.${chapter.number} needs sources`);
+      for (const sourceId of chapter.sourceIds) {
+        assert.ok(sources[sourceId], `${module.id}.${chapter.number} references ${sourceId}`);
+      }
+    }
+  }
+});
+
 test("recognition questions always contain four unique plausible choices", () => {
   for (const cloud of clouds) {
     const question = createRecognitionQuestion(cloud.id, () => 0.42);
@@ -184,6 +237,20 @@ test("recognition practice increases priority after an error", () => {
     selectRecognitionCloud(["cirrus", "cumulus"], afterError, null, () => 0),
     "cirrus",
   );
+});
+
+test("recognition mastery exposes weak genera instead of a single opaque score", () => {
+  const cloudIds = ["cirrus", "cumulus", "stratus"];
+  const stats = {
+    cirrus: { correct: 1, wrong: 3 },
+    cumulus: { correct: 4, wrong: 0 },
+  };
+  const mastery = recognitionMastery(cloudIds, stats);
+
+  assert.equal(mastery.find((item) => item.cloudId === "cirrus").state, "focus");
+  assert.equal(mastery.find((item) => item.cloudId === "cumulus").state, "steady");
+  assert.equal(mastery.find((item) => item.cloudId === "stratus").state, "new");
+  assert.equal(weakestRecognitionCloud(cloudIds, stats), "cirrus");
 });
 
 test("wind interpretation reverses cloud motion and normalizes bearings", () => {

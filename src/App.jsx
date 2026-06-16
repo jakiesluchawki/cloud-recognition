@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AirplaneTilt,
   ArrowLeft,
@@ -42,10 +42,13 @@ import {
 } from "./data/encyclopedia.js";
 import {
   hardCases,
+  lessonPractices,
   learningModules,
+  moduleChecks,
   placementQuestions,
   quizQuestions,
 } from "./data/learning.js";
+import { lessons } from "./data/lessons.js";
 import { fieldPrinciples, fieldQuestions } from "./data/field-guide.js";
 import { getSources, sourceList } from "./data/sources.js";
 import {
@@ -72,9 +75,11 @@ import {
 } from "./lib/storage.js";
 import {
   createRecognitionQuestion,
+  recognitionMastery,
   recognitionSummary,
   selectRecognitionCloud,
   updateRecognitionStats,
+  weakestRecognitionCloud,
 } from "./lib/recognition.js";
 import { windFromCloudMotion } from "./lib/wind.js";
 
@@ -88,207 +93,76 @@ const navItems = [
 
 const publicAsset = (path) => `${import.meta.env.BASE_URL}${path}`;
 
-const lessonContent = {
-  obserwacja: {
-    lead:
-      "Dobra identyfikacja nie zaczyna się od zgadywania nazwy. Zaczyna się od opisu, który inna osoba mogłaby sprawdzić.",
-    blocks: [
-      {
-        title: "1. Sylwetka",
-        body:
-          "Czy widzisz oddzielne kłęby, jednolitą warstwę, włókna, fale czy głęboką wieżę? Nazwij geometrię bez używania nazw chmur.",
-      },
-      {
-        title: "2. Skala",
-        body:
-          "Wyciągnij rękę. Drobne elementy mniejsze od małego palca wspierają wysokie Cirrocumulus, elementy wielkości 1–3 palców częściej wskazują Altocumulus, a większe człony mogą prowadzić do Stratocumulus.",
-      },
-      {
-        title: "3. Światło i opad",
-        body:
-          "Sprawdź cieniowanie, ostrość tarczy Słońca, halo i to, czy smugi opadu docierają do ziemi. Te cechy są często bardziej rozstrzygające niż kolor.",
-      },
-      {
-        title: "4. Czas",
-        body:
-          "Jedno zdjęcie zatrzymuje proces. Zapisz, czy chmura rośnie, rozpada się, rozlewa w warstwę albo gęstnieje. Przemiana bywa kluczem do poprawnej nazwy.",
-      },
-    ],
-  },
-  rodziny: {
-    lead:
-      "Nazwy WMO są złożeniami. Kiedy rozumiesz ich części, klasyfikacja staje się mapą, a nie listą do pamięciowego opanowania.",
-    blocks: [
-      { title: "cirro-", body: "Wysoki poziom i przewaga kryształków lodu." },
-      { title: "alto-", body: "Poziom średni; nie oznacza najwyższej chmury." },
-      { title: "-stratus", body: "Warstwa albo zasłona." },
-      { title: "-cumulus", body: "Człony, kłęby lub rozwój konwekcyjny." },
-      { title: "nimbo-", body: "Chmura związana z opadem; w nazwie rodzaju występuje w Nimbostratus." },
-    ],
-  },
-  procesy: {
-    lead:
-      "Chmura pojawia się, gdy wilgotne powietrze osiąga nasycenie. Najczęściej prowadzi do tego unoszenie i ochładzanie, ale droga może być konwekcyjna, frontowa, orograficzna lub turbulentna.",
-    blocks: [
-      {
-        title: "Stabilność",
-        body:
-          "W atmosferze stabilnej wychylona porcja powietrza wraca ku poziomowi równowagi, więc łatwiej powstają rozległe warstwy. W niestabilnej dalsze unoszenie jest podtrzymywane i rosną chmury kłębiaste.",
-      },
-      {
-        title: "Inwersja",
-        body:
-          "Warstwa, w której temperatura rośnie z wysokością, może działać jak pokrywa. Pod nią rozlewa się Stratus lub Stratocumulus, a Cumulus traci pionowy rozpęd.",
-      },
-      {
-        title: "Podstawa nie jest wierzchołkiem",
-        body:
-          "Podstawa wiąże się z poziomem kondensacji unoszonego powietrza. Wierzchołek zależy od głębokości warstwy niestabilnej, wilgoci, wymuszania i mieszania.",
-      },
-    ],
-  },
-  fronty: {
-    lead:
-      "Sekwencja Cirrus → Cirrostratus → Altostratus → Nimbostratus jest użytecznym modelem frontu ciepłego, ale rzeczywiste niebo może pomijać etapy albo nakładać kilka układów.",
-    blocks: [
-      {
-        title: "Front ciepły",
-        body:
-          "Łagodne unoszenie na dużym obszarze sprzyja warstwom, które z czasem obniżają się i grubieją. Tempo nie jest uniwersalnym zegarem.",
-      },
-      {
-        title: "Front chłodny",
-        body:
-          "Silniejsze, węższe wymuszanie może organizować konwekcję, wały szkwałowe lub linię Cumulonimbus. Słaby front nie musi jednak dawać burz.",
-      },
-      {
-        title: "Po przejściu",
-        body:
-          "Napływ chłodniejszego powietrza nad cieplejsze podłoże często daje pola Cumulus i Stratocumulus z przelotnymi opadami.",
-      },
-    ],
-  },
-  wiatr: {
-    lead:
-      "Chmura nie mierzy wiatru tak jak anemometr. Pokazuje ruch i deformację na własnej wysokości, a wynik trzeba oddzielić od perspektywy, opadania hydrometeorów, propagacji fali i rozwoju samej chmury.",
-    blocks: [
-      {
-        title: "Wiatr jest „z”, ruch jest „do”",
-        body:
-          "Jeżeli element chmury przemieszcza się ku północnemu wschodowi, prosty dryf adwekcyjny wskazuje wiatr z południowego zachodu. Najpierw nazwij kierunek ruchu, potem odwróć go o 180°.",
-      },
-      {
-        title: "Każda warstwa może płynąć inaczej",
-        body:
-          "Stratus, Altocumulus i Cirrus mogą jednocześnie poruszać się w różnych kierunkach. To obserwacja uskoku pionowego, nie błąd oka. Zawsze zapisuj rodzaj albo przybliżony poziom obserwowanej chmury.",
-      },
-      {
-        title: "Perspektywa zbiega pasma",
-        body:
-          "Radiatus wygląda tak, jakby pasma zbiegały się nad horyzontem, choć często są prawie równoległe. Obserwuj ruch fragmentów wysoko nad głową i korzystaj z kilku punktów odniesienia.",
-      },
-      {
-        title: "Chmura może stać mimo silnego wiatru",
-        body:
-          "Lenticularis jest wytwarzany w stałym obszarze wznoszenia fali: krople kondensują po stronie napływu i zanikają po zawietrznej. Kształt stoi, ale powietrze przepływa przez niego.",
-      },
-      {
-        title: "Virga nie pokazuje samego wiatru",
-        body:
-          "Smuga opadu opada i jednocześnie jest znoszona. Jej nachylenie łączy prędkość opadania, parowanie oraz zmianę wiatru z wysokością, dlatego nie należy odczytywać go jak prostej chorągiewki.",
-      },
-      {
-        title: "Burza także się propaguje",
-        body:
-          "Cumulonimbus jest sterowany przepływem, ale nowe komórki mogą rosnąć po jednej stronie układu, a stare zanikać po drugiej. Ruch echa i ruch powietrza nie są zawsze tym samym.",
-      },
-    ],
-  },
-  lotnictwo: {
-    lead:
-      "Kod opisuje obserwację lotniskową w określonym miejscu i czasie. Nie jest pełnym modelem atmosfery ani automatyczną decyzją o bezpieczeństwie.",
-    blocks: [
-      {
-        title: "FEW, SCT, BKN, OVC",
-        body:
-          "To przedziały pokrycia nieba: 1–2, 3–4, 5–7 i 8 oktantów. Wysokość grupy jest podawana w setkach stóp nad poziomem lotniska.",
-      },
-      {
-        title: "Pułap",
-        body:
-          "W praktyce operacyjnej pułap tworzy najniższa warstwa BKN lub OVC albo widzialność pionowa. FEW i SCT mogą być ważne, ale nie tworzą ceiling w tym znaczeniu.",
-      },
-      {
-        title: "CB i TCU",
-        body:
-          "Dopiski wskazują Cumulonimbus lub wypiętrzony Cumulus. Brak dopisku nie dowodzi braku zagrożenia poza bezpośrednim otoczeniem obserwacji.",
-      },
-    ],
-  },
-  warstwy: {
-    lead:
-      "Mapa na poziomie 850 hPa nie pokazuje pogody „1500 metrów nad Tobą”. Pokazuje pole na powierzchni określonego ciśnienia, której wysokość zmienia się przestrzennie i w czasie.",
-    blocks: [
-      {
-        title: "AGL i MSL",
-        body:
-          "AGL liczy wysokość od lokalnego gruntu, MSL od średniego poziomu morza. Na wysokim terenie ta sama wysokość MSL może znaleźć się bardzo blisko powierzchni.",
-      },
-      {
-        title: "Poziom ciśnienia",
-        body:
-          "1000, 850 czy 500 hPa są powierzchniami w atmosferze. Ich wysokość odczytuje się z pola geopotencjału, a nie z jednej stałej tabeli.",
-      },
-      {
-        title: "Model a rzeczywistość",
-        body:
-          "Model wygładza teren i atmosferę w komórkach siatki. W górach niektóre poziomy ciśnienia mogą przebiegać pod powierzchnią modelowego gruntu.",
-      },
-    ],
-  },
-  zagrozenia: {
-    lead:
-      "Niebezpieczeństwo wynika z połączenia fazy wody, temperatury, ruchu pionowego, uskoku wiatru i czasu ekspozycji. Sama nazwa chmury nie daje pełnej odpowiedzi.",
-    blocks: [
-      {
-        title: "Oblodzenie",
-        body:
-          "Najważniejsza jest obecność przechłodzonej wody ciekłej i ujemnej temperatury. Silne prądy pionowe mogą podtrzymywać duże krople i zwiększać zagrożenie.",
-      },
-      {
-        title: "Turbulencja",
-        body:
-          "Może być konwekcyjna, mechaniczna, falowa albo występować w czystym powietrzu przy silnym uskoku. Brak chmur nie oznacza braku turbulencji.",
-      },
-      {
-        title: "CAPE i hamowanie",
-        body:
-          "CAPE opisuje potencjalną energię unoszącej się parceli po spełnieniu założeń. Nie mówi samodzielnie, czy burza powstanie; potrzebne są wilgoć, inicjacja i ocena warstwy hamującej.",
-      },
-    ],
-  },
-  ekspert: {
-    lead:
-      "Pełna nazwa może łączyć rodzaj, gatunek, odmianę, cechę dodatkową, chmurę towarzyszącą oraz informację o przemianie. Nie każda kombinacja jest dopuszczalna.",
-    blocks: [
-      {
-        title: "Rodzaj i gatunek",
-        body:
-          "Rodzaj jest jedną z dziesięciu głównych kategorii i chmura należy w danym momencie do jednego rodzaju. Gatunek opisuje kształt lub strukturę i nie każdy rodzaj ma gatunki.",
-      },
-      {
-        title: "Odmiana",
-        body:
-          "Odmiany opisują układ elementów lub przezroczystość. Niektóre mogą współwystępować, dlatego nazwa może być dłuższa bez tworzenia nowego rodzaju.",
-      },
-      {
-        title: "Przemiana i matka",
-        body:
-          "Genitus wskazuje rozwój z innego rodzaju, mutatus przemianę całej chmury, a homogenitus pochodzenie związane z działalnością człowieka. To opis historii, nie ocena „naturalności”.",
-      },
-    ],
-  },
-};
+const dialogFocusableSelector = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])",
+].join(",");
+const dialogStack = [];
+
+function useDialogFocus(onClose) {
+  const dialogRef = useRef(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogStack.push(dialog);
+
+    const focusFrame = window.requestAnimationFrame(() => {
+      const firstFocusable = dialog?.querySelector(dialogFocusableSelector);
+      (firstFocusable || dialog)?.focus();
+    });
+
+    const handleKeyDown = (event) => {
+      if (dialogStack.at(-1) !== dialog) return;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeRef.current();
+        return;
+      }
+
+      if (event.key !== "Tab" || !dialog) return;
+      const focusable = [...dialog.querySelectorAll(dialogFocusableSelector)]
+        .filter((element) => !element.hasAttribute("disabled") && element.getClientRects().length > 0);
+
+      if (!focusable.length) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", handleKeyDown);
+      const stackIndex = dialogStack.lastIndexOf(dialog);
+      if (stackIndex >= 0) dialogStack.splice(stackIndex, 1);
+      document.body.style.overflow = previousOverflow;
+      if (previousFocus instanceof HTMLElement) previousFocus.focus();
+    };
+  }, []);
+
+  return dialogRef;
+}
 
 function useRoute() {
   const getHash = () => window.location.hash.replace("#/", "") || "home";
@@ -322,20 +196,17 @@ function SourceButton({ ids, onOpen, compact = false }) {
 
 function SourceDrawer({ ids, onClose }) {
   const selected = getSources(ids);
-
-  useEffect(() => {
-    const close = (event) => event.key === "Escape" && onClose();
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, [onClose]);
+  const dialogRef = useDialogFocus(onClose);
 
   return (
     <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
       <aside
+        ref={dialogRef}
         className="source-drawer"
         role="dialog"
         aria-modal="true"
         aria-label="Źródła"
+        tabIndex={-1}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="drawer-header">
@@ -567,6 +438,7 @@ function PlacementModal({ onClose, onFinish }) {
   const [scores, setScores] = useState([]);
   const [result, setResult] = useState(null);
   const question = placementQuestions[step];
+  const dialogRef = useDialogFocus(onClose);
 
   const answer = (score) => {
     const nextScores = [...scores, score];
@@ -581,7 +453,15 @@ function PlacementModal({ onClose, onFinish }) {
 
   return (
     <div className="modal-backdrop modal-backdrop--center" onMouseDown={onClose}>
-      <div className="placement-modal" role="dialog" aria-modal="true" aria-label="Diagnoza wiedzy" onMouseDown={(event) => event.stopPropagation()}>
+      <div
+        ref={dialogRef}
+        className="placement-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Diagnoza wiedzy"
+        tabIndex={-1}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <button className="icon-button placement-close" onClick={onClose} aria-label="Zamknij diagnozę"><X size={22} /></button>
         {!result ? (
           <>
@@ -616,9 +496,67 @@ function PlacementModal({ onClose, onFinish }) {
   );
 }
 
-function LearnPage({ completed, onToggleCompleted, onSources, initialModule, onConsumeInitial }) {
+function LessonCheck({ check }) {
+  const [answer, setAnswer] = useState(null);
+
+  return (
+    <section className="lesson-check" aria-labelledby="lesson-check-title">
+      <div className="lesson-check-heading">
+        <span className="eyebrow">Punkt kontrolny</span>
+        <h2 id="lesson-check-title">{check.prompt}</h2>
+      </div>
+      <div className="lesson-check-options">
+        {check.options.map((option, index) => {
+          const state = answer === null
+            ? ""
+            : index === check.correct
+              ? "correct"
+              : answer === index
+                ? "wrong"
+                : "";
+          return (
+            <button
+              key={option}
+              className={state}
+              onClick={() => answer === null && setAnswer(index)}
+              aria-pressed={answer === index}
+            >
+              <span>{String.fromCharCode(65 + index)}</span>
+              <strong>{option}</strong>
+              {state === "correct" && <Check size={19} />}
+              {state === "wrong" && <X size={19} />}
+            </button>
+          );
+        })}
+      </div>
+      {answer !== null && (
+        <div className="lesson-check-feedback" aria-live="polite">
+          <Info size={20} />
+          <p>{check.explanation}</p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function LearnPage({
+  completed,
+  onToggleCompleted,
+  onSources,
+  initialModule,
+  onConsumeInitial,
+  onBack,
+  onSelectModule,
+  recognitionStats,
+  onOpenRecognition,
+}) {
   const [selected, setSelected] = useState(initialModule || null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const mastery = recognitionMastery(clouds.map((cloud) => cloud.id), recognitionStats);
+  const masteryAttempts = mastery.reduce((sum, item) => sum + item.attempts, 0);
+  const steadyCount = mastery.filter((item) => item.state === "steady").length;
+  const weakestCloudId = weakestRecognitionCloud(clouds.map((cloud) => cloud.id), recognitionStats);
+  const weakestCloud = getCloud(weakestCloudId);
 
   useEffect(() => {
     if (initialModule) {
@@ -629,11 +567,21 @@ function LearnPage({ completed, onToggleCompleted, onSources, initialModule, onC
 
   if (selected) {
     const module = learningModules.find((item) => item.id === selected);
-    const content = lessonContent[selected];
+    const content = lessons[selected];
+    const practice = lessonPractices[selected];
+    const check = moduleChecks[selected];
     const isDone = completed.includes(selected);
     return (
       <main className="page lesson-page">
-        <button className="back-button" onClick={() => setSelected(null)}><ArrowLeft size={18} /> Ścieżka nauki</button>
+        <button
+          className="back-button"
+          onClick={() => {
+            setSelected(null);
+            onBack();
+          }}
+        >
+          <ArrowLeft size={18} /> Ścieżka nauki
+        </button>
         <div className="lesson-hero">
           <span className="lesson-number">{module.number}</span>
           <div>
@@ -642,20 +590,106 @@ function LearnPage({ completed, onToggleCompleted, onSources, initialModule, onC
             <p>{content.lead}</p>
           </div>
         </div>
-        <SourceButton ids={module.sourceIds} onOpen={onSources} />
-        <div className="lesson-blocks">
-          {content.blocks.map((block) => (
-            <article key={block.title}>
-              <h2>{block.title}</h2>
-              <p>{block.body}</p>
+        <section className="lesson-orientation" aria-label="Plan lekcji">
+          <div className="lesson-time-plan">
+            <span className="eyebrow">Skąd bierze się {module.minutes} minut</span>
+            <div>
+              {content.timePlan.map((item) => (
+                <span key={item.label}>
+                  <strong>{item.minutes} min</strong>
+                  {item.label}
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="lesson-objectives">
+            <span className="eyebrow">Po tej lekcji potrafisz</span>
+            <ul>
+              {content.objectives.map((objective) => (
+                <li key={objective}><Check size={16} />{objective}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+        <div className="lesson-source-row">
+          <SourceButton ids={module.sourceIds} onOpen={onSources} />
+          <p>Czas obejmuje czytanie, analizę przykładów, zadanie i sprawdzenie — nie sam tekst.</p>
+        </div>
+        <nav className="lesson-contents" aria-label="Spis rozdziałów lekcji">
+          <span className="eyebrow">W tej lekcji</span>
+          <div>
+            {content.chapters.map((chapter) => (
+              <button
+                key={chapter.number}
+                onClick={() => document
+                  .getElementById(`chapter-${selected}-${chapter.number}`)
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              >
+                <span>{chapter.number}</span>
+                {chapter.title}
+              </button>
+            ))}
+          </div>
+        </nav>
+        <div className="lesson-chapters">
+          {content.chapters.map((chapter) => (
+            <article
+              id={`chapter-${selected}-${chapter.number}`}
+              className="lesson-chapter"
+              key={chapter.number}
+            >
+              <header>
+                <span>{chapter.number}</span>
+                <div>
+                  <small>{chapter.minutes} min lektury i notatki</small>
+                  <h2>{chapter.title}</h2>
+                </div>
+              </header>
+              <div className="lesson-chapter-body">
+                {chapter.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                {chapter.points && (
+                  <ul>
+                    {chapter.points.map((point) => <li key={point}>{point}</li>)}
+                  </ul>
+                )}
+                {chapter.example && (
+                  <aside className="lesson-example">
+                    <span>{chapter.example.label}</span>
+                    <strong>{chapter.example.title}</strong>
+                    <p>{chapter.example.body}</p>
+                  </aside>
+                )}
+                {chapter.callout && (
+                  <aside className="lesson-callout">
+                    <Info size={20} />
+                    <p>{chapter.callout}</p>
+                  </aside>
+                )}
+                <SourceButton ids={chapter.sourceIds} onOpen={onSources} compact />
+              </div>
             </article>
           ))}
         </div>
+        <section className="lesson-recap">
+          <span className="eyebrow">Zapamiętaj przed ćwiczeniem</span>
+          <h2>Krótka mapa lekcji</h2>
+          <ol>
+            {content.recap.map((item) => <li key={item}>{item}</li>)}
+          </ol>
+        </section>
+        <LessonCheck key={selected} check={check} />
         <div className="lesson-practice">
           <div>
-            <span className="eyebrow">Ćwiczenie terenowe</span>
-            <h2>Opisz niebo przez 90 sekund bez użycia nazwy chmury.</h2>
-            <p>Zapisz wysokość pozorną, budowę, cieniowanie, opad i kierunek zmiany. Dopiero potem otwórz atlas.</p>
+            <span className="eyebrow">Ćwiczenie · {practice.label}</span>
+            <h2>{practice.title}</h2>
+            <p>{practice.body}</p>
+            <ol>
+              {practice.steps.map((step) => <li key={step}>{step}</li>)}
+            </ol>
+            <div className="practice-outcome">
+              <Check size={20} />
+              <span><strong>Warunek ukończenia:</strong> {practice.outcome}</span>
+            </div>
           </div>
           <button className={`button ${isDone ? "button--done" : "button--coral"}`} onClick={() => onToggleCompleted(selected)}>
             {isDone ? <><Check size={19} weight="bold" /> Ukończono</> : <>Oznacz jako ukończone <Check size={19} /></>}
@@ -685,7 +719,14 @@ function LearnPage({ completed, onToggleCompleted, onSources, initialModule, onC
         {learningModules.map((module) => {
           const done = completed.includes(module.id);
           return (
-            <button className="learning-card" key={module.id} onClick={() => setSelected(module.id)}>
+            <button
+              className="learning-card"
+              key={module.id}
+              onClick={() => {
+                setSelected(module.id);
+                onSelectModule(module.id);
+              }}
+            >
               <span className={`learning-number ${done ? "done" : ""}`}>{done ? <Check size={20} /> : module.number}</span>
               <span className="learning-card-content">
                 <span className="eyebrow">{module.level} · {module.minutes} min</span>
@@ -701,9 +742,57 @@ function LearnPage({ completed, onToggleCompleted, onSources, initialModule, onC
         })}
       </div>
 
+      <section className="recognition-dashboard">
+        <div className="recognition-dashboard-heading">
+          <div>
+            <span className="eyebrow">Pamięć rozpoznawania</span>
+            <h2>Wiesz, co wymaga powtórki</h2>
+            <p>
+              Liczymy osobno każdą z dziesięciu chmur. Błąd zwiększa częstotliwość
+              powrotu danego rodzaju, a odpowiedzi zostają tylko na tym urządzeniu.
+            </p>
+          </div>
+          <div className="recognition-dashboard-summary" aria-label="Podsumowanie treningu">
+            <span><strong>{masteryAttempts}</strong> odpowiedzi</span>
+            <span><strong>{steadyCount}</strong> utrwalonych</span>
+          </div>
+        </div>
+        <div className="mastery-grid">
+          {mastery.map((item) => {
+            const cloud = getCloud(item.cloudId);
+            return (
+              <button
+                key={item.cloudId}
+                className={`mastery-card mastery-card--${item.state}`}
+                onClick={() => onOpenRecognition(item.cloudId)}
+                aria-label={`Ćwicz ${cloud.name}: ${item.label}`}
+              >
+                <span className="mastery-code">{cloud.code}</span>
+                <span className="mastery-copy">
+                  <strong>{cloud.name}</strong>
+                  <small>{item.label}</small>
+                </span>
+                <span className="mastery-score">
+                  {item.attempts ? `${item.correct}/${item.attempts}` : "—"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="recognition-dashboard-action">
+          <p>
+            Następna rekomendacja: <strong>{weakestCloud.name}</strong>.
+            Priorytet uwzględnia błędy i zbyt małą liczbę prób.
+          </p>
+          <button className="button button--coral" onClick={() => onOpenRecognition(weakestCloudId)}>
+            Ćwicz najsłabszy rodzaj <ArrowRight size={18} />
+          </button>
+        </div>
+      </section>
+
       <section className="quiz-invite">
         <div>
-          <span className="eyebrow">Krótki sprawdzian</span>
+          <span className="eyebrow">Przekrojowy sprawdzian</span>
           <h2>Trzy pytania, bez rankingu</h2>
           <p>Każda odpowiedź od razu wyjaśnia tok rozumowania.</p>
         </div>
@@ -722,6 +811,7 @@ function QuizModal({ onClose }) {
   const [score, setScore] = useState(0);
   const question = quizQuestions[step];
   const finished = step === quizQuestions.length;
+  const dialogRef = useDialogFocus(onClose);
 
   const select = (index) => {
     if (answer !== null) return;
@@ -736,7 +826,15 @@ function QuizModal({ onClose }) {
 
   return (
     <div className="modal-backdrop modal-backdrop--center" onMouseDown={onClose}>
-      <div className="quiz-modal" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
+      <div
+        ref={dialogRef}
+        className="quiz-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Przekrojowy sprawdzian"
+        tabIndex={-1}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <button className="icon-button placement-close" onClick={onClose} aria-label="Zamknij quiz"><X size={22} /></button>
         {!finished ? (
           <>
@@ -776,13 +874,26 @@ function QuizModal({ onClose }) {
   );
 }
 
-function AtlasPage({ onSources, onSaveObservation, initialTab = "atlas" }) {
+function AtlasPage({
+  onSources,
+  onSaveObservation,
+  initialTab = "atlas",
+  initialComparisonIds = null,
+}) {
   const [tab, setTab] = useState(initialTab);
   const [level, setLevel] = useState("wszystkie");
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
   const [selectedTerm, setSelectedTerm] = useState(null);
-  const [comparisonIds, setComparisonIds] = useState(comparisonPresets[1].cloudIds);
+  const [comparisonIds, setComparisonIds] = useState(
+    initialComparisonIds?.length >= 2 ? initialComparisonIds : comparisonPresets[1].cloudIds,
+  );
+
+  useEffect(() => {
+    setTab(initialTab);
+    if (initialComparisonIds?.length >= 2) setComparisonIds(initialComparisonIds);
+  }, [initialComparisonIds?.join(","), initialTab]);
+
   const filtered = clouds.filter((cloud) => {
     const matchesLevel = level === "wszystkie" || cloud.level === level;
     const profile = getCloudProfile(cloud.id);
@@ -1522,10 +1633,19 @@ function CloudDetail({
   onSources,
 }) {
   const profile = getCloudProfile(cloud.id);
+  const dialogRef = useDialogFocus(onClose);
 
   return (
     <div className="modal-backdrop" onMouseDown={onClose}>
-      <article className="cloud-detail" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
+      <article
+        ref={dialogRef}
+        className="cloud-detail"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Monografia ${cloud.name}`}
+        tabIndex={-1}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <button className="icon-button detail-close" onClick={onClose} aria-label="Zamknij kartę"><X size={22} /></button>
         <div className="detail-image">
           <img src={publicAsset(cloud.image.src)} alt={`${cloud.name}, ${cloud.polish}`} />
@@ -1658,12 +1778,21 @@ function TaxonomyRow({ label, values, onOpen }) {
 }
 
 function TermDetail({ term, onClose, onOpenCloud, onSources }) {
+  const dialogRef = useDialogFocus(onClose);
   if (!term) return null;
   const category = taxonomyCategories.find((item) => item.id === term.category);
 
   return (
     <div className="modal-backdrop" onMouseDown={onClose}>
-      <article className="term-detail" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
+      <article
+        ref={dialogRef}
+        className="term-detail"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Hasło ${term.name}`}
+        tabIndex={-1}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <button className="icon-button detail-close" onClick={onClose} aria-label="Zamknij hasło"><X size={22} /></button>
         <div className="term-detail-heading">
           <span className="term-kind">{category?.label}</span>
@@ -2065,15 +2194,29 @@ function SourcesPage({ onSources }) {
   );
 }
 
-function RecognitionTest({ stats, onUpdateStats, onClose, onSources }) {
+function RecognitionTest({
+  stats,
+  initialCloudId,
+  onUpdateStats,
+  onClose,
+  onCompare,
+  onSources,
+}) {
   const cloudIds = clouds.map((cloud) => cloud.id);
   const [question, setQuestion] = useState(() => {
-    const id = selectRecognitionCloud(cloudIds, stats);
+    const id = cloudIds.includes(initialCloudId)
+      ? initialCloudId
+      : selectRecognitionCloud(cloudIds, stats);
     return createRecognitionQuestion(id);
   });
   const [answer, setAnswer] = useState(null);
   const cloud = getCloud(question.cloudId);
+  const chosenCloud = answer ? getCloud(answer) : null;
   const summary = recognitionSummary(stats);
+  const dialogRef = useDialogFocus(onClose);
+  const discriminator = answer && answer !== question.cloudId
+    ? pairDiscriminator(answer, question.cloudId)
+    : null;
 
   const choose = (id) => {
     if (answer) return;
@@ -2090,7 +2233,15 @@ function RecognitionTest({ stats, onUpdateStats, onClose, onSources }) {
 
   return (
     <div className="modal-backdrop modal-backdrop--center" onMouseDown={onClose}>
-      <section className="recognition-test" role="dialog" aria-modal="true" aria-label="Test rozpoznawania chmur" onMouseDown={(event) => event.stopPropagation()}>
+      <section
+        ref={dialogRef}
+        className="recognition-test"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Test rozpoznawania chmur"
+        tabIndex={-1}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
         <div className="recognition-header">
           <div>
             <span className="eyebrow">Test wyrywkowy · cztery prawdopodobne odpowiedzi</span>
@@ -2119,13 +2270,31 @@ function RecognitionTest({ stats, onUpdateStats, onClose, onSources }) {
           })}
         </div>
         {answer && (
-          <div className={`recognition-feedback ${answer === question.cloudId ? "is-correct" : "is-wrong"}`}>
+          <div
+            className={`recognition-feedback ${answer === question.cloudId ? "is-correct" : "is-wrong"}`}
+            aria-live="polite"
+          >
             <span className="eyebrow">{answer === question.cloudId ? "Trafnie" : `Poprawna odpowiedź: ${cloud.name}`}</span>
             <h3>{cloud.headline}</h3>
             <ul>{cloud.observe.map((item) => <li key={item}><Eye size={16} />{item}</li>)}</ul>
             <p><strong>Pułapka:</strong> {cloud.trap}</p>
+            {discriminator && (
+              <aside className="recognition-discriminator">
+                <span>Dlaczego nie {chosenCloud.name}?</span>
+                <strong>{chosenCloud.name} ↔ {cloud.name}</strong>
+                <p>{discriminator}</p>
+              </aside>
+            )}
             <div className="recognition-feedback-actions">
               <SourceButton ids={cloud.sourceIds} onOpen={onSources} compact />
+              {discriminator && (
+                <button
+                  className="button button--secondary"
+                  onClick={() => onCompare([answer, question.cloudId])}
+                >
+                  Porównaj tę parę
+                </button>
+              )}
               <button className="button button--primary" onClick={next}>Następna chmura <ArrowRight size={17} /></button>
             </div>
           </div>
@@ -2167,25 +2336,33 @@ export function App() {
   const [sourceIds, setSourceIds] = useState(null);
   const [entryModule, setEntryModule] = useState(null);
   const [recognitionOpen, setRecognitionOpen] = useState(false);
+  const [recognitionTarget, setRecognitionTarget] = useState(null);
   const [recognitionStats, setRecognitionStats] = useState(loadRecognitionStats);
 
-  const [routeName, routeDetail] = route.split("/");
+  const [routeName, routeDetail, routePayload] = route.split("/");
   const validRoute = useMemo(
     () => [...navItems.map((item) => item.id), "sources"].includes(routeName) ? routeName : "home",
     [routeName],
   );
+  const routeComparisonIds = routeDetail === "compare"
+    ? (routePayload || "")
+      .split(",")
+      .filter((id, index, values) => getCloud(id) && values.indexOf(id) === index)
+      .slice(0, 3)
+    : [];
 
   const chooseProfile = (result) => {
     setProfile(result);
     saveProfile(result);
     setPlacementOpen(false);
     setEntryModule(result.moduleId);
-    navigate("learn");
+    navigate(`learn/${result.moduleId}`);
   };
 
   const openRecommended = () => {
-    setEntryModule(profile?.moduleId || "obserwacja");
-    navigate("learn");
+    const moduleId = profile?.moduleId || "obserwacja";
+    setEntryModule(moduleId);
+    navigate(`learn/${moduleId}`);
   };
 
   const toggleCompleted = (id) => {
@@ -2197,6 +2374,16 @@ export function App() {
   const updateRecognition = (stats) => {
     setRecognitionStats(stats);
     saveRecognitionStats(stats);
+  };
+
+  const openRecognition = (cloudId = null) => {
+    setRecognitionTarget(cloudId);
+    setRecognitionOpen(true);
+  };
+
+  const closeRecognition = () => {
+    setRecognitionOpen(false);
+    setRecognitionTarget(null);
   };
 
   const saveFieldObservation = (draft) => {
@@ -2231,14 +2418,23 @@ export function App() {
             completed={completed}
             onToggleCompleted={toggleCompleted}
             onSources={setSourceIds}
-            initialModule={entryModule}
+            initialModule={
+              entryModule
+              || learningModules.find((module) => module.id === routeDetail)?.id
+              || null
+            }
             onConsumeInitial={() => setEntryModule(null)}
+            onBack={() => navigate("learn")}
+            onSelectModule={(id) => navigate(`learn/${id}`)}
+            recognitionStats={recognitionStats}
+            onOpenRecognition={openRecognition}
           />
         )}
         {validRoute === "atlas" && (
           <AtlasPage
             onSources={setSourceIds}
             onSaveObservation={saveFieldObservation}
+            initialComparisonIds={routeComparisonIds}
             initialTab={
               routeDetail === "observer"
                 ? "observer"
@@ -2254,7 +2450,7 @@ export function App() {
       </div>
       <Footer navigate={navigate} />
       <BottomNav route={validRoute} navigate={navigate} />
-      <button className="quick-test-button" onClick={() => setRecognitionOpen(true)}>
+      <button className="quick-test-button" onClick={() => openRecognition()}>
         <Eye size={20} weight="bold" />
         <span>Sprawdź się</span>
       </button>
@@ -2263,10 +2459,15 @@ export function App() {
       {recognitionOpen && (
         <RecognitionTest
           stats={recognitionStats}
+          initialCloudId={recognitionTarget}
           onUpdateStats={updateRecognition}
-          onClose={() => setRecognitionOpen(false)}
+          onClose={closeRecognition}
+          onCompare={(ids) => {
+            closeRecognition();
+            navigate(`atlas/compare/${ids.join(",")}`);
+          }}
           onSources={(ids) => {
-            setRecognitionOpen(false);
+            closeRecognition();
             setSourceIds(ids);
           }}
         />

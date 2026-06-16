@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Quality Lesson"
+  short_description: "Create source-backed lessons with honest timing"
+  default_prompt: "Use $build-quality-lesson to create or revise a rigorous, source-backed lesson."

@@ -58,6 +58,7 @@ test("GitHub Pages deployment runs tests before publishing", async () => {
   const workflow = await read(".github/workflows/deploy-pages.yml");
 
   assert.match(workflow, /npm test/);
+  assert.match(workflow, /npm run check:lessons/);
   assert.match(workflow, /npm run build/);
   assert.match(workflow, /actions\/deploy-pages@v4/);
   assert.match(workflow, /FORCE_JAVASCRIPT_ACTIONS_TO_NODE24/);
@@ -89,6 +90,23 @@ test("the recognition test is globally available and explains its methodology", 
   assert.match(app, /cztery prawdopodobne odpowiedzi/i);
   assert.match(app, /Dystraktory pochodzą z grup rzeczywiście mylonych wizualnie/);
   assert.match(app, /formatResultCount/);
+});
+
+test("lessons expose honest time plans, adaptive practice and keyboard-safe dialogs", async () => {
+  const app = await read("src/App.jsx");
+  const lessons = await read("src/data/lessons.js");
+
+  assert.match(app, /navigate\(`learn\/\$\{id\}`\)/);
+  assert.match(app, /learningModules\.find\(\(module\) => module\.id === routeDetail\)/);
+  assert.match(app, /Skąd bierze się/);
+  assert.match(app, /Czas obejmuje czytanie, analizę przykładów, zadanie i sprawdzenie/);
+  assert.match(app, /Pamięć rozpoznawania/);
+  assert.match(app, /Dlaczego nie/);
+  assert.match(app, /function useDialogFocus/);
+  assert.match(app, /event\.key === "Escape"/);
+  assert.match(app, /event\.key !== "Tab"/);
+  assert.match(lessons, /METAR opisuje warunki obserwowane/);
+  assert.match(lessons, /Pułap nie jest najniższą dowolną chmurą/);
 });
 
 test("the encyclopedia exposes formation, differential diagnosis and aviation context", async () => {

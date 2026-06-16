@@ -56,3 +56,42 @@ selector, selected-cloud header strip, and one comparison dimension at 390 px.
 4. Removed the final dead responsive selector from the former binary key.
 
 final result: blocked
+
+## Learning Curriculum Target
+
+- User evidence: live desktop screenshots of `#/learn` and the former
+  `Chmury w METAR i TAF` module supplied on 16 June 2026.
+- Implementation target:
+  `http://127.0.0.1:5174/cloud-recognition/#/learn/lotnictwo`
+- Intended viewports: 390 x 844 CSS px and 1440 x 900 CSS px.
+- Current implementation screenshot: unavailable.
+
+### Evidence-Led Finding
+
+- **P0 — Lesson duration was materially misleading**
+  - The former 26-minute aviation lesson displayed only three short definition
+    rows and one generic 90-second observation exercise.
+  - The visible content could be read in seconds and did not teach TAF time
+    groups, vertical visibility, AGL/MSL conversion, worked decoding, or
+    product limitations.
+  - This was a product-content failure, not a cosmetic discrepancy.
+
+### Patches
+
+1. Replaced all nine summary modules with sourced, multi-chapter lessons.
+2. Added explicit time allocation for reading and notes, examples, practice,
+   and assessment.
+3. Added a words-per-minute quality gate so reading time cannot be inflated.
+4. Added a compact chapter index and stable direct lesson routes.
+5. Added module-specific practices, completion conditions, and four-choice
+   checks.
+6. Added adaptive genus mastery and pair-specific recognition feedback.
+7. Added focus trapping, Escape handling, and focus restoration for dialogs.
+
+### Current Limit
+
+The Codex in-app browser still has no available browser surface. A direct
+Brave headless capture also failed to produce an image, so current 390 px and
+desktop screenshots cannot honestly be claimed as verified. Static responsive
+review, build output, content tests, and keyboard implementation are available;
+rendered visual QA remains pending.

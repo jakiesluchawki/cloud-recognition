@@ -242,3 +242,219 @@ export const quizQuestions = [
       "Ciśnienie jest współrzędną pionową modelu. Geopotencjał mówi, na jakiej wysokości ta powierzchnia leży.",
   },
 ];
+
+export const lessonPractices = {
+  obserwacja: {
+    label: "Protokół 90 sekund",
+    title: "Opisz niebo bez użycia nazwy chmury",
+    body:
+      "Zbuduj zapis, który inna osoba mogłaby sprawdzić. Nie oceniaj jeszcze, jaki to rodzaj.",
+    steps: [
+      "Zapisz dominującą sylwetkę, wielkość elementów i stopień cieniowania.",
+      "Sprawdź halo, prześwity, opad oraz relację podstawy do horyzontu.",
+      "Po 90 sekundach zanotuj kierunek i rodzaj zmiany: wzrost, zanik, gęstnienie albo rozlewanie.",
+    ],
+    outcome:
+      "Dopiero po zapisie otwórz Obserwatora i porównaj jego trzy hipotezy z własnym opisem.",
+  },
+  rodziny: {
+    label: "Dekoder nazw",
+    title: "Rozłóż pięć nazw na części znaczeniowe",
+    body:
+      "Nazwy mają być mapą cech, nie ciągiem łacińskich sylab do zapamiętania.",
+    steps: [
+      "Wybierz po jednym przykładzie z członami cirro-, alto-, stratus, cumulus i nimbus.",
+      "Dla każdego członu zapisz, czy mówi o poziomie, budowie czy opadzie.",
+      "Sprawdź w atlasie, gdzie dosłowne znaczenie pomaga, a gdzie nazwa historyczna wymaga doprecyzowania.",
+    ],
+    outcome:
+      "Powinieneś umieć przewidzieć ogólną budowę nieznanej nazwy, ale nie udawać, że sama etymologia rozstrzyga klasyfikację.",
+  },
+  procesy: {
+    label: "Mapa mechanizmu",
+    title: "Połącz wygląd chmury z drogą unoszenia",
+    body:
+      "Przećwicz wyjaśnianie genezy bez sprowadzania każdej chmury do jednego procesu.",
+    steps: [
+      "Znajdź przykład warstwy, oddzielnych kłębów i chmury związanej z terenem lub falą.",
+      "Dla każdego przykładu nazwij prawdopodobne unoszenie: rozległe, konwekcyjne, orograficzne albo turbulentne.",
+      "Dopisz, jaka informacja byłaby potrzebna, aby odróżnić główny mechanizm od współwystępującego.",
+    ],
+    outcome:
+      "Poprawna odpowiedź zawiera mechanizm, dowód i warunek niepewności, a nie tylko nazwę chmury.",
+  },
+  fronty: {
+    label: "Dziennik sekwencji",
+    title: "Obserwuj zmianę nieba jak proces, nie zegarek",
+    body:
+      "Sekwencja frontowa jest modelem roboczym. Ćwiczenie ma ujawnić etapy pominięte, nakładające się lub odwrócone.",
+    steps: [
+      "Wykonaj cztery zapisy nieba w odstępie co najmniej 30 minut.",
+      "W każdym zapisie oceń wysokość pozorną, grubość optyczną, opad i kierunek przemieszczania.",
+      "Na końcu wskaż, które fakty wspierają zmianę frontową, a które mogły powstać lokalnie.",
+    ],
+    outcome:
+      "Nie prognozuj godziny opadu z samego Cirrus. Zapisz scenariusz i obserwację, która mogłaby go obalić.",
+  },
+  wiatr: {
+    label: "Śledzenie elementu",
+    title: "Oddziel dryf, rozwój i pozorny ruch",
+    body:
+      "Jedna smuga lub krawędź może zmieniać kształt. Potrzebujesz kilku punktów odniesienia i czasu.",
+    steps: [
+      "Wybierz mały, trwały element wysoko nad głową i określ, dokąd się przesuwa względem kompasu.",
+      "Po dwóch minutach powtórz pomiar na drugim elemencie tej samej warstwy.",
+      "Odwróć kierunek ruchu o 180° i zapisz wynik jako przybliżony wiatr z kierunku, wraz z poziomem chmury.",
+    ],
+    outcome:
+      "Jeżeli element rośnie w miejscu, fala stoi albo virga opada, oznacz wynik jako niejednoznaczny zamiast wymuszać kierunek.",
+  },
+  lotnictwo: {
+    label: "Odczyt operacyjny",
+    title: "Znajdź pułap, nie sumuj warstw",
+    body:
+      "Pracuj na przykładzie: EPWA 161200Z 24012KT 9999 SCT020 BKN060 18/11 Q1016.",
+    steps: [
+      "Przelicz wysokości grup zachmurzenia z setek stóp na pełne wartości AGL.",
+      "Wskaż najniższą warstwę tworzącą pułap i oddziel ją od warstwy SCT.",
+      "Wypisz dwie ważne rzeczy, których ten pojedynczy raport nie mówi o pogodzie na trasie.",
+    ],
+    outcome:
+      "W tym przykładzie pułap wynosi 6000 ft AGL; SCT020 jest ważną warstwą, ale nie tworzy ceiling.",
+  },
+  warstwy: {
+    label: "Rachunek pionowy",
+    title: "Przelicz MSL na przybliżone AGL",
+    body:
+      "Załóż, że powierzchnia 850 hPa leży na 1500 m MSL. Porównaj punkt nizinny 200 m MSL i przełęcz 1300 m MSL.",
+    steps: [
+      "Odejmij wysokość terenu od wysokości powierzchni ciśnienia w obu punktach.",
+      "Oceń, gdzie poziom 850 hPa leży w swobodnej atmosferze, a gdzie bardzo blisko modelowego gruntu.",
+      "Dopisz, dlaczego rzeczywisty model może dać inny wynik niż ten prosty rachunek.",
+    ],
+    outcome:
+      "Otrzymasz około 1300 m AGL nad niziną i tylko 200 m AGL nad przełęczą. Ta sama warstwa mapy nie oznacza tej samej wysokości nad człowiekiem.",
+  },
+  zagrozenia: {
+    label: "Macierz zagrożeń",
+    title: "Nie wyciągaj decyzji z jednego parametru",
+    body:
+      "Zbuduj cztery kolumny: oblodzenie, turbulencja, konwekcja i uskok. Każda wymaga innych dowodów.",
+    steps: [
+      "Dla każdej kolumny wpisz co najmniej trzy potrzebne informacje, np. temperaturę, fazę wody, ruch pionowy lub profil wiatru.",
+      "Zaznacz dane pochodzące z obserwacji, raportu lotniskowego i modelu.",
+      "Wybierz jedną sytuację, w której brak chmury nie oznacza braku zagrożenia.",
+    ],
+    outcome:
+      "Gotowa macierz ma pokazywać łączenie danych i ograniczenia, nie wydawać operacyjnej zgody na lot.",
+  },
+  ekspert: {
+    label: "Pełna składnia WMO",
+    title: "Zbuduj nazwę i uzasadnij każdą jej warstwę",
+    body:
+      "Długa nazwa jest poprawna tylko wtedy, gdy każdy człon opisuje obserwowalną cechę i jest dopuszczony dla danego rodzaju.",
+    steps: [
+      "Wybierz rodzaj z atlasu i jeden zgodny z nim gatunek.",
+      "Dodaj odmianę lub cechę dodatkową, po czym sprawdź jej relację taksonomiczną w encyklopedii.",
+      "Jeśli widzisz przemianę, rozważ genitus lub mutatus i zapisz dowód historyczny, którego wymaga ta końcówka.",
+    ],
+    outcome:
+      "Jeżeli nie potrafisz wskazać dowodu dla członu nazwy, pomiń go. Krótsza klasyfikacja z dobrym uzasadnieniem jest lepsza od efektownej nadinterpretacji.",
+  },
+};
+
+export const moduleChecks = {
+  obserwacja: {
+    prompt: "Która notatka jest najlepszym początkiem identyfikacji?",
+    options: [
+      "To chyba Altocumulus.",
+      "Ławica drobnych, cieniowanych członów; bez opadu; powoli gęstnieje.",
+      "Ładna szara chmura przed deszczem.",
+      "Wysoka chmura, bo wygląda na daleką.",
+    ],
+    correct: 1,
+    explanation:
+      "Opis cech i zmiany można sprawdzić oraz porównać z kryteriami. Sama nazwa lub wrażenie od razu zamykają rozumowanie.",
+  },
+  rodziny: {
+    prompt: "Co najpewniej opisuje człon „-stratus”?",
+    options: ["Opad gradu", "Wyłącznie niski poziom", "Warstwę lub zasłonę", "Kryształki lodu"],
+    correct: 2,
+    explanation:
+      "Stratus wskazuje budowę warstwową. O poziomie i składzie trzeba wnioskować z pełnej nazwy oraz obserwacji.",
+  },
+  procesy: {
+    prompt: "Co najczęściej odróżnia rozwój kłębiasty od rozległej warstwy?",
+    options: [
+      "Kolor nieba",
+      "Rodzaj aparatu",
+      "Stabilność i sposób unoszenia powietrza",
+      "Pora roku bez innych danych",
+    ],
+    correct: 2,
+    explanation:
+      "Niestabilność podtrzymuje pionowy ruch parceli, a stabilna atmosfera sprzyja rozlewaniu i warstwom, choć procesy mogą współwystępować.",
+  },
+  fronty: {
+    prompt: "Jak traktować sekwencję Ci → Cs → As → Ns?",
+    options: [
+      "Jako dokładny zegar nadejścia deszczu",
+      "Jako model roboczy, który trzeba potwierdzać zmianą całego nieba",
+      "Jako regułę obowiązującą tylko latem",
+      "Jako dowód frontu chłodnego",
+    ],
+    correct: 1,
+    explanation:
+      "To klasyczny model rozwoju zachmurzenia frontu ciepłego, lecz rzeczywiste układy pomijają etapy, nakładają warstwy i zmieniają tempo.",
+  },
+  wiatr: {
+    prompt: "Element chmury dryfuje ku północnemu wschodowi. Przy prostym dryfie wiatr jest…",
+    options: ["z północnego wschodu", "z południowego zachodu", "z południowego wschodu", "z północnego zachodu"],
+    correct: 1,
+    explanation:
+      "Ruch opisujemy jako kierunek „do”, a wiatr meteorologiczny jako kierunek „z”. Trzeba więc odwrócić kierunek o 180°.",
+  },
+  lotnictwo: {
+    prompt: "Która grupa jako najniższa tworzy pułap?",
+    options: ["FEW015", "SCT020", "BKN045", "CB bez podanej wysokości"],
+    correct: 2,
+    explanation:
+      "Pułap tworzy najniższa warstwa BKN lub OVC albo widzialność pionowa. FEW i SCT nie tworzą ceiling w tym znaczeniu.",
+  },
+  warstwy: {
+    prompt: "Dlaczego 850 hPa nie oznacza jednej stałej wysokości AGL?",
+    options: [
+      "Bo ciśnienie mierzy się wyłącznie nad morzem",
+      "Bo wysokość powierzchni ciśnienia i wysokość terenu zmieniają się przestrzennie",
+      "Bo 850 hPa zawsze leży pod ziemią",
+      "Bo AGL i MSL są tym samym",
+    ],
+    correct: 1,
+    explanation:
+      "Modelowa powierzchnia ciśnienia ma zmienny geopotencjał, a AGL dodatkowo zależy od lokalnego terenu.",
+  },
+  zagrozenia: {
+    prompt: "Który wniosek o oblodzeniu jest najbardziej poprawny?",
+    options: [
+      "Każda chmura przy temperaturze ujemnej daje silne oblodzenie",
+      "Brak opadu wyklucza oblodzenie",
+      "Potrzebne są m.in. temperatura, przechłodzona woda i czas ekspozycji",
+      "Rodzaj chmury sam wystarcza do decyzji",
+    ],
+    correct: 2,
+    explanation:
+      "Nazwa chmury jest wskazówką, ale zagrożenie zależy od fazy i zawartości wody, temperatury, rozmiaru kropli, ruchu pionowego oraz ekspozycji.",
+  },
+  ekspert: {
+    prompt: "Kiedy końcówka „mutatus” jest uzasadniona?",
+    options: [
+      "Gdy chmura wygląda niezwykle",
+      "Gdy cała lub znaczna część chmury przekształciła się z innego rodzaju",
+      "Gdy chmura powstała nad miastem",
+      "Gdy obserwator nie zna gatunku",
+    ],
+    correct: 1,
+    explanation:
+      "Mutatus zapisuje przemianę rodzaju i wymaga dowodu historii rozwoju. Nie jest ogólną etykietą nietypowego wyglądu.",
+  },
+};

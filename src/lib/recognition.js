@@ -71,3 +71,49 @@ export function recognitionSummary(stats) {
     { correct: 0, wrong: 0 },
   );
 }
+
+export function recognitionMastery(cloudIds, stats = {}) {
+  return cloudIds.map((cloudId) => {
+    const record = stats[cloudId] || { correct: 0, wrong: 0 };
+    const correct = record.correct || 0;
+    const wrong = record.wrong || 0;
+    const attempts = correct + wrong;
+    const accuracy = attempts ? correct / attempts : null;
+
+    let state = "new";
+    let label = "Nowa";
+
+    if (attempts > 0) {
+      state = "learning";
+      label = "W toku";
+    }
+    if (wrong > correct || (attempts >= 2 && accuracy < 0.6)) {
+      state = "focus";
+      label = "Do powtórki";
+    }
+    if (attempts >= 3 && accuracy >= 0.75) {
+      state = "steady";
+      label = "Utrwalona";
+    }
+
+    return {
+      cloudId,
+      correct,
+      wrong,
+      attempts,
+      accuracy,
+      state,
+      label,
+      priority: recognitionWeight(record),
+    };
+  });
+}
+
+export function weakestRecognitionCloud(cloudIds, stats = {}) {
+  return recognitionMastery(cloudIds, stats)
+    .sort((first, second) => {
+      if (second.priority !== first.priority) return second.priority - first.priority;
+      if (first.attempts !== second.attempts) return first.attempts - second.attempts;
+      return cloudIds.indexOf(first.cloudId) - cloudIds.indexOf(second.cloudId);
+    })[0]?.cloudId || cloudIds[0];
+}

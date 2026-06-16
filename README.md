@@ -9,7 +9,8 @@ The application includes:
 - a WMO-based encyclopedia with 10 genera and 49 formal taxonomy terms;
 - an evidence-based field observer with three transparent hypotheses;
 - a differential comparison laboratory for two or three cloud genera;
-- guided lessons, quizzes, disputed cases, and an observation journal;
+- nine full lessons with honest time plans, sourced chapters, worked examples,
+  module-specific practice, checks, and an adaptive recognition review map;
 - aviation weather: METAR/TAF, ceilings, icing, turbulence, convection, and
   thunderstorms;
 - an independent laboratory for AGL, MSL, pressure levels, geopotential
@@ -31,8 +32,13 @@ npm run dev
 
 ```sh
 npm test
+npm run check:lessons
+npm run check:links
 npm run build
 ```
+
+The versioned `build-quality-lesson` skill under `.codex/skills/` defines the
+content contract for every new or revised lesson.
 
 ## Publishing
 

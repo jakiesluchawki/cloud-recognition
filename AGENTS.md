@@ -34,6 +34,15 @@ Writing production code without an active Lore task is forbidden.
 - Cloud Recognition is a separate project. Never edit or publish any
   Kosmiczne Laboratorium repository from this workspace.
 - Scientific claims shown to learners must cite a reviewable source.
+- Creating or substantially revising a lesson must use the project skill
+  `.codex/skills/build-quality-lesson/`.
+- A lesson duration is a product contract. It must be supported by the
+  audited reading, examples, learner actions, practice, and knowledge check;
+  a short summary must never be presented as a multi-minute lesson.
+- When user feedback reveals a reusable lesson-quality rule, update
+  `.codex/skills/build-quality-lesson/` proactively. Do not wait for a
+  separate request to update the skill. Keep one-off content corrections in
+  the project rather than overfitting the skill.
 - Generated imagery may support atmosphere and diagrams, but it must not be
   presented as photographic evidence for cloud identification.
 - Mobile is a primary surface, not a reduced desktop afterthought.
@@ -50,3 +59,5 @@ Before publishing:
 4. Confirm there are no voice or automatic-recognition features.
 5. Confirm source attribution remains visible and usable.
 6. Complete `design-qa.md` against the selected visual truth.
+7. Run `npm run check:lessons` and confirm every lesson meets the versioned
+   quality contract.
