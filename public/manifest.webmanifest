@@ -1,0 +1,26 @@
+{
+  "name": "CLOUD RECOGNITION",
+  "short_name": "Cloud Atlas",
+  "description": "Polski atlas chmur i pracownia pogody od podstaw po meteorologię lotniczą.",
+  "lang": "pl",
+  "start_url": "/cloud-recognition/",
+  "scope": "/cloud-recognition/",
+  "display": "standalone",
+  "background_color": "#f7f2e8",
+  "theme_color": "#082f4f",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

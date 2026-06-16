@@ -23,7 +23,7 @@ export const clouds = [
     features: ["mamma", "fluctus"],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/cirrus.jpg",
+      src: "assets/clouds/cirrus.jpg",
       author: "PiccoloNamek",
       license: "CC BY-SA 3.0",
       page: "https://commons.wikimedia.org/wiki/File:CirrusField-color.jpg",
@@ -52,7 +52,7 @@ export const clouds = [
     features: ["virga", "mamma", "cavum"],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/cirrocumulus.jpg",
+      src: "assets/clouds/cirrocumulus.jpg",
       author: "autor niepodany w metadanych pliku",
       license: "CC BY-SA 3.0",
       page: "https://commons.wikimedia.org/wiki/File:Cirrocumulus_20040830.jpg",
@@ -81,7 +81,7 @@ export const clouds = [
     features: [],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/cirrostratus.jpg",
+      src: "assets/clouds/cirrostratus.jpg",
       author: "The Great Cloudwatcher",
       license: "CC BY-SA 3.0",
       page: "https://commons.wikimedia.org/wiki/File:Cirrostratus_with_mock_sun.jpg",
@@ -118,7 +118,7 @@ export const clouds = [
     features: ["virga", "mamma", "cavum", "fluctus", "asperitas"],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/altocumulus.jpg",
+      src: "assets/clouds/altocumulus.jpg",
       author: "Bidgee",
       license: "CC BY-SA 3.0",
       page: "https://commons.wikimedia.org/wiki/File:Altocumulus.jpg",
@@ -147,7 +147,7 @@ export const clouds = [
     features: ["virga", "praecipitatio", "mamma", "pannus"],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/altostratus.jpg",
+      src: "assets/clouds/altostratus.jpg",
       author: "Famartin",
       license: "CC BY-SA 4.0",
       page:
@@ -177,7 +177,7 @@ export const clouds = [
     features: ["praecipitatio", "virga", "pannus"],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/nimbostratus.jpg",
+      src: "assets/clouds/nimbostratus.jpg",
       author: "autor niepodany w metadanych pliku",
       license: "CC BY-SA 3.0",
       page: "https://commons.wikimedia.org/wiki/File:Ns1.jpg",
@@ -214,7 +214,7 @@ export const clouds = [
     features: ["virga", "mamma", "praecipitatio", "fluctus", "asperitas", "cavum"],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/stratocumulus.jpg",
+      src: "assets/clouds/stratocumulus.jpg",
       author: "Arun Kulshreshtha",
       license: "CC BY 3.0 US",
       page: "https://commons.wikimedia.org/wiki/File:Above_the_Clouds.jpg",
@@ -243,7 +243,7 @@ export const clouds = [
     features: ["praecipitatio", "fluctus"],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/stratus.jpg",
+      src: "assets/clouds/stratus.jpg",
       author: "kallerna",
       license: "CC BY-SA 4.0",
       page: "https://commons.wikimedia.org/wiki/File:Stratus_clouds_Vodno_4.jpg",
@@ -272,7 +272,7 @@ export const clouds = [
     features: ["virga", "praecipitatio", "arcus", "fluctus", "tuba", "pileus", "velum", "pannus"],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/cumulus.jpg",
+      src: "assets/clouds/cumulus.jpg",
       author: "PiccoloNamek",
       license: "CC BY-SA 3.0",
       page: "https://commons.wikimedia.org/wiki/File:GoldenMedows.jpg",
@@ -314,7 +314,7 @@ export const clouds = [
     ],
     sourceIds: commonSources,
     image: {
-      src: "/assets/clouds/cumulonimbus.jpg",
+      src: "assets/clouds/cumulonimbus.jpg",
       author: "NOAA/AOML/Hurricane Research Division",
       license: "domena publiczna",
       page:

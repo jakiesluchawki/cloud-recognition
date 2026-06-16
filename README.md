@@ -3,7 +3,7 @@
 Polish, source-backed education for learning to identify clouds and understand
 the weather from first observation through advanced aviation interpretation.
 
-The first release will include:
+The first release includes:
 
 - adaptive knowledge placement instead of forcing everyone through lesson one;
 - a WMO-based cloud atlas and visual decision key;
@@ -34,7 +34,7 @@ npm run build
 
 ## Publishing
 
-The public application is intended for:
+The public application is deployed at:
 
 <https://jakiesluchawki.github.io/cloud-recognition/>
 

@@ -31,6 +31,7 @@ test("each cloud record exposes evidence, taxonomy, sources and image provenance
     assert.ok(cloud.sourceIds.includes("wmoAtlas"));
     assert.match(cloud.image.page, /^https:\/\/commons\.wikimedia\.org\//);
     assert.ok(cloud.image.license);
+    assert.doesNotMatch(cloud.image.src, /^\//, `${cloud.name} must respect the Vite base path`);
   }
 });
 

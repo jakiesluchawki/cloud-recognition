@@ -24,3 +24,20 @@ test("the public base path matches the repository", async () => {
 
   assert.match(config, /base: "\/cloud-recognition\/"/);
 });
+
+test("the installable app and offline shell use the Pages base path", async () => {
+  const manifest = JSON.parse(await read("public/manifest.webmanifest"));
+  const worker = await read("public/service-worker.js");
+
+  assert.equal(manifest.start_url, "/cloud-recognition/");
+  assert.equal(manifest.scope, "/cloud-recognition/");
+  assert.match(worker, /const BASE = "\/cloud-recognition\/"/);
+});
+
+test("GitHub Pages deployment runs tests before publishing", async () => {
+  const workflow = await read(".github/workflows/deploy-pages.yml");
+
+  assert.match(workflow, /npm test/);
+  assert.match(workflow, /npm run build/);
+  assert.match(workflow, /actions\/deploy-pages@v4/);
+});

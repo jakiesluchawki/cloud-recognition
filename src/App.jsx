@@ -54,6 +54,8 @@ const navItems = [
   { id: "journal", label: "Dziennik", icon: Notebook },
 ];
 
+const publicAsset = (path) => `${import.meta.env.BASE_URL}${path}`;
+
 const lessonContent = {
   obserwacja: {
     lead:
@@ -375,14 +377,14 @@ function HeightScale() {
   );
 }
 
-function HomePage({ navigate, profile, onPlacement, onBeginner, completed, onSources }) {
+function HomePage({ navigate, profile, onPlacement, onBeginner, completed, onSources, onOpenRecommended }) {
   const recommended = learningModules.find((module) => module.id === profile?.moduleId) || learningModules[0];
   const progress = Math.round((completed.length / learningModules.length) * 100);
 
   return (
     <>
       <section className="hero">
-        <img src="/assets/hero-atlas-swiatla.png" alt="" className="hero-image" />
+        <img src={publicAsset("assets/hero-atlas-swiatla.png")} alt="" className="hero-image" />
         <div className="hero-shade" />
         <HeightScale />
         <div className="hero-content">
@@ -452,7 +454,7 @@ function HomePage({ navigate, profile, onPlacement, onBeginner, completed, onSou
               {recommended.outcomes.slice(0, 4).map((item) => <span key={item}>{item}</span>)}
             </div>
           </div>
-          <button className="round-button" onClick={() => navigate("learn")} aria-label="Przejdź do nauki">
+          <button className="round-button" onClick={onOpenRecommended} aria-label="Przejdź do rekomendowanego modułu">
             <ArrowRight size={24} />
           </button>
         </div>
@@ -539,9 +541,16 @@ function PlacementModal({ onClose, onFinish }) {
   );
 }
 
-function LearnPage({ completed, onToggleCompleted, onSources }) {
-  const [selected, setSelected] = useState(null);
+function LearnPage({ completed, onToggleCompleted, onSources, initialModule, onConsumeInitial }) {
+  const [selected, setSelected] = useState(initialModule || null);
   const [quizOpen, setQuizOpen] = useState(false);
+
+  useEffect(() => {
+    if (initialModule) {
+      setSelected(initialModule);
+      onConsumeInitial();
+    }
+  }, [initialModule, onConsumeInitial]);
 
   if (selected) {
     const module = learningModules.find((item) => item.id === selected);
@@ -741,7 +750,7 @@ function AtlasPage({ onSources }) {
             {filtered.map((cloud) => (
               <button className="cloud-card" key={cloud.id} onClick={() => setSelected(cloud.id)}>
                 <span className="cloud-image-wrap">
-                  <img src={cloud.image.src} alt={`${cloud.name}, ${cloud.polish}`} />
+                  <img src={publicAsset(cloud.image.src)} alt={`${cloud.name}, ${cloud.polish}`} />
                   <span className="cloud-code">{cloud.code}</span>
                   <span className="cloud-level">{cloud.level}</span>
                 </span>
@@ -838,7 +847,7 @@ function DecisionKey({ onOpenCloud, onSources }) {
                 const cloud = getCloud(id);
                 return (
                   <button key={id} onClick={() => onOpenCloud(id)}>
-                    <img src={cloud.image.src} alt="" />
+                    <img src={publicAsset(cloud.image.src)} alt="" />
                     <span><strong>{cloud.name}</strong><small>{cloud.polish}</small></span>
                     <ArrowRight size={18} />
                   </button>
@@ -889,7 +898,7 @@ function CloudDetail({ cloud, onClose, onSources }) {
       <article className="cloud-detail" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
         <button className="icon-button detail-close" onClick={onClose} aria-label="Zamknij kartę"><X size={22} /></button>
         <div className="detail-image">
-          <img src={cloud.image.src} alt={`${cloud.name}, ${cloud.polish}`} />
+          <img src={publicAsset(cloud.image.src)} alt={`${cloud.name}, ${cloud.polish}`} />
           <span className="cloud-code">{cloud.code}</span>
         </div>
         <div className="detail-body">
@@ -1209,6 +1218,7 @@ export function App() {
   const [completed, setCompleted] = useState(loadProgress);
   const [placementOpen, setPlacementOpen] = useState(false);
   const [sourceIds, setSourceIds] = useState(null);
+  const [entryModule, setEntryModule] = useState(null);
 
   const validRoute = useMemo(
     () => [...navItems.map((item) => item.id), "sources"].includes(route) ? route : "home",
@@ -1219,6 +1229,12 @@ export function App() {
     setProfile(result);
     saveProfile(result);
     setPlacementOpen(false);
+    setEntryModule(result.moduleId);
+    navigate("learn");
+  };
+
+  const openRecommended = () => {
+    setEntryModule(profile?.moduleId || "obserwacja");
     navigate("learn");
   };
 
@@ -1242,9 +1258,18 @@ export function App() {
             completed={completed}
             onPlacement={() => setPlacementOpen(true)}
             onBeginner={() => chooseProfile(calculatePlacement([]))}
+            onOpenRecommended={openRecommended}
           />
         )}
-        {validRoute === "learn" && <LearnPage completed={completed} onToggleCompleted={toggleCompleted} onSources={setSourceIds} />}
+        {validRoute === "learn" && (
+          <LearnPage
+            completed={completed}
+            onToggleCompleted={toggleCompleted}
+            onSources={setSourceIds}
+            initialModule={entryModule}
+            onConsumeInitial={() => setEntryModule(null)}
+          />
+        )}
         {validRoute === "atlas" && <AtlasPage onSources={setSourceIds} />}
         {validRoute === "layers" && <LayersPage onSources={setSourceIds} />}
         {validRoute === "journal" && <JournalPage />}
