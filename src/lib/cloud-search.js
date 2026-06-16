@@ -25,7 +25,7 @@ function cloudSearchScore(cloud, profile, taxonomyTerms, query) {
   const exactFields = [cloud.name, cloud.polish, cloud.code, cloud.id]
     .map(normalizeCloudSearch);
   if (exactFields.includes(query)) return 100;
-  if (exactFields.some((field) => field.startsWith(query))) return 80;
+  if (query.length >= 3 && exactFields.some((field) => field.includes(query))) return 80;
 
   const relatedTerms = taxonomyTerms.filter((term) => term.genera.includes(cloud.id));
   const coreText = normalizeCloudSearch([
@@ -59,6 +59,7 @@ export function searchCloudAtlas(
   } = {},
 ) {
   const normalizedQuery = normalizeCloudSearch(query);
+  const effectiveLevel = normalizedQuery ? "wszystkie" : level;
 
   const candidates = cloudList
     .map((cloud, index) => ({
@@ -72,13 +73,15 @@ export function searchCloudAtlas(
       ),
     }))
     .filter(({ cloud, score }) => (
-      (level === "wszystkie" || cloud.level === level) && score > 0
+      (effectiveLevel === "wszystkie" || cloud.level === effectiveLevel) && score > 0
     ));
-  const hasExactMatch = normalizedQuery
-    && candidates.some(({ score }) => score === 100);
+  const directMatchScore = candidates.reduce(
+    (highest, { score }) => (score >= 80 ? Math.max(highest, score) : highest),
+    0,
+  );
 
   return candidates
-    .filter(({ score }) => !hasExactMatch || score === 100)
+    .filter(({ score }) => !directMatchScore || score >= 80)
     .sort((first, second) => second.score - first.score || first.index - second.index)
     .map(({ cloud }) => cloud);
 }

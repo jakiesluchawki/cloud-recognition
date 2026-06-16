@@ -24,6 +24,19 @@ history:
     note: >
       User feedback added a discoverability requirement: the atlas needs an
       unmistakable cloud search rather than a visually recessive text field.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published multi-report briefings, transparent local spaced review, and
+      evidence-aware atlas search in commit 09df7b4 and GitHub Pages run
+      27604850794.
+  - date: "2026-06-16"
+    status: active
+    who: user
+    note: >
+      Reopened after public use showed that a previously selected height filter
+      could silently hide otherwise valid search results.
 ---
 
 # Add multi-report briefings and spaced review
@@ -91,6 +104,9 @@ step is practice across several reports and repeated retrieval of weak rules.
 6. **Search moves before statistics:** User feedback showed that the previous
    underlined field could be missed. The new editorial search block is the
    first atlas tool and states what kinds of evidence can be entered.
+7. **Search always covers the full atlas:** A text query ignores browse-level
+   filters. Starting a search resets the visible filter to `wszystkie`, and
+   height controls remain unavailable until the query is cleared.
 
 ## Broken/Modified Tests
 
@@ -115,6 +131,11 @@ step is practice across several reports and repeated retrieval of weak rules.
 - Added an evidence-aware atlas search surface before statistics and filters.
   Exact names and WMO codes are exclusive results; descriptive queries use
   all entered tokens across observations, traps, taxonomy, and monographs.
+- Corrected the public-search regression reported after release: any non-empty
+  query now ignores a stale height filter, visibly returns to `wszystkie`, and
+  disables height controls until the query is cleared. Direct name fragments
+  outrank looser references, so `nimb` returns Nimbostratus and Cumulonimbus
+  rather than every genus whose wider profile mentions one of those clouds.
 - Verified 390 × 844 and 1440 × 1000 layouts. Both keep document width equal
   to viewport width. Mobile search is 62 px high; briefing renders three
   reports and four choices; review exposes three summary states and native
@@ -124,3 +145,14 @@ step is practice across several reports and repeated retrieval of weak rules.
   local storage deletion.
 - Passed 46 automated tests, the nine-module lesson audit, all 22 monitored
   external links, and the production build.
+- Re-ran the reported mobile sequence at 390 × 844: `średnie` → `nimb`
+  returns two full-atlas results with no horizontal overflow; clearing the
+  query restores enabled filters and leaves `wszystkie` selected.
+
+## Release
+
+- Source commit: `09df7b4`
+- GitHub Pages run: `27604850794`
+- Public assets: `index-DpjTwUZa.js`, `index-BOSGWx8I.css`, service worker `v9`
+- Public mobile verification: `kowadlo` returns only Cumulonimbus at 390 px
+  with no horizontal overflow or runtime errors.

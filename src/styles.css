@@ -1657,6 +1657,14 @@ p {
   color: var(--white);
 }
 
+.filter-scroll.is-disabled {
+  opacity: 0.48;
+}
+
+.filter-scroll button:disabled {
+  cursor: not-allowed;
+}
+
 .cloud-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

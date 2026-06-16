@@ -90,6 +90,16 @@ test("atlas search finds clouds by code, Polish observation and taxonomy", () =>
   assert.ok(search("drobne fale").some((cloud) => cloud.id === "cirrocumulus"));
   assert.deepEqual(
     searchCloudAtlas(clouds, {
+      query: "nimb",
+      level: "średnie",
+      getProfile: getCloudProfile,
+      taxonomyTerms,
+    }).map((cloud) => cloud.id),
+    ["nimbostratus", "cumulonimbus"],
+    "a name fragment must search every level without unrelated taxonomy matches",
+  );
+  assert.deepEqual(
+    searchCloudAtlas(clouds, {
       query: "",
       level: "wysokie",
       getProfile: getCloudProfile,

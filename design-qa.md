@@ -54,6 +54,8 @@
   `design/qa/current/metar-desktop-workshop.png`
 - Desktop wind laboratory:
   `design/qa/current/wind-desktop-lab.png`
+- Mobile full-atlas name search after selecting a level:
+  `design/qa/current/atlas-search-all-levels-mobile.png`
 
 The source visual and lesson are different product states, so the full-view
 comparison evaluates design language rather than identical composition.
@@ -170,6 +172,17 @@ actions, and no prematurely visible recap, final check, or practice.
       choices without overflow. Feedback receives focus, the completed session
       heading receives focus after the final item, and the two-step reset
       removes the local storage record and returns the tracked count to zero.
+
+16. **P1 fixed — Atlas search inherited a browse filter**
+    - Before: selecting `średnie` and then searching for `nimb` hid valid
+      results outside that level and displayed an empty state.
+    - Patch: every non-empty query searches all ten genera, resets the visible
+      level to `wszystkie`, and pauses the level controls until the query is
+      cleared. Direct fragments of formal names take precedence over broad
+      descriptive and taxonomy matches.
+    - Evidence: `atlas-search-all-levels-mobile.png`. At 390 px the exact
+      regression sequence returns only Nimbostratus and Cumulonimbus, reports
+      two results in the full atlas, and keeps document width at 390 px.
 
 ## Required Fidelity Surfaces
 

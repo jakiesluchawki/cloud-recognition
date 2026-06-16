@@ -1005,6 +1005,7 @@ function AtlasPage({
   const [comparisonIds, setComparisonIds] = useState(
     initialComparisonIds?.length >= 2 ? initialComparisonIds : comparisonPresets[1].cloudIds,
   );
+  const hasAtlasQuery = Boolean(query.trim());
 
   useEffect(() => {
     setTab(initialTab);
@@ -1085,10 +1086,14 @@ function AtlasPage({
               <input
                 type="search"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  const nextQuery = event.target.value;
+                  setQuery(nextQuery);
+                  if (nextQuery.trim()) setLevel("wszystkie");
+                }}
                 placeholder="np. Cumulonimbus, Ci, kowadło, bez halo"
               />
-              {query && (
+              {hasAtlasQuery && (
                 <button type="button" onClick={() => setQuery("")} aria-label="Wyczyść wyszukiwanie">
                   <X size={18} />
                 </button>
@@ -1096,11 +1101,13 @@ function AtlasPage({
             </label>
             <div className="atlas-search__status">
               <span aria-live="polite">
-                {query
-                  ? `${formatResultCount(filtered.length)} dla „${query.trim()}”`
+                {hasAtlasQuery
+                  ? `${formatResultCount(filtered.length)} w całym atlasie dla „${query.trim()}”`
                   : "Przeszukujesz pełny atlas 10 rodzajów"}
               </span>
-              {level !== "wszystkie" && <small>Filtr wysokości: {level}</small>}
+              {hasAtlasQuery
+                ? <small>Filtry poziomu są wstrzymane podczas wyszukiwania</small>
+                : level !== "wszystkie" && <small>Filtr wysokości: {level}</small>}
             </div>
           </section>
           <div className="encyclopedia-stats" aria-label="Zakres encyklopedii">
@@ -1111,9 +1118,21 @@ function AtlasPage({
           </div>
           <div className="atlas-tools">
             <span className="atlas-tools__label">Filtruj według typowego poziomu</span>
-            <div className="filter-scroll">
+            <div
+              className={`filter-scroll ${hasAtlasQuery ? "is-disabled" : ""}`}
+              aria-label={hasAtlasQuery
+                ? "Filtry poziomu są dostępne po wyczyszczeniu wyszukiwania"
+                : "Filtruj według typowego poziomu"}
+            >
               {cloudLevels.map((item) => (
-                <button key={item} className={level === item ? "active" : ""} onClick={() => setLevel(item)}>{item}</button>
+                <button
+                  key={item}
+                  className={level === item ? "active" : ""}
+                  disabled={hasAtlasQuery}
+                  onClick={() => setLevel(item)}
+                >
+                  {item}
+                </button>
               ))}
             </div>
           </div>
