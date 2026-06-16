@@ -2,7 +2,7 @@
 id: "0005"
 title: "Replace lesson summaries with an honest learning curriculum"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0003", "0004"]
 tags: ["priority-high", "learning", "content-depth", "accessibility", "release-v3"]
@@ -16,6 +16,13 @@ history:
     note: >
       Created after user review showed that lesson durations promised 12-35
       minutes while the visible modules contained only short summaries.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Rebuilt all nine lessons, added 52 active-recall prompts and focused
+      mobile progression, passed 36 tests and 22 link checks, completed
+      rendered QA across all lesson routes, and published commit f094365.
 ---
 
 # Replace lesson summaries with an honest learning curriculum
@@ -101,6 +108,9 @@ and made the course materially shallower than the encyclopedia.
   `design-qa.md` result is `passed`.
 - Published commit `4170fa7` through GitHub Pages workflow `27601306176`
   and verified the live bundle contains the expanded curriculum.
+- Published focused progression commit `f094365` through GitHub Pages workflow
+  `27602619112`. The live DOM passed mobile chapter, test, and resume checks,
+  and the public service worker serves cache version 5.
 
 ## Issues Encountered
 
