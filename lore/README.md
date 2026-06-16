@@ -1,6 +1,6 @@
 # Lore Index
 
-> Auto-generated on 2026-06-16 07:13. Do not edit manually.
+> Auto-generated on 2026-06-16 08:24. Do not edit manually.
 > Use `lore_generate-index` tool to regenerate.
 
 Quick reference for task dependencies, status, and ADR relationships.
@@ -9,7 +9,7 @@ Quick reference for task dependencies, status, and ADR relationships.
 
 | Active | Blocked | Backlog | Completed | ADRs |
 |:------:|:-------:|:-------:|:---------:|:----:|
-| 0 | 0 | 1 | 1 | 0 |
+| 0 | 0 | 1 | 2 | 0 |
 
 ## Task Status
 
@@ -17,3 +17,4 @@ Quick reference for task dependencies, status, and ADR relationships.
 |:---|:------|:-----|:-------|:-----------|:-------|:-----|
 | 0002 | [Research automatic cloud recognitio...](lore/1-tasks/backlog/0002_RESEARCH_automatic-cloud-recognition.md) | RESEARCH | backlog | — | — | — |
 | 0001 | [Build and publish Cloud Recognition...](lore/1-tasks/archive/0001_FEATURE_cloud-recognition-v1/README.md) | FEATURE | completed | — | — | — |
+| 0003 | [Expand the cloud atlas into a profe...](lore/1-tasks/archive/0003_FEATURE_encyclopedic-cloud-atlas/README.md) | FEATURE | completed | — | — | — |

@@ -6,14 +6,17 @@ application for learning cloud identification and vertical weather analysis.
 ## Current Product
 
 - Adaptive five-question placement or an explicit beginner start.
-- Eight learning modules from visual observation to aviation hazards and WMO
+- Nine learning modules from visual observation to aviation hazards and WMO
   expert classification.
-- Complete ten-genus WMO atlas with species, varieties, supplementary features,
-  observation cues, ambiguity notes, and licensed image provenance.
-- Visual decision key, difficult cases, quiz, local progress, and a private
-  local observation journal.
+- Complete ten-genus WMO atlas plus a searchable 49-term index covering
+  species, varieties, supplementary features, accessory clouds, mother-cloud
+  notation, special clouds, and upper-atmosphere classes.
+- Professional genus monographs explain formation, microphysics, weather,
+  aviation significance, evolution, optics, look-alikes, and field procedure.
+- Visual decision key, difficult cases, global adaptive four-choice image
+  practice, local progress, and a private local observation journal.
 - Interactive AGL/MSL and pressure-level laboratory plus METAR/TAF, icing,
-  turbulence, convection, CAPE, and Skew-T introductions.
+  turbulence, convection, CAPE, Skew-T, and cloud-motion wind interpretation.
 - Contextual source drawers anchored in WMO, FAA, EASA, NOAA AWC, Windy
   interface documentation, and Wikimedia Commons file records.
 
@@ -24,6 +27,8 @@ application for learning cloud identification and vertical weather analysis.
 - Local storage for learner profile, progress, and journal entries.
 - Web manifest and service worker for installable and runtime offline use.
 - GitHub Actions test/build pipeline and GitHub Pages deployment from `main`.
+- Daily external-link monitoring checks registered sources and photograph
+  provenance for HTTP errors, soft 404 pages, and semantically wrong redirects.
 
 ## Public Release
 

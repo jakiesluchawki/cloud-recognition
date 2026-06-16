@@ -2,7 +2,7 @@
 id: "0003"
 title: "Expand the cloud atlas into a professional encyclopedia"
 type: FEATURE
-status: active
+status: completed
 related_adr: []
 related_tasks: ["0001", "0002"]
 tags: ["priority-high", "effort-large", "content", "taxonomy", "release-v2"]
@@ -15,6 +15,14 @@ history:
     note: >
       Created after release review found that the ten-genus atlas was accurate
       but too small and shallow to serve as a professional reference.
+  - date: "2026-06-16"
+    status: completed
+    who: codex
+    note: >
+      Published a 49-term classification index, ten professional genus
+      profiles, a ninth learning module, cloud-motion wind laboratory, global
+      adaptive recognition practice, 22 passing tests, and monitoring for 21
+      external sources and photograph provenance pages.
 ---
 
 # Expand the cloud atlas into a professional encyclopedia
@@ -47,23 +55,23 @@ of a much larger knowledge system.
 
 ## Acceptance Criteria
 
-- [ ] The atlas exposes all ten WMO genera and all official species.
-- [ ] Varieties, supplementary features, accessory clouds, mother-cloud
+- [x] The atlas exposes all ten WMO genera and all official species.
+- [x] Varieties, supplementary features, accessory clouds, mother-cloud
       notation, and special clouds are separately explained.
-- [ ] Every genus has a substantial professional reference profile.
-- [ ] Every classification term has a definition and compatible genera.
-- [ ] Search covers genera and the complete classification vocabulary.
-- [ ] Similar and disputed forms have explicit comparison guidance.
-- [ ] Each genus explains composition, formation mechanisms, and evolution.
-- [ ] A wind module teaches layer-specific cloud motion and its limitations.
-- [ ] A global image test always offers four plausible answers and adapts to
+- [x] Every genus has a substantial professional reference profile.
+- [x] Every classification term has a definition and compatible genera.
+- [x] Search covers genera and the complete classification vocabulary.
+- [x] Similar and disputed forms have explicit comparison guidance.
+- [x] Each genus explains composition, formation mechanisms, and evolution.
+- [x] A wind module teaches layer-specific cloud motion and its limitations.
+- [x] A global image test always offers four plausible answers and adapts to
       the learner's errors.
-- [ ] Aviation significance is present without presenting the atlas as
+- [x] Aviation significance is present without presenting the atlas as
       operational flight-planning advice.
-- [ ] Scientific and taxonomic claims expose primary or authoritative sources.
-- [ ] Mobile and desktop navigation remain practical with the larger corpus.
-- [ ] Automated tests, production build, and public Pages deployment pass.
-- [ ] A scheduled link monitor checks sources and photograph provenance pages.
+- [x] Scientific and taxonomic claims expose primary or authoritative sources.
+- [x] Mobile and desktop navigation remain practical with the larger corpus.
+- [x] Automated tests, production build, and public Pages deployment pass.
+- [x] A scheduled link monitor checks sources and photograph provenance pages.
 
 ## Design Decisions
 
@@ -97,6 +105,9 @@ of a much larger knowledge system.
 9. **Source availability is tested:** A visible citation is not reliable when
    its destination is dead. Scheduled CI inspects status codes and common
    soft-404 page markers without coupling external availability to deployment.
+10. **Source identity is verified as well as availability:** Each registered
+    reference declares an expected content marker. This catches a successful
+    redirect to an unrelated page, not only HTTP errors.
 
 ## Implementation Notes
 
@@ -107,7 +118,9 @@ of a much larger knowledge system.
 - Added a browsable cross-linked term index and detailed term reader.
 - Added a ninth learning module and interactive wind laboratory.
 - Added global adaptive recognition practice backed by local-only statistics.
-- Expanded automated coverage from 10 to 20 tests.
+- Expanded automated coverage from 10 to 22 tests.
+- Added a daily GitHub Actions link audit for 11 registered references and ten
+  photograph provenance pages.
 
 ## Issues Encountered
 
@@ -120,6 +133,9 @@ of a much larger knowledge system.
 - The FAA moved handbook pages from underscored path segments to compact
   `regulationspolicies/handbooksmanuals` paths. The previous citation rendered
   an official soft-404 page and was replaced with the verified 28B landing page.
+- The former NOAA AWC help URL returned HTTP 404 and the former Windy discussion
+  redirected to an unrelated premium-login topic. Replaced both references and
+  added expected-content checks to detect semantically wrong redirects.
 
 ## Broken/Modified Tests
 
